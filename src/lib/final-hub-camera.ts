@@ -11,7 +11,7 @@ export type FinalHubView = { position: Vector3; target: Vector3 }
 
 /** Fit the live layout as the gap closes, excluding the old logo origin and pulse. */
 export function fitFinalHubView(
-  camera: PerspectiveCamera, hub: Object3D, cardBody: Object3D, logo: Object3D,
+  camera: PerspectiveCamera, hub: Object3D, cardBody: Object3D, logo: Object3D, orbitBounds?: Box3,
 ): FinalHubView {
   hub.updateWorldMatrix(true, true)
   cardBody.updateWorldMatrix(true, true)
@@ -19,6 +19,7 @@ export function fitFinalHubView(
   const bounds = new Box3().setFromObject(hub)
     .union(new Box3().setFromObject(cardBody))
     .union(new Box3().setFromObject(logo))
+  if (orbitBounds) bounds.union(orbitBounds)
   const target = bounds.getCenter(new Vector3())
   const size = bounds.getSize(new Vector3())
   const halfFov = Math.tan(MathUtils.degToRad(camera.fov / 2))

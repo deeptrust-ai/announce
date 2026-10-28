@@ -64,6 +64,7 @@ the later joining sequence was already approved or add unrelated page content.
 - `src/lib/hub-approach.ts`: delayed card approach into the top orbit slot.
 - `src/lib/hub-expansion.ts`: clockwise node redistribution, links, and eighth port.
 - `src/lib/hub-breathing.ts`: independent, slow emission rhythms for ports and rim.
+- `src/lib/hub-orbits.ts`: continuous spherical anchor motion, billboard cards, and live 3D links.
 - `src/lib/gravity-lensing.ts`: world-space lens centers and GLSL for only the floor-grid coordinates.
 - `src/lib/timeline.ts`: transition definitions shared by playback and preview menu.
 - `src/app.css`: full-screen layout.
@@ -110,6 +111,7 @@ The shared timeline now overlaps the effects:
 - South connection: starts 3.8 s, lasts 6 s, ends 9.8 s.
 - Hub attraction: starts 5.8 s, lasts 8 s, ends 13.8 s.
 - Final hub view: starts 8.2 s, lasts 5.6 s, ends 13.8 s.
+- Orbital hub: starts 12.04 s, lifts over 3 s, then continues indefinitely.
 - Grid release: starts 12.6 s, lasts 1.2 s, ends 13.8 s.
 
 The user explicitly superseded the earlier sequential timing and the requirement
@@ -303,14 +305,50 @@ hub plate bounds can retain the pre-placement position near the origin and send
 the wire north through the logo. The world orientation itself is correct:
 north is screen up / -Z, south is screen down / +Z, east is +X, west is -X.
 
-The 3D sequence ends at 13.8 seconds and the text reveal completes at 15.55
-seconds. Rendering continues afterward for the slow
-port/rim breathing. Hidden tabs pause both clocks. Reduced motion holds the
+The joining/camera/grid beat ends at 13.8 seconds and text completes at 15.55
+seconds. Rendering continues for independent node orbits and port/rim breathing. Hidden tabs pause both clocks. Reduced motion holds the
 final scene with baseline emission and renders on demand. Pixel density is capped at 2. Cleanup disposes geometry, materials,
 shadow maps, and postprocessing resources. Both GLBs must load before the shot
 starts; asynchronous loading handles unmounts and loading errors.
 
 The original rotating wireframe sculpture and stars have been removed.
+
+## Invisible spherical hub and continuous node orbits
+
+The user asked for organic, independent node orbits around an invisible sphere.
+Do not add visible sphere geometry, reflective material, meridian lines, or
+extra equator rings. `Hub_Plate` and the old graphite `Orbit_Rings` are hidden at
+load and replay. The original `Hub_Lime_Rim` is visible throughout; during the
+three-second lift it rises to the virtual anchor center and continues breathing.
+The permanent `Hub_Invisible_Sphere_Anchor` is an Object3D with no material or
+geometry. Its center is raised above the floor so inclined orbits do not pass
+through the ground. There is no visible globe growth or surface morph.
+
+Orbital motion starts only when DeepTrust is close: at 78% of the eight-second
+approach, around second 12.04 (about 93% of its eased travel). Eight nodes blend
+from their joining positions into independent tilted orbital planes over three
+seconds. Inclinations are 24–54 degrees, periods about 44–73 seconds, with varied
+directions, phases, small radial variation, and slow precession. A separate
+unclamped animation clock continues indefinitely after the main scene clock
+finishes. Hidden tabs pause it; reduced motion shows a static final state.
+
+Cards/icons must remain planar to the camera throughout the orbital motion.
+`faceCamera` runs after the camera pose is applied and converts the camera's
+orientation to each card parent's coordinates, with local +Y facing the viewer.
+Do not rotate the cards into their orbital planes or warp their geometry.
+Their 3D anchor positions and connecting ports move independently; each port
+tracks the virtual sphere surface. Eight live cylinders replace the baked flat
+links during orbital motion, preserving blue DeepTrust and amber existing links.
+The original DeepTrust draw connection is hidden once its orbital spoke takes
+over. Replay restores the original transforms, visibility, and planar links.
+
+Framing includes a conservative envelope for all eight orbits, and only caches
+after the lift completes. The camera then stays steady as nodes continue moving.
+The shadow light follows the anchor with a constant offset and a wider shadow
+frustum. New geometry/materials are disposed through the normal scene cleanup.
+The preview stage `?start=orbits` seeks to orbital activation. The original GLB
+and Blender models are preserved. No tests, builds, browser validation, or proof
+screenshots were run for this iteration.
 
 ## Announcement layer and ambient glow
 
@@ -347,7 +385,8 @@ count. The editorial backdrop enters with DeepTrust, and the Doppel image
 has its own opacity. Replay and seeks use absolute scene time; there are no
 independent timers. Reduced motion shows the complete message immediately.
 `SCENE_DURATION` includes the text tail. `HUB_SETTLE_TIME` still anchors the
-camera, card, grid shockwave, and cached final fit to second 13.8. Do not stretch
+camera, card, grid shockwave, to second 13.8. Orbital framing caches after the three-second lift completes
+with the entire orbit envelope included. Do not stretch
 the 3D movement to match the longer text sequence. Release preview also replays
 the whole announcement. The bottom-right Back / Restart / Next controls stay
 separate from the editorial grid and restart the active timeline entry.
@@ -359,7 +398,8 @@ variations; the rim uses 7.2 seconds. Emission stays near baseline, with no shar
 flashes or synchronized beat. Replaced unreferenced source materials are disposed,
 and scene cleanup disposes the assigned clones. Breathing starts after loading
 and continues after the main timeline completes, using a separate ambient clock.
-The camera, logo, layout, normalized grid, and text remain settled. The final
+The camera, normalized grid, and text remain settled while the node positions
+continue moving around their independent spherical orbits. The final
 camera fit is cached once the layout completes and invalidated on replay/resize.
 Hidden tabs pause the ambient clock; reduced motion restores baseline emission
 and stops continuous rendering after the final frame. No tests, builds, browser

@@ -34,9 +34,10 @@ import type { ConnectionView } from './connection-camera'
 import { createHubApproach } from './hub-approach'
 import { createHubExpansion } from './hub-expansion'
 import { createHubBreathing } from './hub-breathing'
+import { createHubOrbits } from './hub-orbits'
 import { applyFinalHubView, fitFinalHubView } from './final-hub-camera'
 import { ANNOUNCEMENT_DURATION } from './announcement'
-import { ANNOUNCEMENT_START, APPROACH_START, ARRIVAL_START, CONNECTION_START, FINAL_HUB_START, FINAL_HUB_DURATION, HUB_SETTLE_TIME, LENS_RELEASE_START, SCENE_DURATION, TRANSITIONS, startingTransition, transitionAt } from './timeline'
+import { ANNOUNCEMENT_START, APPROACH_START, ARRIVAL_START, CONNECTION_START, FINAL_HUB_START, FINAL_HUB_DURATION, HUB_SETTLE_TIME, LENS_RELEASE_START, ORBITS_START, SCENE_DURATION, TRANSITIONS, startingTransition, transitionAt } from './timeline'
 import type { TransitionId } from './timeline'
 
 type SceneCallbacks = {
@@ -96,10 +97,10 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
   key.position.copy(keyOffset)
   key.castShadow = true
   key.shadow.mapSize.set(2048, 2048)
-  key.shadow.camera.left = -1
-  key.shadow.camera.right = 1
-  key.shadow.camera.top = 1
-  key.shadow.camera.bottom = -1
+  key.shadow.camera.left = -2.2
+  key.shadow.camera.right = 2.2
+  key.shadow.camera.top = 2.2
+  key.shadow.camera.bottom = -2.2
   key.shadow.camera.near = 0.1
   key.shadow.camera.far = 15
   key.shadow.bias = -0.00001
@@ -127,6 +128,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
   let loadedAssets = 0
   let ready = false
   let elapsed = TRANSITIONS.find((transition) => transition.id === requestedTransition)?.start ?? 0
+  let animationOrigin = elapsed
   let previousTime: number | undefined
   let ambientElapsed = 0
   let logoModel: Object3D | undefined
@@ -138,6 +140,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
   let approach: ReturnType<typeof createHubApproach> | undefined
   let expansion: ReturnType<typeof createHubExpansion> | undefined
   let breathing: ReturnType<typeof createHubBreathing> | undefined
+  let orbits: ReturnType<typeof createHubOrbits> | undefined
   let settledHubView: ReturnType<typeof fitFinalHubView> | undefined
   let reportedTransition: TransitionId | undefined
 
@@ -155,6 +158,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
     requestedTransition = transition
     const start = TRANSITIONS.find((item) => item.id === transition)?.start ?? 0
     elapsed = motionPreference.matches ? SCENE_DURATION : start
+    animationOrigin = elapsed
     previousTime = undefined
     ambientElapsed = 0
     settledHubView = undefined
@@ -163,6 +167,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
     connection?.reset()
     approach?.reset()
     expansion?.reset()
+    orbits?.reset()
     floor.lensing.reset()
     renderer.shadowMap.needsUpdate = true
     reportTransition()
@@ -189,12 +194,16 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
     if (card?.update(elapsed - CARD_CONSTRUCTION.startSeconds)) renderer.shadowMap.needsUpdate = true
     if (approach?.update(elapsed - APPROACH_START)) renderer.shadowMap.needsUpdate = true
     if (expansion?.update(elapsed - APPROACH_START)) renderer.shadowMap.needsUpdate = true
-    if (card) {
-      key.target.position.copy(card.root.position)
-      key.position.copy(card.root.position).add(keyOffset)
-    }
     arrival.update(ready ? elapsed - ARRIVAL_START : -1, camera, motionPreference.matches)
     if (connection?.update(elapsed - CONNECTION_START)) renderer.shadowMap.needsUpdate = true
+    if (orbits?.update(animationOrigin + ambientElapsed - ORBITS_START, motionPreference.matches)) {
+      renderer.shadowMap.needsUpdate = true
+    }
+    if (card) {
+      if (orbits?.active) orbits.center.getWorldPosition(key.target.position)
+      else key.target.position.copy(card.root.position)
+      key.position.copy(key.target.position).add(keyOffset)
+    }
     if (connectionView && elapsed >= CONNECTION_START) {
       applyConnectionView(camera, logoFocus, connectionView,
         (elapsed - CONNECTION_START) / CONNECTION_SHOT.riseSeconds)
@@ -202,11 +211,12 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
     if (elapsed >= FINAL_HUB_START && connectionView && card && hubModel && logoModel) {
       // Refit the moving card and hub each frame rather than caching an early pose.
       const finalHubView = settledHubView ?? fitFinalHubView(camera, hubModel,
-        card.root.getObjectByName('DeepTrust_Card_Body')!, logoModel)
-      if (elapsed >= HUB_SETTLE_TIME) settledHubView = finalHubView
+        card.root.getObjectByName('DeepTrust_Card_Body')!, logoModel, orbits?.getBounds())
+      if (elapsed >= HUB_SETTLE_TIME && (!orbits?.active || orbits.settled)) settledHubView = finalHubView
       applyFinalHubView(camera, connectionView.target, finalHubView,
         (elapsed - FINAL_HUB_START) / FINAL_HUB_DURATION)
     }
+    orbits?.faceCamera(camera)
     // Keep the distant objects clear as the view widens; fog must not hide them at altitude.
     fog.near = Math.max(10, camera.position.y * 1.8)
     fog.far = Math.max(30, camera.position.y * 4)
@@ -248,7 +258,11 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
   }
 
   function updateMotionPreference() {
-    if (ready && motionPreference.matches) elapsed = SCENE_DURATION
+    if (ready && motionPreference.matches) {
+      elapsed = SCENE_DURATION
+      animationOrigin = elapsed
+      ambientElapsed = 0
+    }
     previousTime = undefined
     requestRender()
   }
@@ -300,9 +314,10 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
             connection = createSouthConnection(card.root, card.width, hubModel)
             scene.add(connection.root)
             expansion = createHubExpansion(hubModel)
-            breathing = createHubBreathing(hubModel)
             approach = createHubApproach(card.root, hubModel, expansion.orbitRadius)
             refreshConnectionView()
+            orbits = createHubOrbits(hubModel, card.root, connection.root, expansion.orbitRadius)
+            breathing = createHubBreathing(hubModel)
           } catch (error) {
             callbacks.onError?.(error)
             requestRender()
@@ -335,6 +350,10 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
     hubModel = hub
     // Keep its existing groups intact for the later travel and joining sequence.
     hub.name = 'Doppel_Hub'
+    const plate = hub.getObjectByName('Hub_Plate')
+    const rings = hub.getObjectByName('Orbit_Rings')
+    if (plate) plate.visible = false
+    if (rings) rings.visible = false
   })
 
   function dispose() {

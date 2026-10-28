@@ -34,6 +34,7 @@ The production build is written to `dist/`. Serve that directory with a static h
 - `src/lib/hub-approach.ts`: delayed drift into the top slot of the hub orbit.
 - `src/lib/hub-expansion.ts`: seven-to-eight-node redistribution with moving links and ports.
 - `src/lib/hub-breathing.ts`: independent slow glow rhythms for the lime ports and rim.
+- `src/lib/hub-orbits.ts`: invisible spherical anchors, camera-facing cards, and endless independent node orbits.
 - `src/lib/gravity-lensing.ts`: world-space distortion of only the floor-grid coordinates.
 - `src/lib/timeline.ts`: shared transition names, start times, and durations.
 - `src/lib/announcement.ts`: staged logo fades and character-by-character copy timing.
@@ -64,6 +65,7 @@ The connection starts after the arrival pulse:
 | South connection | 3.8 s | 6 s | 9.8 s |
 | Hub attraction | 5.8 s | 8 s | 13.8 s |
 | Final hub view | 8.2 s | 5.6 s | 13.8 s |
+| Orbital hub | 12.04 s | 3 s to lift | continues |
 | Grid release | 12.6 s | 1.2 s | 13.8 s |
 
 The compact bottom-right controls derive their order and entry points from
@@ -188,16 +190,30 @@ underneath; the text does not track or sit inside the hub. A quiet left gradient
 keeps it legible. Mobile uses six columns with the copy toward the upper left. Beginning at 12.6 seconds, DeepTrust fades in over
 0.65 seconds. After a short pause, the smaller phrase types at 75 ms per
 character. Doppel then fades in after a 0.2-second pause. The reveal completes
-at 15.55 seconds while the 3D scene settles at 13.8 seconds. Space is reserved
+at 15.55 seconds. The joining/camera/grid beat completes at 13.8 seconds;
+the node orbits continue indefinitely. Space is reserved
 for the full phrase to prevent layout shifts. Replay resets the sequence;
 reduced motion shows the complete message immediately. Brand asset provenance is in `public/branding/SOURCES.md`.
 
 Each lime hub port has an independent breathing rhythm, with periods around
 4.6–6.8 seconds and offset phases. The rim breathes more slowly over 7.2 seconds.
 Small secondary variations make the glow less uniform. A separate ambient clock
-continues these rhythms while the camera, models, grid, and text hold their final
-state. Hidden tabs pause it; reduced motion uses steady glow. The final camera
-fit is cached after settlement and refreshed on replay or resize.
+continues these rhythms and the independent node orbits while the camera,
+normalized grid, and completed text hold their final state. Hidden tabs pause it; reduced motion uses steady glow. The final camera
+fit includes the entire orbital envelope and is cached after the lift, then
+refreshed on replay or resize.
+
+The sphere is a permanent invisible coordinate anchor, with no reflective
+surface, meridians, or added equator lines. The original glowing ring remains
+visible, rising with the anchors as orbital motion begins. The old plum plate
+and graphite floor rings are hidden at runtime. Once DeepTrust is close (78% of
+the approach duration, around second 12.04), the eight nodes lift over three
+seconds into individual tilted orbits. Speeds, directions, phases, and gentle
+precession vary independently. All cards stay parallel to the camera; only
+their anchor positions move through 3D. Ports follow the spherical surface and
+live spokes remain attached. Motion continues after the text finishes, pauses
+in hidden tabs, and becomes static under reduced motion. `?start=orbits`
+previews this transition. Source Blender and GLB assets remain unchanged.
 
 ## Blender model
 
