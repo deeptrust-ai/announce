@@ -181,7 +181,8 @@ full-scene lensing pass.
 The text layer is a separate Swiss-style editorial layout above the canvas.
 It uses a twelve-column grid, a five-column copy block, shared left edges,
 Helvetica-family type, generous vertical spacing, and the actual DeepTrust and
-Doppel logo lockups. The line above the logos has been removed. The
+Doppel logo lockups. The vertical gaps are tightened by 25% for a closer visual
+rhythm. The line above the logos has been removed. The
 accessible heading reads “Deep Trust is now a part of Doppel.” The scene plays
 underneath; the text does not track or sit inside the hub. A quiet left gradient
 keeps it legible. Mobile uses six columns with the copy toward the upper left. Beginning at 12.6 seconds, DeepTrust fades in over

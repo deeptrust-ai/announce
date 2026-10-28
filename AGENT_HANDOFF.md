@@ -319,7 +319,8 @@ Three.js scene. The user explicitly rejected text centered inside the hub.
 A full-screen twelve-column grid holds a left-aligned text block spanning five
 columns, with shared logo/type edges and generous spacing. The user asked to
 remove the line above the logos; the border and its padding are gone. Logo/type
-gaps are now slightly larger,
+gaps are now 25% tighter than the preceding spacious version, with the same
+logo sizes and staged reveal timing,
 and large Helvetica-family type. Mobile uses six columns. A restrained dark
 left gradient supports legibility while the animated scene continues underneath.
 The DeepTrust logo lockup is the existing `logo-full.svg`. The Doppel lockup is

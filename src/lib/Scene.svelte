@@ -135,7 +135,7 @@
   h1 {
     display: grid;
     justify-items: start;
-    gap: clamp(2rem, 5vh, 4rem);
+    gap: clamp(1.5rem, 3.75vh, 3rem);
     margin: 0;
     color: #f3f7ff;
     text-align: left;
@@ -251,7 +251,7 @@
     }
 
     h1 {
-      gap: 1.5rem;
+      gap: 1.125rem;
     }
 
     .deeptrust-logo { width: 11rem; }
@@ -259,7 +259,7 @@
   }
 
   @media (max-height: 500px) {
-    h1 { font-size: 1.125rem; gap: 1rem; }
+    h1 { font-size: 1.125rem; gap: 0.75rem; }
     .deeptrust-logo { width: 9rem; }
     .doppel-logo { width: 12rem; }
   }
