@@ -16,7 +16,7 @@ import {
 
 export const SOUTH_CONNECTION = {
   durationSeconds: 6,
-  hubDistanceGridCells: 20,
+  hubDistanceGridCells: 15,
 } as const
 
 /** Draw south (+Z) and keep the source attached as the card approaches the hub. */

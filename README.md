@@ -135,8 +135,8 @@ the final view holds while the lime ports and rim keep breathing slowly. Reduced
 motion holds their baseline glow and renders on demand. Pixel density is
 capped at 2. GPU resources and event listeners are released on unmount.
 
-The hub center sits 20 floor-grid cells directly south of the logo center,
-about `(0, 0, 4.2672)` meters for the current card size,
+The hub center sits 15 floor-grid cells directly south of the logo center,
+about `(0, 0, 3.2004)` meters for the current card size,
 in world +Z and below it in the final view. Spacing derives from the same
 loaded card width and grid ratio as the visible floor cells. After the arrival pulse,
 a blue port appears at the card's bottom center and a connection draws toward

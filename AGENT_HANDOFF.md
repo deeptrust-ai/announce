@@ -200,8 +200,8 @@ blue-gray 32% blend and a 0.7 mm nominal line half-width. Cell spacing is unchan
 Scene cleanup disposes both layers and the shared geometry. PCFShadowMap replaces
 the removed PCFSoftShadowMap constant to avoid its runtime warning.
 
-The hub's GLB scene is named `Doppel_Hub`. Its center is 20 floor-grid cells
-south of the logo center, about `(0, 0, 4.2672)` meters with the current card.
+The hub's GLB scene is named `Doppel_Hub`. Its center is 15 floor-grid cells
+south of the logo center, about `(0, 0, 3.2004)` meters with the current card.
 `hubDistanceGridCells` controls this spacing. Placement derives from the actual
 loaded card width times the exported `GRID_CARD_RATIO`, so floor and hub agree.
 This replaces the earlier 18-meter spacing at the user's request.
