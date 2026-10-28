@@ -27,7 +27,8 @@ import { applyOpeningShot, OPENING_SHOT } from './opening-shot'
 import { CARD_CONSTRUCTION, createCardConstruction } from './card-construction'
 import { createArrivalEffect } from './arrival-effect'
 import { createFloor } from './floor'
-import { ARRIVAL_START, SCENE_DURATION, TRANSITIONS, startingTransition, transitionAt } from './timeline'
+import { createSouthConnection, SOUTH_CONNECTION } from './south-connection'
+import { ARRIVAL_START, CONNECTION_START, SCENE_DURATION, TRANSITIONS, startingTransition, transitionAt } from './timeline'
 import type { TransitionId } from './timeline'
 
 type SceneCallbacks = {
@@ -119,6 +120,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
   let logoModel: Object3D | undefined
   let hubModel: Object3D | undefined
   let card: ReturnType<typeof createCardConstruction> | undefined
+  let connection: ReturnType<typeof createSouthConnection> | undefined
   let reportedTransition: TransitionId | undefined
 
   function reportTransition() {
@@ -137,6 +139,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
     previousTime = undefined
     card?.reset()
     arrival.reset()
+    connection?.reset()
     renderer.shadowMap.needsUpdate = true
     reportTransition()
     requestRender()
@@ -159,6 +162,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
     applyOpeningShot(camera, logoFocus, elapsed)
     if (card?.update(elapsed - CARD_CONSTRUCTION.startSeconds)) renderer.shadowMap.needsUpdate = true
     arrival.update(ready ? elapsed - ARRIVAL_START : -1, camera, motionPreference.matches)
+    if (connection?.update(elapsed - CONNECTION_START)) renderer.shadowMap.needsUpdate = true
     if (ready) reportTransition()
     composer.render()
     if (ready && elapsed < SCENE_DURATION) requestRender()
@@ -226,6 +230,8 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
             floor.setCardWidth(card.width)
             card.root.add(arrival.root)
             scene.add(card.root)
+            connection = createSouthConnection(card.root, card.width, hubModel)
+            scene.add(connection.root)
           } catch (error) {
             callbacks.onError?.(error)
             requestRender()
@@ -258,7 +264,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
     hubModel = hub
     // Keep its existing groups intact for the later travel and joining sequence.
     hub.name = 'Doppel_Hub'
-    hub.position.set(12, 0, -12)
+    hub.position.set(0, 0, SOUTH_CONNECTION.hubDistance)
   })
 
   function dispose() {

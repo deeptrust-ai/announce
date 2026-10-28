@@ -1,10 +1,12 @@
 import { OPENING_DURATION } from './opening-shot'
 import { CARD_CONSTRUCTION, CARD_DURATION } from './card-construction'
 import { ARRIVAL_EFFECT } from './arrival-effect'
+import { SOUTH_CONNECTION } from './south-connection'
 
 export const ARRIVAL_START = Math.max(
   OPENING_DURATION, CARD_CONSTRUCTION.startSeconds + CARD_DURATION,
 )
+export const CONNECTION_START = ARRIVAL_START + ARRIVAL_EFFECT.durationSeconds
 
 export const TRANSITIONS = [
   { id: 'camera', name: 'Camera rise', start: 0, duration: OPENING_DURATION },
@@ -21,10 +23,14 @@ export const TRANSITIONS = [
     id: 'arrival', name: 'Arrival pulse', start: ARRIVAL_START,
     duration: ARRIVAL_EFFECT.durationSeconds,
   },
+  {
+    id: 'connect', name: 'South connection', start: CONNECTION_START,
+    duration: SOUTH_CONNECTION.durationSeconds,
+  },
 ] as const
 
 export type TransitionId = typeof TRANSITIONS[number]['id']
-export const SCENE_DURATION = ARRIVAL_START + ARRIVAL_EFFECT.durationSeconds
+export const SCENE_DURATION = CONNECTION_START + SOUTH_CONNECTION.durationSeconds
 
 export function startingTransition(search: string): TransitionId {
   const requested = new URLSearchParams(search).get('start')

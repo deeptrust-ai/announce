@@ -28,6 +28,7 @@ The production build is written to `dist/`. Serve that directory with a static h
 - `src/lib/card-construction.ts`: split border trace, sparks, and tiled card fill.
 - `src/lib/arrival-effect.ts`: floor shockwave and brief camera impact.
 - `src/lib/floor.ts`: solid shadow-receiving floor with a faint world-aligned grid.
+- `src/lib/south-connection.ts`: outgoing port and southbound connection trace.
 - `src/lib/timeline.ts`: shared transition names, start times, and durations.
 - `src/lib/Scene.svelte`: canvas lifecycle and WebGL fallback.
 - `src/App.svelte`: page composition.
@@ -44,7 +45,8 @@ The turn ends at azimuth 0 so the logo finishes aligned with the screen, with
 horizontal bars and no diagonal tilt. The camera keeps looking at the logo
 throughout. The shot plays once after both GLBs load; refresh the page to replay it.
 
-The transitions overlap and finish together at second 3:
+The camera and card transitions overlap and finish together at second 3.
+The connection starts after the arrival pulse:
 
 | Preview | Starts | Duration | Ends |
 | --- | --- | --- | --- |
@@ -52,6 +54,7 @@ The transitions overlap and finish together at second 3:
 | Border draw | 1.5 s | 1.5 s | 3 s |
 | Tiled fill | 2 s | 1 s | 3 s |
 | Arrival pulse | 3 s | 0.8 s | 3.8 s |
+| South connection | 3.8 s | 3 s | 6.8 s |
 
 The left-side preview menu derives names, durations, and entry points from these
 shared values. Clicking resets and replays from that point, with the camera and
@@ -63,6 +66,7 @@ The menu also updates the URL without reloading. `http://localhost:5173/?start=d
 starts border drawing at its first frame with the camera halfway through its
 move. `http://localhost:5173/?start=fill` starts fill with a partially drawn border
 and the camera at second 2. `?start=arrival` previews the completed-card impact.
+`?start=connect` previews the south connection with camera and card complete.
 Refresh to replay that starting point and the remaining sequence.
 The default URL still plays the full sequence. Reduced motion still skips to
 the completed card.
@@ -101,6 +105,7 @@ measure 70% of the actual hub card width: about 0.21336 m (8.4 inches) for a
 12-inch card. The grid is part of the floor material, so it receives the same
 shadows without overlapping geometry or z-fighting. Antialiasing and distance
 fading keep the lines subdued near the horizon.
+The grid now uses stronger blue-gray contrast and slightly wider lines for visibility.
 
 The grazing 4-degree start puts the camera about 3 cm above the floor. It starts
 0.24 meters from the logo and arcs outward to roughly a 0.56-meter ground-plane
@@ -111,12 +116,16 @@ eye height. Replay and direct-stage shortcuts also restore the proper lens.
 The logo stays centered while settling into the forming card. Reduced
 motion skips to the completed card and overhead camera, without sparks,
 shockwave, or jolt. Hidden tabs pause the timeline. Rendering stops after the
-3.8-second sequence until a resize or visibility change. Pixel density is
+6.8-second sequence until a resize or visibility change. Pixel density is
 capped at 2. GPU resources and event listeners are released on unmount.
 
-The existing hub network sits at `(12, 0, -12)` meters, outside the opening shot.
-Its separate nodes and links are retained for the later acquisition sequence.
-Logo travel, joining the hub, and rearranging nodes are not implemented yet.
+The existing hub network sits at `(0, 0, 18)` meters, directly south of the logo
+in world +Z and below it in the final overhead view. After the arrival pulse,
+a blue port appears at the card's bottom center and a connection draws toward
+the hub's northern rim over 3 seconds. The trace starts slowly, then accelerates
+into the distance. The camera stays fixed overhead; the head leaves the bottom
+of the frame while the hub remains distant. Menu replay resets the port and wire.
+The card and other nodes do not travel or rearrange in this transition.
 
 ## Blender model
 

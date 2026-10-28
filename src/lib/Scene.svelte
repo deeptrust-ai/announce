@@ -50,7 +50,7 @@
 <div class="scene" aria-busy={status === 'loading'}>
   <canvas
     bind:this={canvas}
-    aria-label="The DeepTrust logo becoming a blue card as the camera rises, followed by a soft arrival pulse"
+    aria-label="The DeepTrust logo becoming a blue card, emitting a floor pulse, and drawing a connection south toward the distant hub"
   ></canvas>
   <nav class="transitions" aria-label="Animation transitions">
     <h2>Preview transitions</h2>

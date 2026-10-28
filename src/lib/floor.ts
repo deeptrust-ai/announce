@@ -10,7 +10,7 @@ export function createFloor() {
   })
   material.onBeforeCompile = (shader) => {
     shader.uniforms.uFloorCellSize = cellSize
-    shader.uniforms.uFloorGridColor = { value: new Color('#34465D') }
+    shader.uniforms.uFloorGridColor = { value: new Color('#43566F') }
     shader.vertexShader = 'varying vec3 vFloorWorldPosition;\n' + shader.vertexShader
     shader.vertexShader = shader.vertexShader.replace(
       '#include <begin_vertex>',
@@ -29,8 +29,8 @@ export function createFloor() {
       vec2 footprint = max(fwidth(gridUV), vec2(0.000001));
       vec2 edgeDistance = abs(fract(gridUV + 0.5) - 0.5);
       vec2 coverage = 1.0 - smoothstep(
-        vec2(0.0004 / uFloorCellSize),
-        vec2(0.0004 / uFloorCellSize) + footprint,
+        vec2(0.0007 / uFloorCellSize),
+        vec2(0.0007 / uFloorCellSize) + footprint,
         edgeDistance
       );
       float pixelFade = 1.0 - smoothstep(0.04, 0.22, max(footprint.x, footprint.y));
@@ -38,10 +38,10 @@ export function createFloor() {
         4.0, 14.0, distance(cameraPosition.xz, vFloorWorldPosition.xz)
       );
       float grid = max(coverage.x, coverage.y) * pixelFade * distanceFade;
-      diffuseColor.rgb = mix(diffuseColor.rgb, uFloorGridColor, grid * 0.16);`,
+      diffuseColor.rgb = mix(diffuseColor.rgb, uFloorGridColor, grid * 0.32);`,
     )
   }
-  material.customProgramCacheKey = () => 'subtle-world-floor-grid-v1'
+  material.customProgramCacheKey = () => 'world-floor-grid-v2-visible'
 
   const mesh = new Mesh(new PlaneGeometry(200, 200), material)
   mesh.name = 'Floor'

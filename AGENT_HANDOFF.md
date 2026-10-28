@@ -29,8 +29,9 @@ Two assets have been created: the DeepTrust logo and a hub network based on the
 user's supplied image. Both are loaded into the same Three.js floor scene.
 The opening is implemented: an accelerating rise from near the floor to overhead,
 overlapping construction of a blue node/card. They finish together in a brief
-blue shockwave and restrained camera impact.
-Logo travel, hub joining, and node rearrangement have not been implemented.
+blue shockwave and restrained camera impact. A blue connection then draws south
+from the completed card toward the distant hub while the camera stays fixed.
+Moving the logo into the hub orbit and rearranging nodes have not been implemented.
 The travel route, joining timing, arrival point, and final logo placement have
 not been decided.
 
@@ -48,6 +49,7 @@ the later joining sequence was already approved or add unrelated page content.
 - `src/lib/card-construction.ts`: matching node body, split border, sparks, tiled fill.
 - `src/lib/arrival-effect.ts`: floor pulse, damped camera impact, and reset.
 - `src/lib/floor.ts`: solid floor with a faint, antialiased world-aligned grid.
+- `src/lib/south-connection.ts`: bottom-center port and southbound connection trace.
 - `src/lib/timeline.ts`: transition definitions shared by playback and preview menu.
 - `src/app.css`: full-screen layout.
 - `public/models/hub-network.glb`: distant destination for the later sequence.
@@ -90,11 +92,12 @@ The shared timeline now overlaps the effects:
 - Border draw: starts 1.5 s, lasts 1.5 s, ends 3 s.
 - Tiled fill: starts 2 s, lasts 1 s, ends 3 s.
 - Arrival pulse: starts 3 s, lasts 0.8 s, ends 3.8 s.
+- South connection: starts 3.8 s, lasts 3 s, ends 6.8 s.
 
 The user explicitly superseded the earlier sequential timing and the requirement
 to close the border before filling. Camera, outline, and fill all complete when
 the arrival impact begins. Offsets and durations are derived from shared values.
-The left-side preview menu lists all four effects. Clicking resets and seeks to
+The left-side preview menu lists all five effects. Clicking resets and seeks to
 that entry, with correct partial camera/card state, then plays forward without
 a reload or model refetch. Camera rise replays all. The latest started stage is
 highlighted as playback advances. Native buttons provide keyboard activation.
@@ -103,12 +106,14 @@ The URL tracks the selected starting point without reloading:
 `http://localhost:5173/?start=draw` begins with an undrawn border and the camera
 at second 1.5. `http://localhost:5173/?start=fill` begins at second 2, with fill at
 zero, partial border, and camera still rising. `?start=arrival` starts the pulse
-with camera and card complete. Refresh to replay. The default URL starts the
-whole sequence. Reduced motion shows the completed card without animated impact.
+with camera and card complete. `?start=connect` starts the south connection from
+its first frame after the pulse has ended. Refresh to replay. The default URL
+starts the whole sequence. Reduced motion shows the completed card and wire
+without animated impact.
 
 `createScene` returns a controller with `playFrom(transitionId)` and `dispose()`.
 Replays reset the logo's original pose/color, border draw ranges, body reveal,
-sparks, arrival pulse, and shadow state before seeking. Do not remove this reset when adding
+sparks, arrival pulse, outgoing connection, and shadow state before seeking. Do not remove this reset when adding
 later transitions, or replaying the camera shot can retain a completed card.
 
 Card construction overlaps the camera shot:
@@ -162,14 +167,24 @@ about 0.21336 m / 8.4 inches for a 12-inch card. The material pattern uses world
 X/Z coordinates and is part of the existing shadow-receiving plane. No second
 surface is added. Derivative antialiasing, pixel-density fading, and distance
 fading suppress distracting distant lines. The grid material is disposed by the
-existing scene cleanup.
+existing scene cleanup. The user could not see the first faint grid iteration.
+The current version uses a brighter blue-gray, a 32% blend instead of 16%, and
+a 0.7 mm nominal line half-width instead of 0.4 mm. Cell spacing is unchanged.
 
-The hub's GLB scene is named `Doppel_Hub` and positioned at `(12, 0, -12)` meters,
-about 17 meters from the logo. It stays outside the opening frame. Its existing
-groups remain intact for later animation. The hub stays distant. The logo stays
-centered while scaling and lifting into its forming card during the camera move.
+The hub's GLB scene is named `Doppel_Hub` and positioned at `(0, 0, 18)` meters.
+World +Z is south: down the screen in the square overhead view. The hub remains
+distant and its internal node positions are retained. The logo stays centered
+while scaling and lifting into its forming card during the camera move.
 
-Rendering continues during the 3.8-second sequence including arrival fade, then returns to rendering on
+After the pulse finishes, a small blue port appears at the card's bottom-center
+border. A matching wire draws south toward the hub's northern plate rim over
+3 seconds, with cubic progress so the visible beginning grows slowly before
+the head leaves the frame. The camera stays fixed overhead throughout this
+transition. The connector uses separate absolute transforms and resets on menu
+replay. No card travel or node rearrangement occurs yet. Its path is fixed for
+this iteration; later movement will require updating connector endpoints.
+
+Rendering continues during the 6.8-second sequence including the south connection, then returns to rendering on
 demand. Pixel density is capped at 2. Cleanup disposes geometry, materials,
 shadow maps, and postprocessing resources. Both GLBs must load before the shot
 starts; asynchronous loading handles unmounts and loading errors.
