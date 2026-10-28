@@ -25,6 +25,7 @@ The production build is written to `dist/`. Serve that directory with a static h
 
 - `src/lib/scene.ts`: GLB loading, floor, lighting, and animation lifecycle.
 - `src/lib/opening-shot.ts`: opening camera path, timing, and distances.
+- `src/lib/card-construction.ts`: split border trace, sparks, and tiled card fill.
 - `src/lib/Scene.svelte`: canvas lifecycle and WebGL fallback.
 - `src/App.svelte`: page composition.
 - `src/app.css`: full-screen layout.
@@ -38,12 +39,30 @@ The turn ends at azimuth 0 so the logo finishes aligned with the screen, with
 horizontal bars and no diagonal tilt. The camera keeps looking at the logo
 throughout. The shot plays once after both GLBs load; refresh the page to replay it.
 
+After the overhead camera settles, a blue card constructs around the logo:
+
+- The border traces from the top center down both sides simultaneously, meeting
+  at the bottom center over 3 seconds. Bright heads emit blue spark trails.
+- Only after the border closes, a 24-by-24 grid reveals the interior over 3.5
+  seconds. Cells appear top-to-bottom with deterministic variation near the fill
+  front and a brief blue flash. The finished surface is solid, without a checker
+  pattern or tile gaps.
+- The card reuses the hub's 12-inch rounded-square body, 2.4-inch corner radius,
+  1.5-inch depth, border thickness, and material roughness/metalness. Its navy
+  color is DeepTrust's `#061533`, sourced from `public/branding/logo-mark.svg`.
+  Border and spark emission use brighter versions of the same blue.
+- As construction starts, the logo settles into a white icon: 52% of its original
+  width and height, with 0.15-inch extrusion above the card surface. The original
+  GLB remains unchanged. `Node_DeepTrust` parents the logo and construction parts
+  for later movement together.
+
 The grazing 4-degree start puts the camera about 6 cm above the floor in a
-landscape viewport. Camera distance rises continuously from 0.68 to 1.2 meters, with
-extra distance for portrait viewports. The logo stays still. Reduced motion skips
-directly to the final overhead shot. Hidden tabs pause the timeline. Rendering
-stops after the shot finishes until a resize or visibility change. Pixel density is capped at 2.
-GPU resources and event listeners are released when the component unmounts.
+landscape viewport. Camera distance rises continuously from 0.68 to 1.2 meters,
+with extra distance for portrait viewports. The logo stays still during the
+camera shot. Reduced motion skips to the completed card and overhead camera,
+without sparks. Hidden tabs pause the timeline. Rendering stops after the full
+18.5-second sequence until a resize or visibility change. Pixel density is
+capped at 2. GPU resources and event listeners are released on unmount.
 
 The existing hub network sits at `(12, 0, -12)` meters, outside the opening shot.
 Its separate nodes and links are retained for the later acquisition sequence.

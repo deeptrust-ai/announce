@@ -29,7 +29,7 @@
 <div class="scene" aria-busy={status === 'loading'}>
   <canvas
     bind:this={canvas}
-    aria-label="The DeepTrust logo lying on a floor as the camera circles and rises to an overhead view"
+    aria-label="The DeepTrust logo on a floor, revealed from overhead as a blue rounded card traces and fills around it"
   ></canvas>
   {#if status !== 'ready'}
     <p role="status">{status === 'loading' ? 'Loading scene…' : errorMessage}</p>

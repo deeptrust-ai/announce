@@ -27,8 +27,8 @@ Treat this as the user's creative brief, not evidence of a public acquisition.
 
 Two assets have been created: the DeepTrust logo and a hub network based on the
 user's supplied image. Both are loaded into the same Three.js floor scene.
-The first logo/camera transition is implemented: one continuous rising spiral
-from near the floor to an overhead view.
+The opening is implemented: one continuous rising spiral from near the floor to
+an overhead view, followed by construction of a blue node/card around the logo.
 Logo travel, hub joining, and node rearrangement have not been implemented.
 The travel route, joining timing, arrival point, and final logo placement have
 not been decided.
@@ -44,6 +44,7 @@ the later joining sequence was already approved or add unrelated page content.
 - `src/lib/Scene.svelte`: canvas lifecycle, model-loading status, and errors.
 - `src/lib/scene.ts`: GLB loading, floor, lights, shadows, and animation lifecycle.
 - `src/lib/opening-shot.ts`: camera choreography and configurable shot constants.
+- `src/lib/card-construction.ts`: matching node body, split border, sparks, tiled fill.
 - `src/app.css`: full-screen layout.
 - `public/models/hub-network.glb`: distant destination for the later sequence.
 - `public/models/inner-truth.glb`: DeepTrust logo currently featured by the camera.
@@ -68,14 +69,41 @@ Current opening shot choices:
 - Ease only at the overall start and finish. There is no stage boundary or
   midpoint stop. Play once and hold the final view. Refresh to replay.
 - Keep a stable camera up vector at the overhead pole and focus on the logo.
-- Reduced motion skips to the final shot. Hidden tabs pause elapsed time.
+- Reduced motion skips to the final overhead shot and completed card, without
+  sparks. Hidden tabs pause elapsed time.
+
+After the 12-second camera shot, the camera holds still while the card forms:
+
+- Three seconds: outline starts at top center, grows around both sides at once,
+  then joins at bottom center. Two blue luminous heads emit short spark trails.
+- Next 3.5 seconds: the interior appears as small cells, advancing top-to-bottom
+  with randomized activation near the advancing front. Cells briefly flash blue.
+  No fill is visible before border closure. Final fill is a solid navy surface,
+  with no permanent checker pattern.
+- Geometry comes from the hub GLB's actual `Messages_Body`, with matching
+  12-inch width, 2.4-inch corner radius, and 1.5-inch depth. The border uses the
+  hub's 0.09-inch wire radius and material roughness/metalness.
+- The user specifically requested DeepTrust blue rather than the other nodes'
+  orange. `#061533` comes from `public/branding/logo-mark.svg`. Body uses this
+  navy; border, glow, and sparks use brighter emission of the same blue.
+- The logo stays light for contrast. During the first 0.9 seconds of construction
+  it settles to 52% of its source width/height and 0.15-inch extrusion, just above
+  the body. This changes the runtime instance only, preserving the source GLB.
+- `Node_DeepTrust` parents the logo and all construction parts, keeping a single
+  transform for later travel. Border branches, body, and effects remain separate.
+- Border glow cools to its final blue after closure. Sparks have deterministic
+  birth times and fade naturally. The body uses a shader reveal on the original
+  rounded geometry, so there are no final tile seams or square corner overhangs.
+- Shadows refresh during construction; the incomplete fill does not cast a
+  premature solid-card shadow. Generated meshes and spark resources are disposed
+  through the scene cleanup.
 
 The hub's GLB scene is named `Doppel_Hub` and positioned at `(12, 0, -12)` meters,
 about 17 meters from the logo. It stays outside the opening frame. Its existing
 groups remain intact for later animation. Neither the logo nor the hub moves
 during this first camera transition.
 
-Rendering continues during the 12-second opening, then returns to rendering on
+Rendering continues during the full 18.5-second sequence, then returns to rendering on
 demand. Pixel density is capped at 2. Cleanup disposes geometry, materials,
 shadow maps, and postprocessing resources. Both GLBs must load before the shot
 starts; asynchronous loading handles unmounts and loading errors.
@@ -107,7 +135,9 @@ the actual SVG geometry. Do not revert to a font glyph. The historical
 
 The logo GLB is upright, centered at the origin, Y-up, facing +Z, with extrusion
 depth along Z. The live scene rotates it -90 degrees around X so its front faces
-upward, then lifts its base to Y=0. The runtime scene is named `DeepTrust_Logo`.
+upward, then lifts its base to Y=0 for the opening. During card construction the
+runtime instance scales down and lifts above the new card surface. Its name is
+`DeepTrust_Logo`, parented under `Node_DeepTrust`.
 
 ## Hub asset
 
@@ -190,8 +220,8 @@ The hub-only implementation commit, before the opening camera shot, was:
 
 `ca61694` — Show hub network on a lit floor in Three.js
 
-The next iteration adds the automatic opening logo orbit and overhead camera
-transition. Read the local Git log for its commit hash.
+The opening camera shot has since been refined and extended with card
+construction. Read the local Git log for the latest implementation commit.
 
 Earlier relevant commits:
 

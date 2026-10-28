@@ -6,6 +6,7 @@ import {
   DirectionalLight,
   Fog,
   HemisphereLight,
+  LineSegments,
   Material,
   Mesh,
   MeshStandardMaterial,
@@ -25,6 +26,9 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js'
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js'
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { applyOpeningShot, OPENING_DURATION } from './opening-shot'
+import { CARD_DURATION, createCardConstruction } from './card-construction'
+
+const SCENE_DURATION = OPENING_DURATION + CARD_DURATION
 
 type SceneCallbacks = {
   onReady?: () => void
@@ -36,7 +40,7 @@ function disposeModel(root: Object3D) {
   const materials = new Set<Material>()
   const textures = new Set<Texture>()
   root.traverse((object) => {
-    if (!(object instanceof Mesh)) return
+    if (!(object instanceof Mesh) && !(object instanceof LineSegments)) return
     geometries.add(object.geometry)
     for (const material of Array.isArray(object.material) ? object.material : [object.material]) {
       materials.add(material)
@@ -109,8 +113,11 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
   let ready = false
   let elapsed = 0
   let previousTime: number | undefined
+  let logoModel: Object3D | undefined
+  let hubModel: Object3D | undefined
+  let card: ReturnType<typeof createCardConstruction> | undefined
 
-  // Animate the opening once, then hold the overhead shot without a render loop.
+  // Play the camera shot and card construction once, then hold the completed node.
   function requestRender() {
     if (!disposed && !document.hidden && !frame) frame = requestAnimationFrame(render)
   }
@@ -118,15 +125,16 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
   function render(time: number) {
     frame = 0
     if (disposed) return
-    if (ready && elapsed < OPENING_DURATION) {
+    if (ready && elapsed < SCENE_DURATION) {
       if (previousTime !== undefined) {
-        elapsed = Math.min(OPENING_DURATION, elapsed + (time - previousTime) / 1000)
+        elapsed = Math.min(SCENE_DURATION, elapsed + (time - previousTime) / 1000)
       }
       previousTime = time
     }
     applyOpeningShot(camera, logoFocus, elapsed)
+    if (card?.update(elapsed - OPENING_DURATION)) renderer.shadowMap.needsUpdate = true
     composer.render()
-    if (ready && elapsed < OPENING_DURATION) requestRender()
+    if (ready && elapsed < SCENE_DURATION) requestRender()
   }
 
   function resize() {
@@ -143,7 +151,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
   }
 
   function updateMotionPreference() {
-    if (ready && motionPreference.matches) elapsed = OPENING_DURATION
+    if (ready && motionPreference.matches) elapsed = SCENE_DURATION
     previousTime = undefined
     requestRender()
   }
@@ -185,9 +193,17 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
         scene.add(model)
         renderer.shadowMap.needsUpdate = true
         loadedAssets += 1
-        if (loadedAssets === 2) {
+        if (loadedAssets === 2 && logoModel && hubModel) {
+          try {
+            card = createCardConstruction(logoModel, hubModel)
+            scene.add(card.root)
+          } catch (error) {
+            callbacks.onError?.(error)
+            requestRender()
+            return
+          }
           ready = true
-          elapsed = motionPreference.matches ? OPENING_DURATION : 0
+          elapsed = motionPreference.matches ? SCENE_DURATION : 0
           previousTime = undefined
           callbacks.onReady?.()
         }
@@ -201,6 +217,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
   }
 
   loadAsset('inner-truth.glb', (logo) => {
+    logoModel = logo
     logo.name = 'DeepTrust_Logo'
     // The logo arrives upright. Rotate its front face upward and rest its base on the floor.
     logo.rotation.x = -Math.PI / 2
@@ -210,6 +227,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
   })
 
   loadAsset('hub-network.glb', (hub) => {
+    hubModel = hub
     // Keep its existing groups intact for the later travel and joining sequence.
     hub.name = 'Doppel_Hub'
     hub.position.set(12, 0, -12)
