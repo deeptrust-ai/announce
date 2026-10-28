@@ -1,12 +1,16 @@
 import {
-  Box3, CylinderGeometry, Group, MathUtils, Mesh,
+  Box3, CylinderGeometry, Euler, Group, MathUtils, Mesh,
   Object3D, PerspectiveCamera, Quaternion, Vector2, Vector3,
 } from 'three'
 
 export const HUB_ORBITS = { approachFraction: 0.78, riseSeconds: 3 } as const
 const KINDS = ['DeepTrust', 'Messages', 'Domains', 'Email', 'Social_Media', 'Paid_Ads', 'Telco', 'URLs']
+// A square antiprism gives eight uniformly separated points on a sphere:
+// two equal squares, offset by 45 degrees, with equal nearest-neighbor edges.
+const LATITUDE_HEIGHT = Math.sqrt(1 / (1 + 2 * Math.SQRT2))
+const LATITUDE_RADIUS = Math.sqrt(1 - LATITUDE_HEIGHT ** 2)
 
-/** Lift the joined network into independent, slowly precessing spherical orbits. */
+/** Place eight fixed, evenly spaced anchors on a sphere and rotate them together. */
 export function createHubOrbits(hub: Object3D, card: Object3D, connection: Group, orbitRadius: number) {
   const plate = hub.getObjectByName('Hub_Plate')
   const rim = hub.getObjectByName('Hub_Lime_Rim')
@@ -19,6 +23,7 @@ export function createHubOrbits(hub: Object3D, card: Object3D, connection: Group
   const nodeWidth = orbitRadius / 4
   const centerHeight = orbitRadius * 1.05 + nodeWidth / 2
   const rimPosition = rim.position.clone()
+  const rimRotation = rim.quaternion.clone()
   const root = new Group()
   root.name = 'Hub_Spherical_Orbits'
   hub.add(root)
@@ -55,29 +60,34 @@ export function createHubOrbits(hub: Object3D, card: Object3D, connection: Group
       portPosition: port.position.clone(), portRotation: port.quaternion.clone(),
       portVisible: port.visible, linkVisible: oldLink.visible,
       flatPort: port.position.clone(),
-      nominal: new Vector3(), resolved: new Vector3(), view: new Vector3(), avoidance: new Vector3(),
+      resolved: new Vector3(),
+      anchorDirection: new Vector3(
+        Math.sin(index * Math.PI / 4) * LATITUDE_RADIUS,
+        (index % 2 === 0 ? 1 : -1) * LATITUDE_HEIGHT,
+        -Math.cos(index * Math.PI / 4) * LATITUDE_RADIUS,
+      ),
     }
   })
   const local = new Vector3(), desired = new Vector3(), direction = new Vector3()
   const start = new Vector3(), end = new Vector3(), world = new Vector3()
-  const axis = new Vector3(), up = new Vector3(0, 1, 0)
-  const tilt = new Quaternion(), orientation = new Quaternion()
+  const up = new Vector3(0, 1, 0)
+  const sphereRotation = new Quaternion(), orientation = new Quaternion()
+  const sphereEuler = new Euler(0, 0, 0, 'YXZ')
   const cameraRotation = new Quaternion(), parentRotation = new Quaternion()
-  const viewRight = new Vector3(), viewUp = new Vector3(), sphereCenter = new Vector3()
+  const sphereCenter = new Vector3()
   const frontToCamera = new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), Math.PI / 2)
   let active = false, settled = false, blend = 0
-  let previousOrbitTime: number | undefined
-  let orbitDelta = 0
 
   function reset() {
     active = settled = false
     blend = 0
-    previousOrbitTime = undefined
     root.visible = false
     root.scale.setScalar(0)
+    anchor.quaternion.identity()
     plate.visible = false
     rim.visible = true
     rim.position.copy(rimPosition)
+    rim.quaternion.copy(rimRotation)
     floorRings.visible = false
     for (const entry of entries) {
       entry.node.position.copy(entry.nodePosition)
@@ -86,16 +96,12 @@ export function createHubOrbits(hub: Object3D, card: Object3D, connection: Group
       entry.port.quaternion.copy(entry.portRotation)
       entry.port.visible = entry.portVisible
       entry.oldLink.visible = entry.linkVisible
-      entry.avoidance.set(0, 0, 0)
     }
   }
 
   function update(time: number, reducedMotion: boolean) {
     if (time <= 0) return false
     active = true
-    orbitDelta = reducedMotion || previousOrbitTime === undefined
-      ? 0 : MathUtils.clamp(time - previousOrbitTime, 0, 0.05)
-    previousOrbitTime = time
     blend = reducedMotion ? 1 : MathUtils.smootherstep(time / HUB_ORBITS.riseSeconds, 0, 1)
     settled = blend === 1
     const motionTime = reducedMotion ? 0 : Math.max(0, time - HUB_ORBITS.riseSeconds * 0.25)
@@ -103,16 +109,20 @@ export function createHubOrbits(hub: Object3D, card: Object3D, connection: Group
     root.scale.setScalar(1)
     rim.position.copy(rimPosition)
     rim.position.y += centerHeight * blend
+    // One shared spin, slow tumble, and gentle precession preserve every
+    // anchor-to-anchor distance rather than letting nodes drift individually.
+    sphereEuler.set(
+      motionTime * 0.025 + 0.24 * Math.sin(motionTime * 0.075),
+      motionTime * 0.075,
+      0.18 * Math.sin(motionTime * 0.05),
+      'YXZ',
+    )
+    sphereRotation.setFromEuler(sphereEuler)
+    anchor.quaternion.copy(sphereRotation)
+    orientation.copy(sphereRotation).multiply(rimRotation)
+    rim.quaternion.slerpQuaternions(rimRotation, orientation, blend)
     for (const entry of entries) {
-      const phase = entry.index * Math.PI / 4
-      const speed = (entry.index % 3 === 0 ? -1 : 1) * Math.PI * 2 / (44 + entry.index * 4.1)
-      const angle = phase + motionTime * speed + 0.025 * Math.sin(motionTime * 0.23 + phase) * Math.min(motionTime, 1)
-      const axisAngle = entry.index * 2.399963 + 0.08 * Math.sin(motionTime * 0.07 + phase)
-      axis.set(Math.cos(axisAngle), 0, Math.sin(axisAngle))
-      tilt.setFromAxisAngle(axis, MathUtils.degToRad(24 + entry.index % 4 * 10))
-      const radius = orbitRadius * (1 + 0.02 * Math.sin(motionTime * 0.2 + phase))
-      desired.set(Math.sin(angle) * radius, 0, -Math.cos(angle) * radius).applyQuaternion(tilt)
-      direction.copy(desired).normalize()
+      desired.copy(entry.anchorDirection).applyQuaternion(sphereRotation).multiplyScalar(orbitRadius)
       desired.y += centerHeight
       // Base transforms are restored by approach/expansion before each update.
       entry.node.getWorldPosition(local)
@@ -122,7 +132,7 @@ export function createHubOrbits(hub: Object3D, card: Object3D, connection: Group
       entry.node.parent!.worldToLocal(world)
       entry.node.position.copy(world)
       entry.node.updateWorldMatrix(true, true)
-      // Save the planar port before the post-camera separation pass places
+      // Save the planar port before the post-camera billboard pass places
       // its spherical anchor and rebuilds the live spoke.
       start.copy(entry.portPosition)
       if (entry.index > 0) {
@@ -141,81 +151,20 @@ export function createHubOrbits(hub: Object3D, card: Object3D, connection: Group
     hub.getWorldPosition(world)
     world.y += centerHeight * blend
     const extent = orbitRadius * 1.02 + nodeWidth * 0.65
-    const verticalExtent = (orbitRadius * 0.84 + nodeWidth * 0.65) * blend + 0.05
+    const verticalExtent = (orbitRadius + nodeWidth * 0.65) * blend + 0.05
     return new Box3().setFromCenterAndSize(world, new Vector3(extent * 2, verticalExtent * 2, extent * 2))
   }
 
   function faceCamera(camera: PerspectiveCamera) {
     if (!active) return
     camera.getWorldQuaternion(cameraRotation)
-    viewRight.setFromMatrixColumn(camera.matrixWorld, 0)
-    viewUp.setFromMatrixColumn(camera.matrixWorld, 1)
     anchor.getWorldPosition(sphereCenter)
-    for (const entry of entries) {
-      entry.node.getWorldPosition(entry.nominal)
-      entry.avoidance.multiplyScalar(Math.exp(-orbitDelta * 1.25))
-      entry.resolved.copy(entry.nominal).add(entry.avoidance)
-      entry.view.copy(entry.resolved).applyMatrix4(camera.matrixWorldInverse)
-    }
-
-    function nudge(entry: typeof entries[number], x: number, y: number) {
-      const depth = Math.max(camera.near, -entry.view.z)
-      entry.resolved.addScaledVector(viewRight, x * depth).addScaledVector(viewUp, y * depth)
-      entry.view.x += x * depth
-      entry.view.y += y * depth
-    }
-
-    // A broad, gentle force starts moving neighbors apart before their cards
-    // approach the hard minimum screen-space clearance.
-    for (let i = 0; i < entries.length; i += 1) {
-      for (let j = i + 1; j < entries.length; j += 1) {
-        const a = entries[i]!, b = entries[j]!
-        const depthA = Math.max(camera.near, -a.view.z), depthB = Math.max(camera.near, -b.view.z)
-        const x = b.view.x / depthB - a.view.x / depthA
-        const y = b.view.y / depthB - a.view.y / depthA
-        const distance = Math.hypot(x, y)
-        const comfort = nodeWidth * 1.1 * (1 / depthA + 1 / depthB)
-        if (distance >= comfort || distance < 0.000001) continue
-        const force = (comfort - distance) * Math.min(0.2, orbitDelta * 2) / 2
-        nudge(a, -x / distance * force, -y / distance * force)
-        nudge(b, x / distance * force, y / distance * force)
-      }
-    }
-
-    // Resolve card rectangles in projection, including a generous gap. This
-    // also separates nodes which are far apart in 3D but align in the camera.
-    for (let pass = 0; pass < 24; pass += 1) {
-      let separated = true
-      for (let i = 0; i < entries.length; i += 1) {
-        for (let j = i + 1; j < entries.length; j += 1) {
-          const a = entries[i]!, b = entries[j]!
-          const depthA = Math.max(camera.near, -a.view.z), depthB = Math.max(camera.near, -b.view.z)
-          const x = b.view.x / depthB - a.view.x / depthA
-          const y = b.view.y / depthB - a.view.y / depthA
-          const clearance = nodeWidth * 0.72 * (1 / depthA + 1 / depthB)
-          if (Math.abs(x) >= clearance || Math.abs(y) >= clearance) continue
-          separated = false
-          if (clearance - Math.abs(x) < clearance - Math.abs(y)) {
-            const push = (Math.sign(x) || (i % 2 ? -1 : 1)) * (clearance - Math.abs(x) + 0.00001) / 2
-            nudge(a, -push, 0); nudge(b, push, 0)
-          } else {
-            const push = (Math.sign(y) || (j % 2 ? -1 : 1)) * (clearance - Math.abs(y) + 0.00001) / 2
-            nudge(a, 0, -push); nudge(b, 0, push)
-          }
-        }
-      }
-      if (separated) break
-    }
-
     cameraRotation.multiply(frontToCamera)
     for (const entry of entries) {
-      entry.avoidance.copy(entry.resolved).sub(entry.nominal)
-      world.copy(entry.resolved)
-      entry.node.parent!.worldToLocal(world)
-      entry.node.position.copy(world)
+      entry.node.getWorldPosition(entry.resolved)
       entry.node.parent!.getWorldQuaternion(parentRotation)
       entry.node.quaternion.copy(parentRotation.invert()).multiply(cameraRotation)
-      // Re-anchor the port and spoke after repulsion, so neither endpoint lags.
+      // Ports and spokes follow the same rigid sphere rotation as their cards.
       direction.copy(entry.resolved).sub(sphereCenter).normalize()
       start.copy(entry.flatPort); hub.localToWorld(start)
       end.copy(sphereCenter).addScaledVector(direction, sphereRadius)

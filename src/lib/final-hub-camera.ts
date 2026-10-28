@@ -19,7 +19,7 @@ export function fitFinalHubView(
   const bounds = new Box3().setFromObject(hub)
     .union(new Box3().setFromObject(cardBody))
     .union(new Box3().setFromObject(logo))
-  // Keep the final crop stable as individual nodes repel and orbit off-screen.
+  // Keep the final crop stable as the fixed sphere anchors rotate off-screen.
   if (orbitBounds) bounds.copy(orbitBounds)
   const target = bounds.getCenter(new Vector3())
   const size = bounds.getSize(new Vector3())

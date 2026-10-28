@@ -34,7 +34,7 @@ The production build is written to `dist/`. Serve that directory with a static h
 - `src/lib/hub-approach.ts`: delayed drift into the top slot of the hub orbit.
 - `src/lib/hub-expansion.ts`: seven-to-eight-node redistribution with moving links and ports.
 - `src/lib/hub-breathing.ts`: independent slow glow rhythms for the lime ports and rim.
-- `src/lib/hub-orbits.ts`: invisible spherical anchors, camera-facing cards, and endless independent node orbits.
+- `src/lib/hub-orbits.ts`: invisible spherical anchors, camera-facing cards, and evenly spaced anchors and endless shared sphere rotation.
 - `src/lib/gravity-lensing.ts`: world-space distortion of only the floor-grid coordinates.
 - `src/lib/timeline.ts`: shared transition names, start times, and durations.
 - `src/lib/announcement.ts`: staged logo fades and character-by-character copy timing.
@@ -198,7 +198,7 @@ reduced motion shows the complete message immediately. Brand asset provenance is
 Each lime hub port has an independent breathing rhythm, with periods around
 4.6–6.8 seconds and offset phases. The rim breathes more slowly over 7.2 seconds.
 Small secondary variations make the glow less uniform. A separate ambient clock
-continues these rhythms and the independent node orbits while the camera,
+continues these rhythms and the shared sphere rotation while the camera,
 normalized grid, and completed text hold their final state. Hidden tabs pause it; reduced motion uses steady glow. The final camera
 crop uses the fixed orbital envelope instead of chasing individual nodes and
 is cached after the lift, then refreshed on replay or resize.
@@ -208,13 +208,13 @@ surface, meridians, or added equator lines. The original glowing ring remains
 visible, rising with the anchors as orbital motion begins. The old plum plate
 and graphite floor rings are hidden at runtime. Once DeepTrust is close (78% of
 the approach duration, around second 12.04), the eight nodes lift over three
-seconds into individual tilted orbits. Speeds, directions, phases, and gentle
-precession vary independently. All cards stay parallel to the camera; only
-their anchor positions move through 3D. A soft repelling force and projected
-card-rectangle constraints keep neighbors apart, including nodes that are far
-apart in 3D but overlap from the camera. Repulsion offsets relax back toward each
-node’s own orbit. Ports and live spokes update after separation so they remain
-attached. Motion continues after the text finishes, pauses
+seconds into eight fixed, evenly spaced anchors. They use two staggered square
+latitudes with equal nearest-neighbor distances. A single shared rotation adds
+slow spin, tumble, and gentle precession while preserving the 3D spacing.
+The earlier independent paths and per-node repulsion offsets are replaced by
+this rigid arrangement. All cards stay parallel to the camera; their anchors,
+ports, and spokes turn together. The original glowing ring turns with the sphere.
+Motion continues after the text finishes, pauses
 in hidden tabs, and becomes static under reduced motion. `?start=orbits`
 previews this transition. Source Blender and GLB assets remain unchanged.
 

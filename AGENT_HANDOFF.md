@@ -309,16 +309,17 @@ the wire north through the logo. The world orientation itself is correct:
 north is screen up / -Z, south is screen down / +Z, east is +X, west is -X.
 
 The joining/camera/grid beat ends at 13.8 seconds and text completes at 15.55
-seconds. Rendering continues for independent node orbits and port/rim breathing. Hidden tabs pause both clocks. Reduced motion holds the
+seconds. Rendering continues for shared sphere rotation and port/rim breathing. Hidden tabs pause both clocks. Reduced motion holds the
 final scene with baseline emission and renders on demand. Pixel density is capped at 2. Cleanup disposes geometry, materials,
 shadow maps, and postprocessing resources. Both GLBs must load before the shot
 starts; asynchronous loading handles unmounts and loading errors.
 
 The original rotating wireframe sculpture and stars have been removed.
 
-## Invisible spherical hub and continuous node orbits
+## Invisible spherical hub with evenly spaced rotating anchors
 
-The user asked for organic, independent node orbits around an invisible sphere.
+The latest request replaces independent paths with evenly spaced fixed anchors
+on an invisible sphere, rotating as one unit.
 Do not add visible sphere geometry, reflective material, meridian lines, or
 extra equator rings. `Hub_Plate` and the old graphite `Orbit_Rings` are hidden at
 load and replay. The original `Hub_Lime_Rim` is visible throughout; during the
@@ -329,17 +330,24 @@ through the ground. There is no visible globe growth or surface morph.
 
 Orbital motion starts only when DeepTrust is close: at 78% of the eight-second
 approach, around second 12.04 (about 93% of its eased travel). Eight nodes blend
-from their joining positions into independent tilted orbital planes over three
-seconds. Inclinations are 24–54 degrees, periods about 44–73 seconds, with varied
-directions, phases, small radial variation, and slow precession. A separate
-unclamped animation clock continues indefinitely after the main scene clock
-finishes. Hidden tabs pause it; reduced motion shows a static final state.
+from their joining positions into a fixed eight-point square antiprism over
+three seconds. Four points occupy each of two symmetric latitudes, staggered
+by 45 degrees. Unit height is `sqrt(1 / (1 + 2*sqrt(2)))`; the latitude radius
+is `sqrt(1-height²)`, giving equal nearest-neighbor distances. This means evenly
+spaced neighbors, not equal distance between all possible pairs.
+
+A single quaternion rotates all anchor vectors at the same radius. Motion
+combines continuous yaw (0.075 rad/s), slower tumble (0.025 rad/s), and gentle
+sinusoidal pitch/roll precession. The virtual anchor and original lime ring
+rotate with it. Distances between nodes remain fixed after the blend. The
+separate unclamped animation clock continues indefinitely; hidden tabs pause
+it and reduced motion shows the static final arrangement.
 
 Cards/icons must remain planar to the camera throughout the orbital motion.
 `faceCamera` runs after the camera pose is applied and converts the camera's
 orientation to each card parent's coordinates, with local +Y facing the viewer.
 Do not rotate the cards into their orbital planes or warp their geometry.
-Their 3D anchor positions and connecting ports move independently; each port
+Their 3D anchor positions and connecting ports rotate as one rigid set; each port
 tracks the virtual sphere surface. Eight live cylinders replace the baked flat
 links during orbital motion, preserving blue DeepTrust and amber existing links.
 The original DeepTrust draw connection is hidden once its orbital spoke takes
@@ -347,17 +355,13 @@ over. Replay restores the original transforms, visibility, and planar links.
 
 Final framing crops a fixed orbital envelope, and only caches after the lift
 completes. It deliberately ignores individual node bounds once orbital motion
-is active, so repulsion and off-screen motion do not pump the camera zoom.
-Nodes now repel one another in the camera projection as well as moving through
-3D. Each node carries a persistent world-space avoidance offset which decays
-smoothly toward its own nominal orbit. A broad soft force starts separating
-neighbors before contact. Up to 24 position-constraint passes then enforce card
-rectangle clearance with extra space (1.44 card widths at equal depth), handling
-nodes that align on screen despite being far apart in depth. Corrections move
-along camera right/up, retaining depth and billboard orientation. Port anchors
-and live spokes are rebuilt after separation each frame, so no connection lags
-behind. Avoidance offsets reset on replay. The camera crop stays fixed instead
-of following these corrections. No tests or visual proof were run.
+is active, so shared rotation and off-screen motion do not pump the camera zoom.
+The former per-node paths, soft repulsion, and screen-space avoidance offsets
+have been removed because they would change the fixed spherical spacing. Do
+not reintroduce independent motion under the latest brief. Fixed 3D spacing does
+not imply equal projected distances as points move through depth. Ports and
+spokes are rebuilt from the rotated anchors each frame. No tests or proof were
+run for this iteration.
 
 The shadow light follows the anchor with a constant offset and a wider shadow
 frustum. New geometry/materials are disposed through the normal scene cleanup.
@@ -414,7 +418,7 @@ flashes or synchronized beat. Replaced unreferenced source materials are dispose
 and scene cleanup disposes the assigned clones. Breathing starts after loading
 and continues after the main timeline completes, using a separate ambient clock.
 The camera, normalized grid, and text remain settled while the node positions
-continue moving around their independent spherical orbits. The final
+continue rotating together at their fixed spherical anchor points. The final
 camera fit is cached once the layout completes and invalidated on replay/resize.
 Hidden tabs pause the ambient clock; reduced motion restores baseline emission
 and stops continuous rendering after the final frame. No tests, builds, browser
