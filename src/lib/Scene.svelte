@@ -65,7 +65,9 @@
 <div class="scene" aria-busy={status === 'loading'}>
   <canvas
     bind:this={canvas}
-    aria-label="The DeepTrust logo becoming a blue card, drawing a connection south, and drifting toward the hub with gravitational lensing around both objects"
+    role="application"
+    tabindex="0"
+    aria-label="DeepTrust joining the Doppel hub. Once the sphere settles, drag or use the arrow keys to influence its rotation."
   ></canvas>
   <section
     class="editorial"
@@ -123,6 +125,11 @@
     width: 100%;
     height: 100%;
     touch-action: none;
+  }
+
+  canvas:focus-visible {
+    outline: 1px solid #a6cdff;
+    outline-offset: -3px;
   }
 
   .editorial {

@@ -65,6 +65,7 @@ the later joining sequence was already approved or add unrelated page content.
 - `src/lib/hub-expansion.ts`: clockwise node redistribution, links, and eighth port.
 - `src/lib/hub-breathing.ts`: independent, slow emission rhythms for ports and rim.
 - `src/lib/hub-orbits.ts`: continuous spherical anchor motion, billboard cards, and live 3D links.
+- `src/lib/sphere-interaction.ts`: pointer hit testing, hover influence, dragging, inertia, and keyboard input.
 - `src/lib/gravity-lensing.ts`: world-space lens centers and GLSL for only the floor-grid coordinates.
 - `src/lib/timeline.ts`: transition definitions shared by playback and preview menu.
 - `src/app.css`: full-screen layout.
@@ -375,6 +376,31 @@ illumination. It does not cast shadows; no shadow frustum is allocated or update
 The preview stage `?start=orbits` seeks to orbital activation. The original GLB
 and Blender models are preserved. No tests, builds, browser validation, or proof
 screenshots were run for this iteration.
+
+## Sphere interaction
+
+The user can influence the shared sphere rotation once its three-second lift is
+complete. `sphere-interaction.ts` ray-tests pointer positions against the virtual
+sphere envelope, including its visible cropped portion. Mouse hover adds a small
+damped tilt. Primary-button or single-touch drag rotates around camera right/up,
+with pointer capture so dragging can continue outside the canvas. Release adds
+a short exponentially damped coast, unless the pointer was held stationary or
+cancelled. Arrow keys rotate the focused canvas in small increments. The canvas
+has a descriptive accessible label and a keyboard focus outline.
+
+The input quaternion is composed with the existing automatic sphere quaternion.
+It rotates the entire fixed anchor set, ports, and spokes; it does not rotate
+the camera, change node spacing, affect billboard orientation, or turn the lime
+circumference. Drag orientation persists while automatic rotation continues.
+Hover influence eases away on pointer exit. The press-release link and transition
+controls are sibling DOM targets; canvas listeners do not intercept their clicks.
+
+Replay resets interaction state. Hidden tabs and window blur cancel active
+gestures and stop inertia. Pointer cancellation/lost capture cannot leave the
+sphere stuck dragging. Reduced motion disables hover and inertial animation but
+still permits direct dragging and arrow-key rotation, requesting only the needed
+frames. Disposal releases pointer capture and removes canvas/window listeners.
+No tests, builds, browser checks, or proof screenshots were run for this iteration.
 
 ## Announcement layer and ambient glow
 

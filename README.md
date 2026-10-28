@@ -35,6 +35,7 @@ The production build is written to `dist/`. Serve that directory with a static h
 - `src/lib/hub-expansion.ts`: seven-to-eight-node redistribution with moving links and ports.
 - `src/lib/hub-breathing.ts`: independent slow glow rhythms for the lime ports and rim.
 - `src/lib/hub-orbits.ts`: invisible spherical anchors, camera-facing cards, and evenly spaced anchors and endless shared sphere rotation.
+- `src/lib/sphere-interaction.ts`: pointer steering, drag inertia, and keyboard rotation.
 - `src/lib/gravity-lensing.ts`: world-space distortion of only the floor-grid coordinates.
 - `src/lib/timeline.ts`: shared transition names, start times, and durations.
 - `src/lib/announcement.ts`: staged logo fades and character-by-character copy timing.
@@ -222,6 +223,15 @@ anchor set rotates.
 Motion continues after the text finishes, pauses
 in hidden tabs, and becomes static under reduced motion. `?start=orbits`
 previews this transition. Source Blender and GLB assets remain unchanged.
+
+Once the sphere settles, mouse movement over it adds subtle rotation influence.
+Drag with mouse or touch to turn it directly, then release for a short inertial
+coast. Arrow keys also turn it when the canvas is focused. Input rotates the
+whole anchor arrangement on top of the automatic motion; node spacing, camera
+framing, camera-facing icons, and the fixed glowing circumference are preserved.
+The press-release link and playback controls remain separate interactive targets.
+Replay resets user rotation. Reduced motion allows direct input but disables
+hover steering and inertia. Hidden tabs cancel gestures and pause animation.
 
 ## Blender model
 

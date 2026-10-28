@@ -99,7 +99,7 @@ export function createHubOrbits(hub: Object3D, card: Object3D, connection: Group
     }
   }
 
-  function update(time: number, reducedMotion: boolean) {
+  function update(time: number, reducedMotion: boolean, influence?: Quaternion) {
     if (time <= 0) return false
     active = true
     blend = reducedMotion ? 1 : MathUtils.smootherstep(time / HUB_ORBITS.riseSeconds, 0, 1)
@@ -118,6 +118,7 @@ export function createHubOrbits(hub: Object3D, card: Object3D, connection: Group
       'YXZ',
     )
     sphereRotation.setFromEuler(sphereEuler)
+    if (influence) sphereRotation.premultiply(influence)
     anchor.quaternion.copy(sphereRotation)
     // Keep the glowing circumference circular; only the anchor set rotates.
     rim.quaternion.copy(rimRotation)

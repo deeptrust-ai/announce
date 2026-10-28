@@ -13,6 +13,7 @@ import {
   Object3D,
   PerspectiveCamera,
   Scene,
+  Sphere,
   Texture,
   Vector2,
   Vector3,
@@ -34,6 +35,7 @@ import { createHubApproach } from './hub-approach'
 import { createHubExpansion } from './hub-expansion'
 import { createHubBreathing } from './hub-breathing'
 import { createHubOrbits } from './hub-orbits'
+import { createSphereInteraction } from './sphere-interaction'
 import { applyFinalHubView, fitFinalHubView } from './final-hub-camera'
 import { ANNOUNCEMENT_DURATION } from './announcement'
 import { ANNOUNCEMENT_START, APPROACH_START, ARRIVAL_START, CONNECTION_START, FINAL_HUB_START, FINAL_HUB_DURATION, HUB_SETTLE_TIME, LENS_RELEASE_START, ORBITS_START, SCENE_DURATION, TRANSITIONS, startingTransition, transitionAt } from './timeline'
@@ -130,6 +132,16 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
   let orbits: ReturnType<typeof createHubOrbits> | undefined
   let settledHubView: ReturnType<typeof fitFinalHubView> | undefined
   let reportedTransition: TransitionId | undefined
+  const interactionSphere = new Sphere()
+  const interaction = createSphereInteraction(canvas, camera, () => {
+    const orbit = orbits
+    if (!orbit?.settled) return undefined
+    const bounds = orbit.getBounds()
+    if (!bounds) return undefined
+    orbit.center.getWorldPosition(interactionSphere.center)
+    interactionSphere.radius = (bounds.max.x - bounds.min.x) / 2
+    return interactionSphere
+  }, requestRender, () => motionPreference.matches)
 
   function reportTransition() {
     callbacks.onAnnouncement?.(MathUtils.clamp((elapsed - ANNOUNCEMENT_START) / ANNOUNCEMENT_DURATION, 0, 1))
@@ -155,6 +167,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
     approach?.reset()
     expansion?.reset()
     orbits?.reset()
+    interaction.reset()
     floor.lensing.reset()
     reportTransition()
     requestRender()
@@ -168,9 +181,10 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
   function render(time: number) {
     frame = 0
     if (disposed) return
+    let delta = 0
     if (ready) {
       if (previousTime !== undefined) {
-        const delta = (time - previousTime) / 1000
+        delta = (time - previousTime) / 1000
         elapsed = Math.min(SCENE_DURATION, elapsed + delta)
         ambientElapsed += delta
       }
@@ -182,7 +196,8 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
     expansion?.update(elapsed - APPROACH_START)
     arrival.update(ready ? elapsed - ARRIVAL_START : -1, camera, motionPreference.matches)
     connection?.update(elapsed - CONNECTION_START)
-    orbits?.update(animationOrigin + ambientElapsed - ORBITS_START, motionPreference.matches)
+    const interacting = interaction.update(Math.min(delta, 0.05), motionPreference.matches)
+    orbits?.update(animationOrigin + ambientElapsed - ORBITS_START, motionPreference.matches, interaction.rotation)
     if (card) {
       if (orbits?.active) orbits.center.getWorldPosition(key.target.position)
       else key.target.position.copy(card.root.position)
@@ -211,7 +226,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
     if (ready) reportTransition()
     breathing?.update(ambientElapsed, motionPreference.matches)
     composer.render()
-    if (ready && (elapsed < SCENE_DURATION || !motionPreference.matches)) requestRender()
+    if (ready && (elapsed < SCENE_DURATION || !motionPreference.matches || interacting)) requestRender()
   }
 
   function refreshConnectionView() {
@@ -254,6 +269,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
   function updateVisibility() {
     previousTime = undefined
     if (document.hidden) {
+      interaction.cancel()
       cancelAnimationFrame(frame)
       frame = 0
     } else {
@@ -342,6 +358,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
   function dispose() {
     disposed = true
     cancelAnimationFrame(frame)
+    interaction.dispose()
     resizeObserver.disconnect()
     document.removeEventListener('visibilitychange', updateVisibility)
     motionPreference.removeEventListener('change', updateMotionPreference)
