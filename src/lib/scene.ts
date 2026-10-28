@@ -30,7 +30,9 @@ import { createFloor, GRID_CARD_RATIO } from './floor'
 import { createSouthConnection, SOUTH_CONNECTION } from './south-connection'
 import { applyConnectionView, fitConnectionView } from './connection-camera'
 import type { ConnectionView } from './connection-camera'
-import { ARRIVAL_START, CONNECTION_START, SCENE_DURATION, TRANSITIONS, startingTransition, transitionAt } from './timeline'
+import { createHubApproach } from './hub-approach'
+import { createGravityLensing } from './gravity-lensing'
+import { APPROACH_START, ARRIVAL_START, CONNECTION_START, SCENE_DURATION, TRANSITIONS, startingTransition, transitionAt } from './timeline'
 import type { TransitionId } from './timeline'
 
 type SceneCallbacks = {
@@ -85,7 +87,8 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
 
   scene.add(new HemisphereLight('#c5d8ed', '#29212c', 1.1))
   const key = new DirectionalLight('#fff0dc', 3)
-  key.position.set(-3, 6, 4)
+  const keyOffset = new Vector3(-3, 6, 4)
+  key.position.copy(keyOffset)
   key.castShadow = true
   key.shadow.mapSize.set(2048, 2048)
   key.shadow.camera.left = -1
@@ -105,8 +108,10 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
   const renderPass = new RenderPass(scene, camera)
   const bloomPass = new UnrealBloomPass(new Vector2(1, 1), 0.35, 0.4, 1.1)
   const outputPass = new OutputPass()
+  const lensing = createGravityLensing()
   composer.addPass(renderPass)
   composer.addPass(bloomPass)
+  composer.addPass(lensing.pass)
   composer.addPass(outputPass)
 
   const arrival = createArrivalEffect()
@@ -125,6 +130,8 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
   let card: ReturnType<typeof createCardConstruction> | undefined
   let connection: ReturnType<typeof createSouthConnection> | undefined
   let connectionView: ConnectionView | undefined
+  let connectionBounds: Box3 | undefined
+  let approach: ReturnType<typeof createHubApproach> | undefined
   let reportedTransition: TransitionId | undefined
 
   function reportTransition() {
@@ -144,6 +151,8 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
     card?.reset()
     arrival.reset()
     connection?.reset()
+    approach?.reset()
+    lensing.reset()
     renderer.shadowMap.needsUpdate = true
     reportTransition()
     requestRender()
@@ -165,6 +174,11 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
     }
     applyOpeningShot(camera, logoFocus, elapsed)
     if (card?.update(elapsed - CARD_CONSTRUCTION.startSeconds)) renderer.shadowMap.needsUpdate = true
+    if (approach?.update(elapsed - APPROACH_START)) renderer.shadowMap.needsUpdate = true
+    if (card) {
+      key.target.position.copy(card.root.position)
+      key.position.copy(card.root.position).add(keyOffset)
+    }
     arrival.update(ready ? elapsed - ARRIVAL_START : -1, camera, motionPreference.matches)
     if (connection?.update(elapsed - CONNECTION_START)) renderer.shadowMap.needsUpdate = true
     if (connectionView && elapsed >= CONNECTION_START) {
@@ -174,6 +188,9 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
     // Keep the distant objects clear as the view widens; fog must not hide them at altitude.
     fog.near = Math.max(10, camera.position.y * 1.8)
     fog.far = Math.max(30, camera.position.y * 4)
+    if (card && hubModel) {
+      lensing.update(elapsed - APPROACH_START, camera, card.root, hubModel, motionPreference.matches)
+    }
     if (ready) reportTransition()
     composer.render()
     if (ready && elapsed < SCENE_DURATION) requestRender()
@@ -181,11 +198,14 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
 
   function refreshConnectionView() {
     if (!card || !hubModel) return
-    card.root.updateWorldMatrix(true, true)
-    hubModel.updateWorldMatrix(true, true)
-    const body = card.root.getObjectByName('DeepTrust_Card_Body')!
-    const bounds = new Box3().setFromObject(body).union(new Box3().setFromObject(hubModel))
-    connectionView = fitConnectionView(camera, logoFocus, bounds)
+    // Keep the original composition through travel, replay, and resize.
+    if (!connectionBounds) {
+      card.root.updateWorldMatrix(true, true)
+      hubModel.updateWorldMatrix(true, true)
+      const body = card.root.getObjectByName('DeepTrust_Card_Body')!
+      connectionBounds = new Box3().setFromObject(body).union(new Box3().setFromObject(hubModel))
+    }
+    connectionView = fitConnectionView(camera, logoFocus, connectionBounds)
   }
 
   function resize() {
@@ -254,6 +274,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
             scene.add(card.root)
             connection = createSouthConnection(card.root, card.width, hubModel)
             scene.add(connection.root)
+            approach = createHubApproach(card.root, hubModel, card.width * GRID_CARD_RATIO)
             refreshConnectionView()
           } catch (error) {
             callbacks.onError?.(error)
@@ -298,6 +319,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
     disposeModel(scene)
     key.shadow.dispose()
     bloomPass.dispose()
+    lensing.pass.dispose()
     outputPass.dispose()
     renderPass.dispose()
     composer.dispose()

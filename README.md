@@ -30,6 +30,8 @@ The production build is written to `dist/`. Serve that directory with a static h
 - `src/lib/floor.ts`: unlit floor grid with a separate shadow receiver.
 - `src/lib/south-connection.ts`: outgoing port and southbound connection trace.
 - `src/lib/connection-camera.ts`: vertical camera rise that frames the logo and hub.
+- `src/lib/hub-approach.ts`: delayed drift of the whole DeepTrust card toward the hub.
+- `src/lib/gravity-lensing.ts`: localized screen distortion around both objects.
 - `src/lib/timeline.ts`: shared transition names, start times, and durations.
 - `src/lib/Scene.svelte`: canvas lifecycle and WebGL fallback.
 - `src/App.svelte`: page composition.
@@ -56,6 +58,7 @@ The connection starts after the arrival pulse:
 | Tiled fill | 2 s | 1 s | 3 s |
 | Arrival pulse | 3 s | 0.8 s | 3.8 s |
 | South connection | 3.8 s | 6 s | 9.8 s |
+| Hub attraction | 5.8 s | 8 s | 13.8 s |
 
 The left-side preview menu derives names, durations, and entry points from these
 shared values. Clicking resets and replays from that point, with the camera and
@@ -68,6 +71,8 @@ starts border drawing at its first frame with the camera halfway through its
 move. `http://localhost:5173/?start=fill` starts fill with a partially drawn border
 and the camera at second 2. `?start=arrival` previews the completed-card impact.
 `?start=connect` previews the south connection with camera and card complete.
+`?start=approach` starts the attraction, with the wire and camera already two
+seconds into the connection scene.
 Refresh to replay that starting point and the remaining sequence.
 The default URL still plays the full sequence. Reduced motion still skips to
 the completed card.
@@ -118,7 +123,7 @@ eye height. Replay and direct-stage shortcuts also restore the proper lens.
 The logo stays centered while settling into the forming card. Reduced
 motion skips to the completed card and overhead camera, without sparks,
 shockwave, or jolt. Hidden tabs pause the timeline. Rendering stops after the
-9.8-second sequence until a resize or visibility change. Pixel density is
+13.8-second sequence until a resize or visibility change. Pixel density is
 capped at 2. GPU resources and event listeners are released on unmount.
 
 The hub center sits 30 floor-grid cells directly south of the logo center,
@@ -132,7 +137,18 @@ easing and gradually aims toward the diagram center. Its floor position and lens
 stay fixed. The final height fits both the logo and the complete hub with margin
 in landscape and portrait. Fog distance grows with altitude to keep them visible. Menu replay resets the port and wire.
 The connection maintains a minimum visible screen thickness as the camera rises.
-The card and other nodes do not travel or rearrange in this transition.
+Two seconds into the line scene, DeepTrust begins an eight-second eased drift
+toward the hub. Its logo, body, border, and source port move together. It stops
+eight grid cells north of the hub center, outside the existing node orbit. The
+wire stays attached as its source moves and continues drawing to the hub.
+The camera completes its existing pullback and holds the original composition.
+The original hub nodes stay in place.
+
+As attraction begins, a postprocessing lens gradually bends the grid and scene
+around each object. Deflection is strongest in a soft ring around each center;
+the icon centers remain readable. The lenses track both world positions and
+scale with camera distance and aspect ratio. Reduced motion omits the lensing
+and shows the completed approach. Replays reset motion and distortion.
 
 ## Blender model
 
@@ -183,6 +199,8 @@ the GLB. Regenerate with:
   --python scripts/create-hub-network.py
 ```
 
-This iteration passed `npm run check`, targeted landscape/portrait camera-framing
-checks, and a browser visual check against the existing local dev server. No
-production build, push, or deployment was performed.
+The preceding grid/camera iteration passed static checks and targeted browser
+verification. The attraction/lensing iteration was committed without tests,
+builds, browser checks, or proof screenshots, following the user’s renewed
+instruction. The user reviews the running app in parallel. No push or deployment
+was performed.

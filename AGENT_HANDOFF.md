@@ -16,7 +16,10 @@ before making changes. Continue from the existing implementation.
 - The user explicitly said not to worry about running tests. Skip routine test
   runs. The user later explicitly requested a test to diagnose the missing grid;
   targeted checks and browser verification were performed for that repair and
-  the accompanying camera change. Be clear about verification for each iteration.
+  the accompanying camera change. The user then reaffirmed that they do not
+  need agent tests or proof because they run the app in parallel. For current
+  iterations, skip tests, builds, browser validation, and proof screenshots.
+  Be clear about verification for each iteration.
 - Do not push or deploy unless requested.
 - Preserve unrelated edits and unsaved Blender work. Inspect the actual state
   before replacing an open file or model.
@@ -34,7 +37,9 @@ overlapping construction of a blue node/card. They finish together in a brief
 blue shockwave and restrained camera impact. A blue connection then draws south
 from the completed card toward the distant hub while the camera rises vertically
 to reveal both objects.
-Moving the logo into the hub orbit and rearranging nodes have not been implemented.
+A delayed drift now brings the complete DeepTrust card closer to the hub, with
+localized gravitational lensing around both objects. Entering the hub orbit and
+rearranging existing nodes have not been implemented.
 The travel route, joining timing, arrival point, and final logo placement have
 not been decided.
 
@@ -54,6 +59,8 @@ the later joining sequence was already approved or add unrelated page content.
 - `src/lib/floor.ts`: solid floor with a faint, antialiased world-aligned grid.
 - `src/lib/south-connection.ts`: bottom-center port and southbound connection trace.
 - `src/lib/connection-camera.ts`: vertical rise and framing of both connection endpoints.
+- `src/lib/hub-approach.ts`: delayed card approach with absolute-time positions.
+- `src/lib/gravity-lensing.ts`: two world-tracked lenses in a postprocessing pass.
 - `src/lib/timeline.ts`: transition definitions shared by playback and preview menu.
 - `src/app.css`: full-screen layout.
 - `public/models/hub-network.glb`: distant destination for the later sequence.
@@ -97,11 +104,12 @@ The shared timeline now overlaps the effects:
 - Tiled fill: starts 2 s, lasts 1 s, ends 3 s.
 - Arrival pulse: starts 3 s, lasts 0.8 s, ends 3.8 s.
 - South connection: starts 3.8 s, lasts 6 s, ends 9.8 s.
+- Hub attraction: starts 5.8 s, lasts 8 s, ends 13.8 s.
 
 The user explicitly superseded the earlier sequential timing and the requirement
 to close the border before filling. Camera, outline, and fill all complete when
 the arrival impact begins. Offsets and durations are derived from shared values.
-The left-side preview menu lists all five effects. Clicking resets and seeks to
+The left-side preview menu lists all six effects. Clicking resets and seeks to
 that entry, with correct partial camera/card state, then plays forward without
 a reload or model refetch. Camera rise replays all. The latest started stage is
 highlighted as playback advances. Native buttons provide keyboard activation.
@@ -112,8 +120,9 @@ at second 1.5. `http://localhost:5173/?start=fill` begins at second 2, with fill
 zero, partial border, and camera still rising. `?start=arrival` starts the pulse
 with camera and card complete. `?start=connect` starts the south connection from
 its first frame after the pulse has ended. Refresh to replay. The default URL
-starts the whole sequence. Reduced motion shows the completed card and wire
-without animated impact.
+starts the whole sequence. `?start=approach` previews attraction with the line
+and camera already two seconds into the connection scene. Reduced motion shows
+the final approached card and wire without animated impact or lensing.
 
 `createScene` returns a controller with `playFrom(transitionId)` and `dispose()`.
 Replays reset the logo's original pose/color, border draw ranges, body reveal,
@@ -200,8 +209,26 @@ for a one-second delay followed by a line-tip chase; do not restore that chase.
 The wire maintains a minimum 1.2-pixel screen diameter at high camera positions,
 scaling only its cross-section. Its endpoint and length remain unchanged.
 The connector uses separate absolute transforms and resets on menu
-replay. No card travel or node rearrangement occurs yet. Its path is fixed for
-this iteration; later movement will require updating connector endpoints.
+replay. The source endpoint and port now follow the moving card each frame; the hub
+endpoint stays at the plate rim. The original hub nodes do not rearrange yet.
+
+Two seconds after connection starts, the complete `Node_DeepTrust` drifts south
+over eight seconds, using smootherstep easing and absolute positions. It stops
+eight floor-grid cells north of the hub center, outside the existing orbit.
+`HUB_APPROACH` controls delay, duration, and stopping distance. Replay restores
+the original card position. The shadow light follows the card with a constant
+offset, preserving its lighting direction and shadow coverage. Camera fitting
+uses the cached original scene bounds so resizing during travel does not
+recompose the shot or lose the original logo location.
+
+The gravitational lensing pass runs after bloom and before output conversion.
+Each lens tracks its object’s projected world position, with world radii of
+0.65 m around DeepTrust and 1.7 m around the hub. Aspect correction keeps the
+deflection circular on screen. A soft annular distortion bends the surrounding
+grid and silhouettes while leaving centers mostly untouched. Strength ramps
+over two seconds and has a gentle modulation during the approach. No bright
+ring geometry or new labels are added. Reduced motion disables distortion.
+The pass resets on replay and is disposed during scene cleanup.
 
 Refresh the card and hub world matrices before measuring nested endpoint meshes.
 The connection is created before the first render. Without that refresh, the
@@ -209,7 +236,7 @@ hub plate bounds can retain the pre-placement position near the origin and send
 the wire north through the logo. The world orientation itself is correct:
 north is screen up / -Z, south is screen down / +Z, east is +X, west is -X.
 
-Rendering continues during the 9.8-second sequence including the south connection, then returns to rendering on
+Rendering continues during the 13.8-second sequence including the south connection, then returns to rendering on
 demand. Pixel density is capped at 2. Cleanup disposes geometry, materials,
 shadow maps, and postprocessing resources. Both GLBs must load before the shot
 starts; asynchronous loading handles unmounts and loading errors.
@@ -337,10 +364,8 @@ Earlier relevant commits:
 
 Changes have been committed locally. No push or deployment was performed in
 this session. Blender asset generation and rendered previews succeeded. The
-latest iteration passed `npm run check` (no diagnostics), targeted mathematical
-checks using the actual hub GLB bounds for landscape and portrait framing, and
-a visual browser check of the grid and wider view on the existing local server.
-The camera checks confirm a monotonic rise, fixed X/Z and lens, and both objects
-inside the final view. No production build was run. The user is checking the app
-in parallel; their server was not started, stopped, or restarted. Recheck current
-behavior before claiming future changes are verified.
+preceding grid/camera iteration passed `npm run check`, targeted framing checks,
+and browser verification. The current approach/lensing iteration was implemented
+and committed without tests, builds, browser validation, or proof screenshots,
+as the user requested. Do not describe its appearance as agent-verified. The
+user runs and reviews the app in parallel; their dev server was left untouched.

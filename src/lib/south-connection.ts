@@ -19,7 +19,7 @@ export const SOUTH_CONNECTION = {
   hubDistanceGridCells: 30,
 } as const
 
-/** Draw a fixed connection south (+Z) as the camera rises to reveal the hub. */
+/** Draw south (+Z) and keep the source attached as the card approaches the hub. */
 export function createSouthConnection(card: Object3D, width: number, hub: Object3D) {
   const border = card.getObjectByName('Border_Left_Trace')
   const plate = hub.getObjectByName('Hub_Plate')
@@ -39,9 +39,9 @@ export function createSouthConnection(card: Object3D, width: number, hub: Object
   const end = new Vector3(
     (hubBounds.min.x + hubBounds.max.x) / 2, hubBounds.max.y, hubBounds.min.z,
   )
-  const direction = end.clone().sub(start)
-  const length = direction.length()
-  direction.normalize()
+  const direction = new Vector3()
+  const up = new Vector3(0, 1, 0)
+  const sourceHeight = start.y - cardCenter.y
   const radius = width * (0.09 / 12)
   const material = border.material.clone()
   material.name = 'DeepTrust south connection — blue'
@@ -54,7 +54,6 @@ export function createSouthConnection(card: Object3D, width: number, hub: Object
 
   const wire = new Mesh(new CylinderGeometry(radius, radius, 1, 8), material)
   wire.name = 'South_Connection_Wire'
-  wire.quaternion.setFromUnitVectors(new Vector3(0, 1, 0), direction)
   wire.castShadow = true
   wire.receiveShadow = true
   const viewport = new Vector2()
@@ -86,6 +85,7 @@ export function createSouthConnection(card: Object3D, width: number, hub: Object
   tip.name = 'South_Connection_Draw_Head'
   root.add(tip)
   let previousProgress = -1
+  const previousStart = new Vector3(Infinity, Infinity, Infinity)
 
   function reset() {
     root.visible = false
@@ -93,6 +93,7 @@ export function createSouthConnection(card: Object3D, width: number, hub: Object
     tip.visible = false
     wire.scale.y = 0
     previousProgress = -1
+    previousStart.set(Infinity, Infinity, Infinity)
   }
 
   function update(time: number) {
@@ -100,6 +101,13 @@ export function createSouthConnection(card: Object3D, width: number, hub: Object
     const elapsed = MathUtils.clamp(time / SOUTH_CONNECTION.durationSeconds, 0, 1)
     // Let the visible starting segment draw slowly before the head travels off-screen.
     const progress = elapsed ** 3
+    card.getWorldPosition(cardCenter)
+    start.set(cardCenter.x, cardCenter.y + sourceHeight, cardCenter.z + width / 2)
+    direction.copy(end).sub(start)
+    const length = direction.length()
+    direction.normalize()
+    wire.quaternion.setFromUnitVectors(up, direction)
+    port.position.copy(start)
     const drawnLength = length * progress
     root.visible = true
     wire.visible = progress > 0
@@ -107,8 +115,9 @@ export function createSouthConnection(card: Object3D, width: number, hub: Object
     wire.position.copy(start).addScaledVector(direction, drawnLength / 2)
     tip.visible = progress > 0 && progress < 1
     tip.position.copy(start).addScaledVector(direction, drawnLength)
-    const changed = progress !== previousProgress
+    const changed = progress !== previousProgress || !start.equals(previousStart)
     previousProgress = progress
+    previousStart.copy(start)
     return changed
   }
 
