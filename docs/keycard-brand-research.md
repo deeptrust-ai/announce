@@ -106,7 +106,7 @@ Keycard.ai, and a press-release link. Scrolling content blocks remain deferred.
 `keycard-scene.ts`. This scene uses a rounded thin card body, the local NFC texture,
 the actual filled DeepTrust SVG paths as etching maps, and a world-space grid shader.
 The camera starts tight on the empty logo area at a low 4-degree floor angle
-from the side. It cranes upward and outward through a restrained 90-degree
+from the side, already moving slowly while the scene fades in over 0.85 seconds. It cranes upward and outward through a restrained 90-degree
 swing during the etch, reaching a full-card floor view just as the shockwave begins.
 This follows the user's correction from a spiral to a quarter-turn crane move.
 It then tracks the card as it lifts and settles into the hero view. The eight original solid
@@ -115,8 +115,15 @@ flat pearlescent finish. A glowing blue beam from outside the upper-left frame
 follows the cutting point, synchronized to the timing map. There is no relief,
 bevel, or simulated edge shading. The shockwave distorts only the floor.
 
-The sequence starts with a 0.8-second hold and 4.8-second engraving/crane move.
-When etching finishes, the shockwave begins immediately. After 0.22 seconds,
+The sequence starts with a 0.8-second empty-card lead-in and a 4.8-second
+engraving. The camera moves from the first frame, including through the
+opening fade, and settles when etching completes.
+When etching finishes, the shockwave begins immediately and gives the card a
+small, damped 0.42-second rattle. Both faces and the body move in a child group,
+so the camera's tracking target stays steady. A brief localized orange/yellow
+flash beneath the card suggests the small launch explosion: warm floor glow,
+yellow core, and a subtle rim on the card. It decays over 0.55 seconds and
+casts no shadows. After 0.22 seconds,
 the card jumps upright over one second; its spin starts 0.65 seconds into that
 jump and lasts three seconds. The floor wave continues through the launch for
 its full 1.7 seconds. The spin ends at 9.47 seconds, then the hero holds for

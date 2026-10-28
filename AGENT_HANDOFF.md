@@ -46,9 +46,20 @@ always carries the untouched original K and KEYCARD.AI artwork, even before
 spinning. It is rotated 180 degrees locally so it reads correctly from behind.
 Circuit tracks remain visible throughout.
 
-Timeline: 0.8-second blank hold, then 4.8-second engraving with the camera
-pullback/crane move. At second 5.6, the completed etching immediately triggers
-the floor shockwave (no cooling pause). At 5.82 the card jumps upright over
+Timeline: the scene fades in over 0.85 seconds with the camera already moving
+slowly from frame one. The 0.8-second empty-card lead-in delays only etching,
+not camera motion. Etching then runs for 4.8 seconds. Camera progress uses a
+small cubic lead-in plus smootherstep: nonzero opening velocity, zero velocity
+at etch completion. At second 5.6, the completed etching immediately triggers
+the floor shockwave (no cooling pause) and a restrained 0.42-second damped
+card rattle. A localized orange/yellow flash blooms beneath it for 0.55 seconds,
+with a 35 ms soft attack and rapid decay. The floor receives a warm halo and
+yellow core, the flat artwork receives a restrained warm rim, and a warm point
+light catches the thin body. The burst bridges the rattle into launch, resets
+on replay, and is omitted for reduced motion. It casts no shadows.
+The rattle uses a child group, so both faces/body shake together
+while the camera follows the stable parent. A small face-normal lift keeps
+the tilted card clear of the floor. Replay resets all impact transforms. At 5.82 the card jumps upright over
 one second; at 6.47 the six-and-a-half-turn spin begins, overlapping the last
 0.35 seconds of the jump. The floor pulse continues independently until 7.3,
 rather than cutting off at launch. The spin ends at 9.47, followed by a
@@ -57,7 +68,7 @@ the same time: etch/camera first, shockwave on completion, then jump and spin.
 This clarification supersedes the earlier shared-ending request.
 The camera starts tight on the empty logo/chip area.
 It begins at a 4-degree grazing angle from the card's left side. During the
-4.8-second etch it cranes upward and outward with only a 90-degree horizontal
+opening and etch it cranes upward and outward with only a 90-degree horizontal
 swing, ending at about 72 degrees above the floor and easing its target toward
 the card center. The user explicitly wants a restrained dolly/crane move, not
 a full spiral or repeated orbit.

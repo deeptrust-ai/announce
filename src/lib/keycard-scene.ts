@@ -10,6 +10,7 @@ import {
   Object3D,
   PerspectiveCamera,
   PlaneGeometry,
+  PointLight,
   Scene,
   ShaderMaterial,
   Shape,
@@ -24,6 +25,7 @@ import { ANNOUNCEMENT_DURATION } from './announcement'
 
 /** The card story resolves before the editorial announcement appears. */
 export const KEYCARD_OPENING = {
+  fade: 0.85,
   pause: 0.8,
   etch: 4.8,
   pulse: 1.7,
@@ -59,6 +61,15 @@ function applyCardPose(object: Object3D, time: number) {
   const height = HEIGHT / 2 * Math.sin(lift * Math.PI / 2) + .22 * lift
   object.position.set(0, .003 + DEPTH / 2 + height, 0)
   object.rotation.set(-Math.PI / 2 * (1 - lift) + .025 * lift, spin * Math.PI * 2 * KEYCARD_OPENING.turns - .12 * lift, .015 * lift)
+}
+function applyCardRattle(object: Object3D, time: number) {
+  object.position.set(0, 0, 0)
+  object.rotation.set(0, 0, 0)
+  const impact = time - PULSE_START
+  if (impact <= 0 || impact >= .42) return
+  const envelope = ease(impact / .025) * Math.pow(1 - impact / .42, 3)
+  object.position.set(.012 * Math.sin(impact * 85) * envelope, .008 * Math.sin(impact * 103) * envelope, .015 * envelope)
+  object.rotation.set(.004 * Math.sin(impact * 82) * envelope, .003 * Math.sin(impact * 97) * envelope, .003 * Math.sin(impact * 91) * envelope)
 }
 const WIDTH = 2.52
 const HEIGHT = 3.96
@@ -135,6 +146,7 @@ const cardFragment = /* glsl */`
   uniform float uEtch;
   uniform float uOriginal;
   uniform float uOpacity;
+  uniform float uBurst;
   varying vec2 vUv;
   float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
   void main() {
@@ -168,6 +180,9 @@ const cardFragment = /* glsl */`
     color += vec3(.5, .85, 1.) * head * 2.;
     // The back face always uses the untouched original K and KEYCARD.AI label.
     color = mix(color, texture2D(uCard, vUv).rgb, uOriginal);
+    float edgeDistance = min(min(vUv.x, 1. - vUv.x), min(vUv.y, 1. - vUv.y));
+    float warmRim = 1. - smoothstep(.015, .11, edgeDistance);
+    color += vec3(.75, .23, .025) * uBurst * warmRim * .25;
     gl_FragColor = vec4(color, uOpacity);
     #include <tonemapping_fragment>
     #include <colorspace_fragment>
@@ -177,6 +192,7 @@ const cardFragment = /* glsl */`
 const floorFragment = /* glsl */`
   uniform float uPulse;
   uniform float uPulseActive;
+  uniform float uBurst;
   varying vec3 vWorld;
   float grid(vec2 p) {
     vec2 uv = p / .42;
@@ -198,6 +214,11 @@ const floorFragment = /* glsl */`
     vec3 color = vec3(.0025, .007, .01);
     color += vec3(.018, .032, .038) * grid(displaced) * fade;
     color += mix(vec3(.07, .24, .27), vec3(.15, .09, .24), uPulse) * compression * envelope * .8;
+    // A localized launch flash: yellow core, softer orange light under the card.
+    vec2 burstPosition = p / vec2(1.65, 2.4);
+    float burstHalo = exp(-dot(burstPosition, burstPosition) * 1.8);
+    float burstCore = exp(-dot(p, p) / .2);
+    color += uBurst * (vec3(.6, .14, .008) * burstHalo + vec3(1., .5, .04) * burstCore * .35);
     float grain = fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453);
     color += (grain - .5) * .003;
     gl_FragColor = vec4(color, 1.);
@@ -211,6 +232,7 @@ export async function createKeycardScene(
   signal: AbortSignal,
   onStage: (index: number) => void,
   onAnnouncement: (progress: number) => void,
+  onOpening: (opacity: number) => void,
 ) {
   const assets = `${import.meta.env.BASE_URL}branding/`
   // Load the SVG before creating any GPU resources, so failures cannot leak a renderer.
@@ -239,19 +261,25 @@ export async function createKeycardScene(
   scene.add(new HemisphereLight('#cee7ee', '#15131e', 2))
   const light = new DirectionalLight('#d9e9ff', 3)
   light.position.set(-3, 5, 2); scene.add(light)
+  const launchLight = new PointLight('#ffb245', 0, 7, 2)
+  launchLight.position.set(0, .15, 0)
+  scene.add(launchLight)
 
   const card = new Group()
   scene.add(card)
+  // Isolate the impact from the camera's smooth tracking target.
+  const cardSurface = new Group()
+  card.add(cardSurface)
   const bodyGeometry = new ExtrudeGeometry(roundedCard(), { depth: DEPTH, bevelEnabled: false, curveSegments: 16 })
   bodyGeometry.translate(0, 0, -DEPTH / 2)
   const bodyMaterial = new MeshStandardMaterial({ color: '#24282d', roughness: .65, metalness: .45 })
   const body = new Mesh(bodyGeometry, bodyMaterial)
-  card.add(body)
+  cardSurface.add(body)
 
   const faceGeometry = new PlaneGeometry(WIDTH, HEIGHT)
   const faceMaterial = new ShaderMaterial({
     vertexShader, fragmentShader: cardFragment,
-    uniforms: { uCard: { value: cardTexture }, uMask: { value: maps.mask }, uTiming: { value: maps.timing }, uEtch: { value: 0 }, uOriginal: { value: 0 }, uOpacity: { value: 1 } },
+    uniforms: { uCard: { value: cardTexture }, uMask: { value: maps.mask }, uTiming: { value: maps.timing }, uEtch: { value: 0 }, uOriginal: { value: 0 }, uOpacity: { value: 1 }, uBurst: { value: 0 } },
   })
   const face = new Mesh(faceGeometry, faceMaterial)
   face.position.z = DEPTH / 2 + .001
@@ -260,7 +288,7 @@ export async function createKeycardScene(
     vec2 corner = abs((vUv - .5) * vec2(${WIDTH}, ${HEIGHT})) - vec2(${WIDTH / 2 - .13}, ${HEIGHT / 2 - .13});
     if (length(max(corner, 0.)) + min(max(corner.x, corner.y), 0.) > .13) discard;
     vec3 color = texture2D`)
-  card.add(face)
+  cardSurface.add(face)
   const backMaterial = new ShaderMaterial({
     vertexShader, fragmentShader: faceMaterial.fragmentShader,
     uniforms: { ...faceMaterial.uniforms, uOriginal: { value: 1 } },
@@ -268,11 +296,11 @@ export async function createKeycardScene(
   const back = new Mesh(faceGeometry, backMaterial)
   back.position.z = -face.position.z
   back.rotation.y = Math.PI
-  card.add(back)
+  cardSurface.add(back)
 
 
   const floorGeometry = new PlaneGeometry(100, 100)
-  const floorMaterial = new ShaderMaterial({ vertexShader, fragmentShader: floorFragment, uniforms: { uPulse: { value: 0 }, uPulseActive: { value: 0 } } })
+  const floorMaterial = new ShaderMaterial({ vertexShader, fragmentShader: floorFragment, uniforms: { uPulse: { value: 0 }, uPulseActive: { value: 0 }, uBurst: faceMaterial.uniforms.uBurst! } })
   const floor = new Mesh(floorGeometry, floorMaterial)
   floor.rotation.x = -Math.PI / 2
   scene.add(floor)
@@ -297,13 +325,22 @@ export async function createKeycardScene(
   if (preference.matches) elapsed = END
 
   function render() {
+    const burstTime = elapsed - PULSE_START
+    const burst = !preference.matches && burstTime > 0 && burstTime < .55
+      ? ease(burstTime / .035) * Math.pow(1 - burstTime / .55, 2.5) : 0
+    faceMaterial.uniforms.uBurst!.value = burst
+    launchLight.intensity = burst * 14
     faceMaterial.uniforms.uEtch!.value = Math.max(0, Math.min(1, (elapsed - KEYCARD_OPENING.pause) / KEYCARD_OPENING.etch))
     floorMaterial.uniforms.uPulse!.value = Math.max(0, Math.min(1, (elapsed - PULSE_START) / KEYCARD_OPENING.pulse))
     floorMaterial.uniforms.uPulseActive!.value = !preference.matches && elapsed > PULSE_START && elapsed < PULSE_START + KEYCARD_OPENING.pulse ? 1 : 0
     const spinProgress = clamp((elapsed - SPIN_START) / KEYCARD_OPENING.spin)
     applyCardPose(card, elapsed)
+    applyCardRattle(cardSurface, elapsed)
     card.updateMatrixWorld(true)
-    const pullback = ease(faceMaterial.uniforms.uEtch!.value)
+    // Nonzero opening velocity reads as an existing move under the fade-in.
+    // The cubic contribution also settles to zero velocity at etch completion.
+    const cameraTime = clamp(elapsed / ETCH_END)
+    const pullback = .06 * (1 - Math.pow(1 - cameraTime, 3)) + .94 * ease(cameraTime)
     const lift = ease((elapsed - LIFT_START) / KEYCARD_OPENING.lift)
     const layout = ease((elapsed - ANNOUNCEMENT_START) / 1.2)
     const stacked = camera.aspect <= .85
@@ -351,6 +388,7 @@ export async function createKeycardScene(
     const stage = KEYCARD_STAGES.reduce<number>((index, candidate, next) => elapsed >= candidate.start ? next : index, 0)
     if (stage !== reportedStage) { reportedStage = stage; onStage(stage) }
     onAnnouncement(clamp((elapsed - ANNOUNCEMENT_START) / ANNOUNCEMENT_DURATION))
+    onOpening(ease(elapsed / KEYCARD_OPENING.fade))
     if (blur > .01 && !preference.matches) {
       // Integrate the complete two-sided card over a short exposure.
       motionBlur.render(elapsed, blur / 30, SPIN_START, (time) => {

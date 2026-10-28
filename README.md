@@ -7,8 +7,10 @@ A minimal Svelte + TypeScript + Vite app with a full-screen Three.js scene.
 - `/`: original Doppel announcement.
 - `/keycard/`: independent Keycard opening. A card rests on a grid, receives the
   original solid DeepTrust logo etching from an off-screen blue laser, and emits one floor shockwave.
-  The camera starts low beside the logo area, then cranes up and out through
-  a 90-degree swing during the etch. The pulse triggers a quick upright jump,
+  The camera is already moving as the scene fades in, starting low beside the
+  logo and craning up and out through a 90-degree swing. The completed etch
+  triggers a small damped card rattle with the shockwave and a brief
+  orange/yellow launch flash beneath it. The pulse triggers a quick upright jump,
   overlapping a six-and-a-half-turn spin with shutter-sampled motion blur, and holds on the Keycard hero.
   Its back always carries the original Keycard K and KEYCARD.AI artwork,
   and faces the camera in the finale. A left-aligned overlay then reveals

@@ -8,6 +8,7 @@
   let ready = $state(false)
   let stage = $state(0)
   let announcementProgress = $state(0)
+  let openingOpacity = $state(0)
   const reveal = $derived(announcementState(announcementProgress))
   const assets = `${import.meta.env.BASE_URL}branding/`
   const pressRelease = 'https://deeptrust.ai/press-release'
@@ -15,7 +16,12 @@
 
   onMount(() => {
     const abort = new AbortController()
-    createKeycardScene(canvas, abort.signal, (index) => { stage = index }, (progress) => { announcementProgress = progress }).then((scene) => {
+    createKeycardScene(
+      canvas, abort.signal,
+      (index) => { stage = index },
+      (progress) => { announcementProgress = progress },
+      (opacity) => { openingOpacity = opacity },
+    ).then((scene) => {
       if (abort.signal.aborted) scene?.dispose()
       else { controller = scene; ready = !!scene }
     }).catch((error: unknown) => {
@@ -31,7 +37,7 @@
 <svelte:head><title>DeepTrust × Keycard</title></svelte:head>
 
 <main class="keycard-opening" aria-label="DeepTrust's next chapter with Keycard">
-  <canvas bind:this={canvas} role="img" aria-label="A Keycard lies on a dark grid while a glowing blue laser from off-screen etches DeepTrust into its center using its original solid shapes. A shockwave expands, the card lifts upright, spins with the original Keycard K and KEYCARD.AI artwork on its back, then stops with that Keycard side facing the camera." />
+  <canvas bind:this={canvas} style:opacity={openingOpacity} role="img" aria-label="A moving side view fades in over a Keycard on a dark grid. A glowing blue laser etches the original DeepTrust mark while the camera cranes upward. The shockwave gives the card a small rattle and a brief orange-and-yellow launch flash, then it jumps and spins, finishing with the original Keycard artwork facing the camera." />
   <section class="editorial" style:--reveal={reveal.deeptrustOpacity} aria-label="Acquisition announcement" aria-hidden={!ready || announcementProgress === 0}>
     <div class="editorial-copy">
       <h1 aria-label="DeepTrust is now a part of Keycard.ai">
