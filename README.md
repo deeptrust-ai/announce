@@ -31,7 +31,7 @@ The production build is written to `dist/`. Serve that directory with a static h
 - `src/lib/south-connection.ts`: outgoing port and southbound connection trace.
 - `src/lib/connection-camera.ts`: vertical camera rise that frames the logo and hub.
 - `src/lib/hub-approach.ts`: delayed drift of the whole DeepTrust card toward the hub.
-- `src/lib/gravity-lensing.ts`: localized screen distortion around both objects.
+- `src/lib/gravity-lensing.ts`: world-space distortion of only the floor-grid coordinates.
 - `src/lib/timeline.ts`: shared transition names, start times, and durations.
 - `src/lib/Scene.svelte`: canvas lifecycle and WebGL fallback.
 - `src/App.svelte`: page composition.
@@ -144,11 +144,13 @@ wire stays attached as its source moves and continues drawing to the hub.
 The camera completes its existing pullback and holds the original composition.
 The original hub nodes stay in place.
 
-As attraction begins, a postprocessing lens gradually bends the grid and scene
-around each object. Deflection is strongest in a soft ring around each center;
-the icon centers remain readable. The lenses track both world positions and
-scale with camera distance and aspect ratio. Reduced motion omits the lensing
-and shows the completed approach. Replays reset motion and distortion.
+As attraction begins, the floor shader gradually bends only its grid lookup
+coordinates around each object. The logo, hub, connection, lighting, shadows,
+and bloom retain their normal rendering. The grid lenses follow the objects in
+world X/Z with fixed world radii. Reduced motion omits the grid distortion and
+shows the completed approach. Replays reset motion and distortion. There is no
+full-scene lensing pass.
+
 
 ## Blender model
 

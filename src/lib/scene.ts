@@ -31,7 +31,6 @@ import { createSouthConnection, SOUTH_CONNECTION } from './south-connection'
 import { applyConnectionView, fitConnectionView } from './connection-camera'
 import type { ConnectionView } from './connection-camera'
 import { createHubApproach } from './hub-approach'
-import { createGravityLensing } from './gravity-lensing'
 import { APPROACH_START, ARRIVAL_START, CONNECTION_START, SCENE_DURATION, TRANSITIONS, startingTransition, transitionAt } from './timeline'
 import type { TransitionId } from './timeline'
 
@@ -108,10 +107,8 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
   const renderPass = new RenderPass(scene, camera)
   const bloomPass = new UnrealBloomPass(new Vector2(1, 1), 0.35, 0.4, 1.1)
   const outputPass = new OutputPass()
-  const lensing = createGravityLensing()
   composer.addPass(renderPass)
   composer.addPass(bloomPass)
-  composer.addPass(lensing.pass)
   composer.addPass(outputPass)
 
   const arrival = createArrivalEffect()
@@ -152,7 +149,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
     arrival.reset()
     connection?.reset()
     approach?.reset()
-    lensing.reset()
+    floor.lensing.reset()
     renderer.shadowMap.needsUpdate = true
     reportTransition()
     requestRender()
@@ -189,7 +186,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
     fog.near = Math.max(10, camera.position.y * 1.8)
     fog.far = Math.max(30, camera.position.y * 4)
     if (card && hubModel) {
-      lensing.update(elapsed - APPROACH_START, camera, card.root, hubModel, motionPreference.matches)
+      floor.lensing.update(elapsed - APPROACH_START, card.root, hubModel, motionPreference.matches)
     }
     if (ready) reportTransition()
     composer.render()
@@ -319,7 +316,6 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
     disposeModel(scene)
     key.shadow.dispose()
     bloomPass.dispose()
-    lensing.pass.dispose()
     outputPass.dispose()
     renderPass.dispose()
     composer.dispose()

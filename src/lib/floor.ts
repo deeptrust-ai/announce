@@ -1,13 +1,17 @@
 import { Color, Mesh, MeshBasicMaterial, PlaneGeometry, ShadowMaterial, Vector3 } from 'three'
 
+import { createGravityLensing, GRAVITY_LENS_GLSL } from './gravity-lensing'
+
 export const GRID_CARD_RATIO = 0.7
 
 /** Keep floor color/grid independent of lighting, with a separate shadow receiver. */
 export function createFloor() {
+  const lensing = createGravityLensing()
   const cellSize = { value: 12 * 0.0254 * GRID_CARD_RATIO }
   const cameraPosition = { value: new Vector3() }
   const material = new MeshBasicMaterial({ color: '#182331' })
   material.onBeforeCompile = (shader) => {
+    Object.assign(shader.uniforms, lensing.uniforms)
     shader.uniforms.uFloorCellSize = cellSize
     shader.uniforms.uFloorCameraPosition = cameraPosition
     shader.uniforms.uFloorGridColor = { value: new Color('#43566F') }
@@ -18,6 +22,7 @@ export function createFloor() {
       vFloorWorldPosition = (modelMatrix * vec4(position, 1.0)).xyz;`,
     )
     shader.fragmentShader = `
+      ${GRAVITY_LENS_GLSL}
       varying vec3 vFloorWorldPosition;
       uniform float uFloorCellSize;
       uniform vec3 uFloorGridColor;
@@ -26,7 +31,11 @@ export function createFloor() {
     shader.fragmentShader = shader.fragmentShader.replace(
       '#include <color_fragment>',
       `#include <color_fragment>
-      vec2 gridUV = vFloorWorldPosition.xz / uFloorCellSize;
+      vec2 gridPosition = vFloorWorldPosition.xz;
+      vec2 warpedGridPosition = gridPosition
+        + gridDeflection(gridPosition, uGridLogoCenter, 0.65)
+        + gridDeflection(gridPosition, uGridHubCenter, 1.7);
+      vec2 gridUV = warpedGridPosition / uFloorCellSize;
       vec2 footprint = max(fwidth(gridUV), vec2(0.000001));
       vec2 edgeDistance = abs(fract(gridUV + 0.5) - 0.5);
       vec2 coverage = 1.0 - smoothstep(
@@ -44,7 +53,7 @@ export function createFloor() {
       diffuseColor.rgb = mix(diffuseColor.rgb, uFloorGridColor, grid * 0.32);`,
     )
   }
-  material.customProgramCacheKey = () => 'unlit-world-floor-grid-v3'
+  material.customProgramCacheKey = () => 'unlit-world-floor-grid-v4-grid-lensing'
 
   const geometry = new PlaneGeometry(200, 200)
   const mesh = new Mesh(geometry, material)
@@ -66,5 +75,5 @@ export function createFloor() {
     cellSize.value = width * GRID_CARD_RATIO
   }
 
-  return { mesh, setCardWidth }
+  return { mesh, setCardWidth, lensing }
 }

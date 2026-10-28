@@ -60,7 +60,7 @@ the later joining sequence was already approved or add unrelated page content.
 - `src/lib/south-connection.ts`: bottom-center port and southbound connection trace.
 - `src/lib/connection-camera.ts`: vertical rise and framing of both connection endpoints.
 - `src/lib/hub-approach.ts`: delayed card approach with absolute-time positions.
-- `src/lib/gravity-lensing.ts`: two world-tracked lenses in a postprocessing pass.
+- `src/lib/gravity-lensing.ts`: world-space lens centers and GLSL for only the floor-grid coordinates.
 - `src/lib/timeline.ts`: transition definitions shared by playback and preview menu.
 - `src/app.css`: full-screen layout.
 - `public/models/hub-network.glb`: distant destination for the later sequence.
@@ -221,14 +221,17 @@ offset, preserving its lighting direction and shadow coverage. Camera fitting
 uses the cached original scene bounds so resizing during travel does not
 recompose the shot or lose the original logo location.
 
-The gravitational lensing pass runs after bloom and before output conversion.
-Each lens tracks its object’s projected world position, with world radii of
-0.65 m around DeepTrust and 1.7 m around the hub. Aspect correction keeps the
-deflection circular on screen. A soft annular distortion bends the surrounding
-grid and silhouettes while leaving centers mostly untouched. Strength ramps
-over two seconds and has a gentle modulation during the approach. No bright
-ring geometry or new labels are added. Reduced motion disables distortion.
-The pass resets on replay and is disposed during scene cleanup.
+The user clarified that gravitational lensing must affect ONLY the grid. The
+first implementation used a full-scene postprocessing pass, which also warped
+the logo and hub. That pass has been removed. Do not restore whole-scene lensing.
+`floor.ts` now injects `gravity-lensing.ts` GLSL into the floor material and bends
+only the coordinates used to sample the grid pattern. It does not change floor
+geometry, model rendering, connection geometry, shadows, lighting, or bloom.
+The two lens centers track the objects in world X/Z, with radii of 0.65 m around
+DeepTrust and 1.7 m around the hub. The same soft annular profile and two-second
+strength ramp are retained. Reduced motion disables the grid distortion; replay
+resets it. Uniforms are owned by the floor material, with no separate GPU pass.
+
 
 Refresh the card and hub world matrices before measuring nested endpoint meshes.
 The connection is created before the first render. Without that refresh, the
