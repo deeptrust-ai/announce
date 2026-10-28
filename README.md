@@ -27,6 +27,7 @@ The production build is written to `dist/`. Serve that directory with a static h
 - `src/lib/opening-shot.ts`: opening camera path, timing, and distances.
 - `src/lib/card-construction.ts`: split border trace, sparks, and tiled card fill.
 - `src/lib/arrival-effect.ts`: floor shockwave and brief camera impact.
+- `src/lib/floor.ts`: solid shadow-receiving floor with a faint world-aligned grid.
 - `src/lib/timeline.ts`: shared transition names, start times, and durations.
 - `src/lib/Scene.svelte`: canvas lifecycle and WebGL fallback.
 - `src/App.svelte`: page composition.
@@ -85,10 +86,18 @@ While the camera is still rising, a blue card constructs around the logo:
   for later movement together.
 
 At second 3, the camera, border, and fill finish together. A subtle soft blue ring
-expands across the floor for 0.8 seconds and fades. A small damped camera impact
+expands across the floor for 0.8 seconds and fades. Its width parameter is 0.11 m,
+twice the original 0.055 m; peak brightness and expansion timing are unchanged.
+A small damped camera impact
 lasts 0.28 seconds, then returns to the exact square overhead pose. Offsets are
 applied to a fresh base pose every frame, so they cannot accumulate. Spark tails
 and border glow cool naturally during the arrival pulse.
+
+The solid dark floor has faint square grid lines aligned to world X/Z. Cells
+measure 70% of the actual hub card width: about 0.21336 m (8.4 inches) for a
+12-inch card. The grid is part of the floor material, so it receives the same
+shadows without overlapping geometry or z-fighting. Antialiasing and distance
+fading keep the lines subdued near the horizon.
 
 The grazing 4-degree start puts the camera about 3 cm above the floor. It starts
 0.24 meters from the logo and arcs outward to roughly a 0.56-meter ground-plane

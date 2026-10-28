@@ -299,5 +299,5 @@ export function createCardConstruction(logo: Object3D, hub: Object3D) {
     return changed
   }
 
-  return { root, update, reset }
+  return { root, update, reset, width: size.x }
 }

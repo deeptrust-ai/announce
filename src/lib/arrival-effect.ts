@@ -14,7 +14,7 @@ export const ARRIVAL_EFFECT = {
   joltSeconds: 0.28,
   startRadius: 0.07,
   endRadius: 0.75,
-  ringWidth: 0.055,
+  ringWidth: 0.11,
 } as const
 
 /** A floor-level pulse and a tiny, absolute-time camera impulse at completion. */

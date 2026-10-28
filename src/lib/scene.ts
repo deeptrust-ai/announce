@@ -9,11 +9,9 @@ import {
   LineSegments,
   Material,
   Mesh,
-  MeshStandardMaterial,
   Object3D,
   PCFSoftShadowMap,
   PerspectiveCamera,
-  PlaneGeometry,
   Scene,
   Texture,
   Vector2,
@@ -28,6 +26,7 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { applyOpeningShot, OPENING_SHOT } from './opening-shot'
 import { CARD_CONSTRUCTION, createCardConstruction } from './card-construction'
 import { createArrivalEffect } from './arrival-effect'
+import { createFloor } from './floor'
 import { ARRIVAL_START, SCENE_DURATION, TRANSITIONS, startingTransition, transitionAt } from './timeline'
 import type { TransitionId } from './timeline'
 
@@ -77,15 +76,8 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
   const camera = new PerspectiveCamera(OPENING_SHOT.endFov, 1, 0.02, 80)
   const logoFocus = new Vector3()
 
-  const floor = new Mesh(
-    new PlaneGeometry(200, 200),
-    new MeshStandardMaterial({ color: '#111820', roughness: 0.92, metalness: 0.05 }),
-  )
-  floor.name = 'Floor'
-  floor.rotation.x = -Math.PI / 2
-  floor.position.y = -0.001
-  floor.receiveShadow = true
-  scene.add(floor)
+  const floor = createFloor()
+  scene.add(floor.mesh)
 
   scene.add(new HemisphereLight('#c5d8ed', '#29212c', 1.1))
   const key = new DirectionalLight('#fff0dc', 3)
@@ -231,6 +223,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
         if (loadedAssets === 2 && logoModel && hubModel) {
           try {
             card = createCardConstruction(logoModel, hubModel)
+            floor.setCardWidth(card.width)
             card.root.add(arrival.root)
             scene.add(card.root)
           } catch (error) {

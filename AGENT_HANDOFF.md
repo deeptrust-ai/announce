@@ -47,6 +47,7 @@ the later joining sequence was already approved or add unrelated page content.
 - `src/lib/opening-shot.ts`: camera choreography and configurable shot constants.
 - `src/lib/card-construction.ts`: matching node body, split border, sparks, tiled fill.
 - `src/lib/arrival-effect.ts`: floor pulse, damped camera impact, and reset.
+- `src/lib/floor.ts`: solid floor with a faint, antialiased world-aligned grid.
 - `src/lib/timeline.ts`: transition definitions shared by playback and preview menu.
 - `src/app.css`: full-screen layout.
 - `public/models/hub-network.glb`: distant destination for the later sequence.
@@ -141,12 +142,22 @@ Card construction overlaps the camera shot:
   through the scene cleanup.
 
 At second 3, a soft bluish floor ring expands from the logo area and fades over
-0.8 seconds. Camera impact lasts 0.28 seconds: maximum configured 1.5 cm vertical
+0.8 seconds. Its width parameter is 0.11 m, doubled from 0.055 m without changing
+peak brightness, expansion radius, speed, or timing. Camera impact lasts 0.28 seconds:
+maximum configured 1.5 cm vertical
 impulse, 0.35-degree tilt, and 0.65-degree roll, attenuated immediately by damping.
 The base camera pose is reapplied before each impulse, so offsets do not build
 up. After the brief impact, camera alignment is exactly overhead and square.
 Arrival is attached to `Node_DeepTrust`, reset on menu replay, and disposed with
 the scene. Its shader ring is soft additive blue, not a full-screen flash.
+
+The environment floor stays solid dark with faint square grid lines. Grid cells
+are 70% of the actual final card width, measured from the loaded hub geometry:
+about 0.21336 m / 8.4 inches for a 12-inch card. The material pattern uses world
+X/Z coordinates and is part of the existing shadow-receiving plane. No second
+surface is added. Derivative antialiasing, pixel-density fading, and distance
+fading suppress distracting distant lines. The grid material is disposed by the
+existing scene cleanup.
 
 The hub's GLB scene is named `Doppel_Hub` and positioned at `(12, 0, -12)` meters,
 about 17 meters from the logo. It stays outside the opening frame. Its existing
