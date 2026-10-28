@@ -4,7 +4,8 @@ A minimal Svelte + TypeScript + Vite app with a full-screen Three.js scene.
 
 ## Versions
 
-- `/`: original Doppel announcement.
+- `/`: black status page with white “Loaded 200 OK” text.
+- `/doppel/`: original Doppel announcement.
 - `/keycard/`: independent Keycard opening. A card rests on a grid, receives the
   original solid DeepTrust logo etching from an off-screen blue laser, and emits one floor shockwave.
   The camera is already moving as the scene fades in, starting low beside the
@@ -25,7 +26,7 @@ Bottom-right Previous / Restart / Next controls step through `floor`, `etch`,
 `pulse`, `lift`, `spin`, `hero`, and `announcement`. R restarts the current stage.
 Shortcuts: `?start=etch`, `?start=spin`, `?start=hero`, `?start=announcement`, `?start=complete`.
 Doppel retains its existing stage IDs. Vite has separate HTML build entries for
-both pages. No tests, build, app browser verification, push, or deployment were
+all three pages. No tests, build, app browser verification, push, or deployment were
 run for this version, following the user's workflow.
 
 The brand/product research and design decisions are in
@@ -70,7 +71,8 @@ The production build is written to `dist/`. Serve that directory with a static h
 - `src/lib/timeline.ts`: shared transition names, start times, and durations.
 - `src/lib/announcement.ts`: staged logo fades and character-by-character copy timing.
 - `src/lib/Scene.svelte`: editorial overlay, compact controls, and canvas lifecycle.
-- `src/App.svelte`: original Doppel page composition.
+- `src/App.svelte`: minimal root status page.
+- `doppel/main.ts`: independent Doppel entry point.
 - `keycard/main.ts`: independent Keycard entry point.
 - `src/lib/KeycardPage.svelte`: Keycard canvas lifecycle, editorial announcement, and playback controls.
 - `src/lib/keycard-scene.ts`: flat credential, SVG etching, grid shockwave, lift/spin, hero framing, and announcement timing.
@@ -110,9 +112,9 @@ replays the current transition. The current name and position update as playback
 advances. Back is disabled on the first transition, Next on the last. Native
 buttons support keyboard activation and focus; the canvas stays full-screen.
 
-The menu also updates the URL without reloading. `http://localhost:5173/?start=draw`
+The menu also updates the URL without reloading. `http://localhost:5173/doppel/?start=draw`
 starts border drawing at its first frame with the camera halfway through its
-move. `http://localhost:5173/?start=fill` starts fill with a partially drawn border
+move. `http://localhost:5173/doppel/?start=fill` starts fill with a partially drawn border
 and the camera at second 2. `?start=arrival` previews the completed-card impact.
 `?start=connect` previews the south connection with camera and card complete.
 `?start=approach` starts the attraction, with the wire and camera already two

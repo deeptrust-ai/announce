@@ -77,7 +77,8 @@ These are design interpretations drawn from the
 
 ## How this becomes the new landing page
 
-The page lives at `/keycard/`. The original Doppel scene stays at `/`.
+The page lives at `/keycard/`. The original Doppel scene is at `/doppel/`;
+the root is a minimal black status page reading “Loaded 200 OK”.
 The user explicitly corrected the first adaptation: the hub-and-spoke metaphor
 belongs to Doppel. Keycard must use its credential objects and layered content
 blocks instead. No hub, orbiting nodes, or invisible sphere is mounted by the

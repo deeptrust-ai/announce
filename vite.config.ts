@@ -8,7 +8,8 @@ export default defineConfig({
   build: {
     rolldownOptions: {
       input: {
-        doppel: fileURLToPath(new URL('./index.html', import.meta.url)),
+        index: fileURLToPath(new URL('./index.html', import.meta.url)),
+        doppel: fileURLToPath(new URL('./doppel/index.html', import.meta.url)),
         keycard: fileURLToPath(new URL('./keycard/index.html', import.meta.url)),
       },
     },

@@ -7,18 +7,22 @@ You are continuing the DeepTrust announcement landing page in:
 Read this prompt, the applicable `AGENTS.md` instructions, and the current source
 before making changes. Continue from the existing implementation.
 
-## Current versions: Doppel and Keycard
+## Current routes: status, Doppel, and Keycard
 
 The user corrected the Keycard direction: the hub-and-spoke model is a Doppel
 concept. Keycard must use its physical credential hero and layered content
 blocks, as shown in the two supplied reference screenshots. Do not theme the
 Doppel network or copy its sphere animation into the Keycard page.
 
-`/` remains the original Doppel scene. Its source was restored to the pre-Keycard
-implementation, retaining the sphere interaction and all prior refinements.
+`/` is now a minimal black page with white “Loaded 200 OK” text, mounted through
+`src/main.ts` and `src/App.svelte`. The user explicitly replaced the proposed
+“Deep Trust Announcement Mocks” heading with this status text.
+The original Doppel scene is at `/doppel/`, with its own HTML and
+`doppel/main.ts` mounting `Scene.svelte` directly. Its choreography and sphere
+interaction are preserved. The status page imports neither scene.
 `/keycard/` has its own HTML and `keycard/main.ts`, mounting
 `src/lib/KeycardPage.svelte` directly. It does not import or mount the Three.js
-hub, GLBs, or sphere code. `vite.config.ts` keeps both HTML build inputs.
+hub, GLBs, or sphere code. `vite.config.ts` keeps all three HTML build inputs.
 
 The user is building the Keycard story one transition at a time.
 `KeycardPage.svelte` mounts the independent `keycard-scene.ts` Three.js scene.
@@ -164,7 +168,8 @@ the later joining sequence was already approved or add unrelated page content.
 ## Current app
 
 - Svelte 5, TypeScript, Vite 8, Three.js 0.186; npm and `package-lock.json`.
-- `src/App.svelte`: full-screen page composition.
+- `src/App.svelte`: minimal root status page.
+- `doppel/main.ts`: independent Doppel scene entry point.
 - `src/lib/Scene.svelte`: editorial overlay, playback controls, and canvas lifecycle.
 - `src/lib/announcement.ts`: staged text/logo reveal with absolute timeline progress.
 - `src/lib/scene.ts`: GLB loading, floor, lights, shadows, and animation lifecycle.
@@ -244,8 +249,8 @@ Seeking resets and restores the correct partial state without reloading or
 refetching models. Native buttons provide keyboard focus and activation.
 
 The URL tracks the selected starting point without reloading:
-`http://localhost:5173/?start=draw` begins with an undrawn border and the camera
-at second 1.5. `http://localhost:5173/?start=fill` begins at second 2, with fill at
+`http://localhost:5173/doppel/?start=draw` begins with an undrawn border and the camera
+at second 1.5. `http://localhost:5173/doppel/?start=fill` begins at second 2, with fill at
 zero, partial border, and camera still rising. `?start=arrival` starts the pulse
 with camera and card complete. `?start=connect` starts the south connection from
 its first frame after the pulse has ended. Refresh to replay. The default URL
