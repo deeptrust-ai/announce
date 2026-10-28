@@ -45,6 +45,7 @@ the later joining sequence was already approved or add unrelated page content.
 - `src/lib/scene.ts`: GLB loading, floor, lights, shadows, and animation lifecycle.
 - `src/lib/opening-shot.ts`: camera choreography and configurable shot constants.
 - `src/lib/card-construction.ts`: matching node body, split border, sparks, tiled fill.
+- `src/lib/timeline.ts`: transition definitions shared by playback and preview menu.
 - `src/app.css`: full-screen layout.
 - `public/models/hub-network.glb`: distant destination for the later sequence.
 - `public/models/inner-truth.glb`: DeepTrust logo currently featured by the camera.
@@ -72,11 +73,22 @@ Current opening shot choices:
 - Reduced motion skips to the final overhead shot and completed card, without
   sparks. Hidden tabs pause elapsed time.
 
-Visual iteration shortcut: `http://localhost:5173/?start=draw` skips the opening
-camera move and starts border drawing from time zero in the exact overhead pose.
-Refresh that URL to replay the draw and fill with their normal timing. The
-default URL keeps the complete sequence; reduced motion still shows the final
-completed card.
+The left-side preview menu offers Camera rise (12 s), Border draw (3 s), and
+Tiled fill (3.5 s), derived from shared timeline constants. Clicking replays from
+that stage's beginning and naturally continues the following stages, without a
+reload or model refetch. Camera rise replays all. The current stage is highlighted
+as playback advances. Native buttons provide keyboard activation and focus.
+
+The URL tracks the selected starting point without reloading:
+`http://localhost:5173/?start=draw` begins at exact overhead with an undrawn border;
+`http://localhost:5173/?start=fill` begins with the border closed and fill at time
+zero. Refresh to replay. The default URL starts the camera sequence. Reduced
+motion still shows the completed card immediately.
+
+`createScene` returns a controller with `playFrom(transitionId)` and `dispose()`.
+Replays reset the logo's original pose/color, border draw ranges, body reveal,
+sparks, and shadow state before seeking. Do not remove this reset when adding
+later transitions, or replaying the camera shot can retain a completed card.
 
 After the 12-second camera shot, the camera holds still while the card forms:
 

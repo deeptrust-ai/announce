@@ -26,13 +26,19 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js'
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js'
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { applyOpeningShot, OPENING_DURATION } from './opening-shot'
-import { CARD_DURATION, createCardConstruction } from './card-construction'
-
-const SCENE_DURATION = OPENING_DURATION + CARD_DURATION
+import { createCardConstruction } from './card-construction'
+import { SCENE_DURATION, TRANSITIONS, startingTransition, transitionAt } from './timeline'
+import type { TransitionId } from './timeline'
 
 type SceneCallbacks = {
   onReady?: () => void
   onError?: (error: unknown) => void
+  onTransition?: (transition: TransitionId) => void
+}
+
+export type SceneController = {
+  playFrom: (transition: TransitionId) => void
+  dispose: () => void
 }
 
 function disposeModel(root: Object3D) {
@@ -54,8 +60,8 @@ function disposeModel(root: Object3D) {
   textures.forEach((texture) => texture.dispose())
 }
 
-/** Mount the floor scene and return cleanup for Svelte unmounts and hot reloads. */
-export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks = {}): () => void {
+/** Mount the floor scene and return playback and cleanup controls. */
+export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks = {}): SceneController {
   const renderer = new WebGLRenderer({ canvas, antialias: true })
   renderer.toneMapping = ACESFilmicToneMapping
   renderer.toneMappingExposure = 1.05
@@ -107,17 +113,37 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
   composer.addPass(outputPass)
 
   const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)')
-  const startElapsed = new URLSearchParams(window.location.search).get('start') === 'draw'
-    ? OPENING_DURATION : 0
+  let requestedTransition = startingTransition(window.location.search)
   let disposed = false
   let frame = 0
   let loadedAssets = 0
   let ready = false
-  let elapsed = startElapsed
+  let elapsed = TRANSITIONS.find((transition) => transition.id === requestedTransition)!.start
   let previousTime: number | undefined
   let logoModel: Object3D | undefined
   let hubModel: Object3D | undefined
   let card: ReturnType<typeof createCardConstruction> | undefined
+  let reportedTransition: TransitionId | undefined
+
+  function reportTransition() {
+    const current = transitionAt(elapsed)
+    if (current !== reportedTransition) {
+      reportedTransition = current
+      callbacks.onTransition?.(current)
+    }
+  }
+
+  function playFrom(transition: TransitionId) {
+    if (disposed) return
+    requestedTransition = transition
+    const start = TRANSITIONS.find((item) => item.id === transition)!.start
+    elapsed = motionPreference.matches ? SCENE_DURATION : start
+    previousTime = undefined
+    card?.reset()
+    renderer.shadowMap.needsUpdate = true
+    reportTransition()
+    requestRender()
+  }
 
   // Play the camera shot and card construction once, then hold the completed node.
   function requestRender() {
@@ -135,6 +161,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
     }
     applyOpeningShot(camera, logoFocus, elapsed)
     if (card?.update(elapsed - OPENING_DURATION)) renderer.shadowMap.needsUpdate = true
+    if (ready) reportTransition()
     composer.render()
     if (ready && elapsed < SCENE_DURATION) requestRender()
   }
@@ -205,8 +232,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
             return
           }
           ready = true
-          elapsed = motionPreference.matches ? SCENE_DURATION : startElapsed
-          previousTime = undefined
+          playFrom(requestedTransition)
           callbacks.onReady?.()
         }
         requestRender()
@@ -235,7 +261,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
     hub.position.set(12, 0, -12)
   })
 
-  return () => {
+  function dispose() {
     disposed = true
     cancelAnimationFrame(frame)
     resizeObserver.disconnect()
@@ -249,4 +275,6 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
     composer.dispose()
     renderer.dispose()
   }
+
+  return { playFrom, dispose }
 }

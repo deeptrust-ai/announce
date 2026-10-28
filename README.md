@@ -26,6 +26,7 @@ The production build is written to `dist/`. Serve that directory with a static h
 - `src/lib/scene.ts`: GLB loading, floor, lighting, and animation lifecycle.
 - `src/lib/opening-shot.ts`: opening camera path, timing, and distances.
 - `src/lib/card-construction.ts`: split border trace, sparks, and tiled card fill.
+- `src/lib/timeline.ts`: shared transition names, start times, and durations.
 - `src/lib/Scene.svelte`: canvas lifecycle and WebGL fallback.
 - `src/App.svelte`: page composition.
 - `src/app.css`: full-screen layout.
@@ -39,10 +40,19 @@ The turn ends at azimuth 0 so the logo finishes aligned with the screen, with
 horizontal bars and no diagonal tilt. The camera keeps looking at the logo
 throughout. The shot plays once after both GLBs load; refresh the page to replay it.
 
-For rapid visual iteration, open `http://localhost:5173/?start=draw`. This starts
-at the exact overhead pose and plays border drawing from its first frame, then
-the normal tiled fill. Refresh to restart drawing. The default URL still plays
-the full sequence. Reduced motion still skips to the completed card.
+The left-side preview menu lists Camera rise (12 s), Border draw (3 s), and Tiled
+fill (3.5 s). Click an entry to reset and replay from its beginning, then continue
+the following transitions. Camera rise also replays the whole sequence. The
+active entry follows playback. Buttons support normal keyboard focus and
+activation; the canvas stays full-screen beneath the overlay. Menu names,
+durations, and start times come from the shared timeline.
+
+The menu also updates the URL without reloading. `http://localhost:5173/?start=draw`
+starts at the exact overhead pose and plays border drawing from its first frame.
+`http://localhost:5173/?start=fill` starts with the border complete and fill just
+beginning. Refresh either URL to replay that stage and its following transitions.
+The default URL still plays the full sequence. Reduced motion still skips to
+the completed card.
 
 After the overhead camera settles, a blue card constructs around the logo:
 

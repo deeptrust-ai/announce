@@ -219,6 +219,23 @@ export function createCardConstruction(logo: Object3D, hub: Object3D) {
   })
   let previousTime = -1
 
+  function reset() {
+    construction.visible = false
+    body.visible = false
+    body.castShadow = false
+    fillProgress.value = 0
+    logo.position.copy(startPosition)
+    logo.scale.copy(startScale)
+    logoMaterials.forEach((color, material) => material.color.copy(color))
+    borderMaterial.emissiveIntensity = 24
+    for (const { mesh, head } of branches) {
+      mesh.geometry.setDrawRange(0, 0)
+      head.visible = false
+    }
+    sparks.visible = false
+    previousTime = -1
+  }
+
   function update(time: number) {
     if (time < 0) return false
     const activeTime = MathUtils.clamp(time, 0, CARD_DURATION)
@@ -275,5 +292,5 @@ export function createCardConstruction(logo: Object3D, hub: Object3D) {
     return changed
   }
 
-  return { root, update }
+  return { root, update, reset }
 }
