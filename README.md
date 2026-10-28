@@ -33,6 +33,17 @@ The brand/product research and design decisions are in
 [`docs/keycard-brand-research.md`](docs/keycard-brand-research.md). This is an
 acquisition concept based on the user's brief, not evidence of a public deal.
 
+## AWS sandbox hosting
+
+The user confirmed DeepTrust sandbox account `272183979614`, profile
+`deeptrust-sandbox`, region `us-east-1`. Hosting uses a private S3 bucket behind
+an HTTPS CloudFront distribution. All three routes have independent HTML files.
+
+Infrastructure, caching, and repeatable deployment are documented in
+[`infra/README.md`](infra/README.md). Run `python3 scripts/deploy-sandbox.py`
+to build and redeploy to this sandbox. The script checks the account before any
+mutation. It does not run tests or touch the local dev server.
+
 ## Development
 
 Use Node.js 22.12+ or 24 LTS.

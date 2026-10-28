@@ -125,6 +125,25 @@ not evidence that an acquisition has occurred. No tests, builds, local browser
 validation, or proof screenshots were run. Nothing was pushed or deployed.
 Continue to let the user run and assess the app in parallel.
 
+## AWS sandbox deployment
+
+The user explicitly requested S3 + CloudFront deployment, then confirmed the
+verified STS account `272183979614` as DeepTrust sandbox. Use profile
+`deeptrust-sandbox` and region `us-east-1` explicitly. The default CLI has no
+credentials. Do not deploy through another profile or account.
+
+`infra/announcements.cfn.json` defines stack `deeptrust-announcement-mocks`:
+a private encrypted, versioned S3 bucket; CloudFront OAC signed requests;
+distribution-only bucket read policy; HTTPS redirect; a viewer-request function
+for per-directory index.html; and a cache policy respecting HTML/object headers.
+`scripts/deploy-sandbox.py` verifies the account, builds, applies the stack,
+uploads assets before HTML, and invalidates CloudFront. It retains old hashed
+assets for open clients and retains the S3 bucket on stack deletion. The
+production build succeeded for the initial deployment. No tests or browser
+proofs were run. The dev server was left untouched. Deployment outputs are
+written to `infra/sandbox-deployment.json` only when deployment succeeds; consult
+that file and current AWS state before claiming a current live deployment.
+
 ## User workflow
 
 - The user is a senior developer. Use short, direct updates and quick bullets.
