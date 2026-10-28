@@ -158,7 +158,8 @@ DeepTrust is still approaching. Framing measures the moving hub, DeepTrust card,
 and logo each frame, keeping the pair together as the gap shrinks. It finishes
 square overhead in an oversized crop. The hub center sits inside the lower-right
 area so more of the sphere is visible, with its right and bottom edges allowed
-to overflow. Portrait uses the same composition with adjusted coverage. The old
+to overflow. Portrait keeps the same composition center but doubles the sphere’s apparent
+size, allowing additional overflow on the right and bottom. The old
 logo position and pulse plane are excluded; resize uses the current layout.
 During the approach, the seven original nodes slide clockwise into seven
 evenly spaced slots, leaving the top slot for DeepTrust. The final eight-node

@@ -266,8 +266,11 @@ tracks the closing gap while the camera eases away from the wide pose. It ends
 square overhead, north up. The final composition is now deliberately oversized
 and cropped, but shows more of the sphere than the first northwest-only crop:
 the virtual center is inside the viewport at screen X 84%, Y 78% desktop / 84%
-portrait. Right and bottom edges may overflow. Vertical coverage is 125%;
-desktop width coverage is 115%, portrait 135%. Distance also respects clearance above the orbital volume. This replaces
+portrait. Right and bottom edges may overflow. Desktop coverage is 125% vertically and
+115% horizontally. Portrait framing now applies `mobileScale: 2`, doubling
+coverage to 250% vertically and 270% horizontally while preserving the center.
+Camera clearance above the rotating volume still applies, so near-square
+portrait viewports may reach slightly less than 2x before that safety limit. Distance also respects clearance above the orbital volume. This replaces
 the earlier small full-hub fit at 73% X. Do not restore automatic fit-to-all-nodes
 or viewport-edge clamping: nodes should orbit into and out of the crop. The
 camera and gaze translate together to preserve the overhead view and the left

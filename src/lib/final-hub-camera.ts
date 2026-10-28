@@ -5,6 +5,7 @@ export const FINAL_HUB_SHOT = {
   frameCoverage: 1.25,
   maxWidthFraction: 1.15,
   screenCenterX: 0.84,
+  mobileScale: 2,
 } as const
 
 export type FinalHubView = { position: Vector3; target: Vector3 }
@@ -27,8 +28,9 @@ export function fitFinalHubView(
   const screenCenterY = camera.aspect < 1 ? 0.84 : 0.78
   const ndcX = FINAL_HUB_SHOT.screenCenterX * 2 - 1
   const ndcY = 1 - screenCenterY * 2
-  const coverageX = camera.aspect < 1 ? 1.35 : FINAL_HUB_SHOT.maxWidthFraction
-  const coverageY = FINAL_HUB_SHOT.frameCoverage
+  const mobileScale = camera.aspect < 1 ? FINAL_HUB_SHOT.mobileScale : 1
+  const coverageX = (camera.aspect < 1 ? 1.35 : FINAL_HUB_SHOT.maxWidthFraction) * mobileScale
+  const coverageY = FINAL_HUB_SHOT.frameCoverage * mobileScale
   const distance = Math.max(
     Math.max(size.z / (2 * coverageY), size.x / (2 * camera.aspect * coverageX)) / halfFov,
     size.y / 2 + camera.near + 0.35,
