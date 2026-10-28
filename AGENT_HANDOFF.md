@@ -9,38 +9,45 @@ before making changes. Continue from the existing implementation.
 
 ## Current versions: Doppel and Keycard
 
-The user requested a separate Keycard AI acquisition concept while preserving
-the Doppel scene. `/` remains Doppel. `/keycard/` is the Keycard edition, with
-its own `keycard/index.html` entry and shared Svelte/Three implementation.
-`src/App.svelte` selects the variant from the pathname; query stage shortcuts
-preserve that pathname. `vite.config.ts` includes both HTML build inputs.
+The user corrected the Keycard direction: the hub-and-spoke model is a Doppel
+concept. Keycard must use its physical credential hero and layered content
+blocks, as shown in the two supplied reference screenshots. Do not theme the
+Doppel network or copy its sphere animation into the Keycard page.
 
-Read `docs/keycard-brand-research.md` for the researched product positioning,
-visual observations, sources, and design translation. This is concept copy for
-the user's exit scenario, not evidence that an acquisition has occurred.
-Keycard's live visual language uses a dark technical grid, iridescent credential
-surfaces, fine borders, chip/circuit artwork, compact metadata, and restrained
-lime verification accents. The new page uses official Keycard SVGs, self-hosted
-Geist/Geist Mono with OFL notices, and an original credential-style editorial
-frame. Commercial Mori/Supply fonts are not redistributed. Asset provenance is
-in `public/branding/keycard/SOURCES.md`.
+`/` remains the original Doppel scene. Its source was restored to the pre-Keycard
+implementation, retaining the sphere interaction and all prior refinements.
+`/keycard/` has its own HTML and `keycard/main.ts`, mounting
+`src/lib/KeycardPage.svelte` directly. It does not import or mount the Three.js
+hub, GLBs, or sphere code. `vite.config.ts` keeps both HTML build inputs.
 
-`brand.ts` contains independent defaults, including the original Doppel palette.
-`Scene.svelte` accepts a variant and passes it to `createScene`; it also selects
-logo artwork, accessible copy, page title, and Keycard-specific overlay styles.
-`floor.ts` and the arrival effect accept brand colors. The Keycard GLB instance
-is recolored at runtime by `keycard-network.ts`: dark iridescent node bodies,
-pearl/cyan links, lilac rim, and muted lime ports. The seven existing channel
-icons are hidden and replaced with original monoline Identity, Agents,
-Credentials, Policy, Resources, Sessions, and Audit icons. The source GLB/Blender
-files and DeepTrust logo are unchanged. Doppel does not run that transformation.
+The Keycard page is a scrolling, responsive layout with a grainy near-black
+field and fine grid. The hero pairs the staged DeepTrust/Keycard announcement
+with Keycard's authentic portrait NFC-card artwork. The card arrives in a soft
+3D turn, floats slowly, tilts toward pointer movement, responds to arrow keys,
+and resets its tilt on click. Foil highlights follow the pointer. The actual
+card art is self-hosted as `public/branding/keycard/credential-card.png`.
+The original commercial artwork and logos are not regenerated or altered.
 
-Both retain the staged text/CTA reveal, cropped invisible sphere, evenly spaced
-shared rotation, fixed circular rim, no cast shadows, breathing ports, doubled
-mobile sphere, mouse/touch influence, arrow-key control, and playback buttons.
-The CTA retains the user-provided `https://deeptrust.ai/press-release` URL.
-Research inspected the official Keycard website only. No tests, builds, local
-app browser checks, or proof screenshots were run; nothing was pushed/deployed.
+Below the hero is a separate layered content-block composition: context fields,
+a wide iridescent issued-credential panel, chip/circuit rail, lime trust signals,
+fine tick separators, and resource tiles. The copy announces DeepTrust joining
+Keycard; it does not pretend to perform actual authentication or issue tokens.
+The point is Keycard's credential/object metaphor, not a renamed graph.
+
+The page has its own four playback stages (`card`, `identity`, `join`, `release`)
+in compact bottom-right Back / Restart / Next controls. Query shortcuts preserve
+the Keycard URL. Visibility pauses the reveal clock; reduced motion shows the
+completed copy and disables ambient float/foil animation. The keycard can still
+be tilted with keyboard input. Fonts are self-hosted Geist/Geist Mono with OFL
+notices. The CTA retains `https://deeptrust.ai/press-release` and reveals last,
+with a real arrow, transparent styling, and separation from the logos.
+
+The obsolete Keycard hub rebranding files (`brand.ts`, `keycard-network.ts`) and
+shared scene variant branches were removed. Read
+`docs/keycard-brand-research.md` and `public/branding/keycard/SOURCES.md` for the
+research and asset provenance. This is concept copy for the user's exit scenario,
+not evidence that an acquisition has occurred. No tests, builds, local browser
+validation, or proof screenshots were run. Nothing was pushed or deployed.
 Continue to let the user run and assess the app in parallel.
 
 ## User workflow

@@ -5,12 +5,12 @@ A minimal Svelte + TypeScript + Vite app with a full-screen Three.js scene.
 ## Versions
 
 - `/`: original Doppel announcement.
-- `/keycard/`: separate Keycard acquisition concept with official artwork,
-  credential/iridescent styling, cool pearl/lime scene materials, and identity
-  node icons. The complete animation and rotation interactions are shared.
+- `/keycard/`: independent Keycard acquisition concept with a floating,
+  pointer-tilting physical credential hero, staged announcement, and scrolling
+  translucent content blocks. It does not use Doppel's hub-and-spoke model.
 
-Use `http://localhost:5173/keycard/` on the existing dev server. Stage shortcuts
-work on either page, for example `/keycard/?start=release`. Vite has separate
+Use `http://localhost:5173/keycard/` on the existing dev server. Keycard has its own playback stages (`card`, `identity`, `join`, `release`),
+for example `/keycard/?start=release`; Doppel retains its existing stage IDs. Vite has separate
 HTML build entries for both pages. No tests, build, app browser verification,
 push, or deployment were run for this version, following the user's workflow.
 
@@ -56,9 +56,9 @@ The production build is written to `dist/`. Serve that directory with a static h
 - `src/lib/timeline.ts`: shared transition names, start times, and durations.
 - `src/lib/announcement.ts`: staged logo fades and character-by-character copy timing.
 - `src/lib/Scene.svelte`: editorial overlay, compact controls, and canvas lifecycle.
-- `src/App.svelte`: entry-path selection for Doppel and Keycard.
-- `src/lib/brand.ts`: independent brand copy, asset, scene, and lighting defaults.
-- `src/lib/keycard-network.ts`: Keycard materials and original identity/access icons.
+- `src/App.svelte`: original Doppel page composition.
+- `keycard/main.ts`: independent Keycard entry point.
+- `src/lib/KeycardPage.svelte`: Keycard hero, content blocks, interaction, and playback.
 - `src/app.css`: full-screen layout.
 
 The scene starts focused on the DeepTrust logo, lying flat on a dark floor.

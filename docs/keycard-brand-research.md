@@ -78,36 +78,40 @@ These are design interpretations drawn from the
 
 ## How this becomes the new landing page
 
-The page lives at `/keycard/`. The original Doppel page stays at `/`.
+The page lives at `/keycard/`. The original Doppel scene stays at `/`.
+The user explicitly corrected the first adaptation: the hub-and-spoke metaphor
+belongs to Doppel. Keycard must use its credential objects and layered content
+blocks instead. No hub, orbiting nodes, invisible sphere, or Three.js scene is
+mounted by the Keycard entry point.
 
-The core sequence remains recognizable: the original DeepTrust mark becomes a
-card, connects, approaches, and joins eight evenly spaced anchors. Their shared
-rotation, camera-facing icons, invisible sphere, fixed circular rim, no cast
-shadows, mobile crop, pointer influence, and keyboard controls are preserved.
-The scene is recolored with graphite card bodies, pearl/cyan connections, lilac
-arrival light, restrained bloom, and lime port breathing.
+The hero uses Keycard's actual NFC card artwork as a physical-looking portrait
+credential. It arrives with a soft turn, floats slowly, and responds to pointer
+or keyboard tilt with a foil highlight. A dark field, fine grid, grain, and cool
+ambient light follow the supplied references. DeepTrust fades in, the joining
+phrase types, the Keycard wordmark fades in, and the outlined press-release link
+appears last. The CTA retains `https://deeptrust.ai/press-release`.
 
-The seven existing destination cards now represent Identity, Agents,
-Credentials, Policy, Resources, Sessions, and Audit. They use original monoline
-icons generated locally, replacing the media-channel imagery at runtime. The
-original GLB and Blender assets are not overwritten.
-
-The final editorial layer follows the existing left-aligned grid and ordered
-reveal: DeepTrust fades in, the joining phrase types, the authentic Keycard
-wordmark fades in, then the outlined press-release action appears. Chip artwork,
-quiet metadata, and translucent credential framing make this a Keycard edition
-rather than a logo-only substitution. The CTA keeps the user-supplied
-`https://deeptrust.ai/press-release` destination.
+The page scrolls into a separate content-block composition: context above,
+a wide iridescent credential crossing the stack, chip/circuit rail, lime trust
+signals, tick-mark separators, and resource tiles below. Its announcement copy
+expresses a shared new chapter rather than pretending to execute real
+credential issuance. Typography and illustration are independent of the hero
+card's motion. The concept is Keycard's credential language, not a reskin of
+Doppel's network metaphor.
 
 ## Implementation and review status
 
-`brand.ts` holds independent defaults for both brands. Keycard-specific node
-materials and icons live in `keycard-network.ts`. Theme changes do not mutate
-source files or persist across page loads. Both HTML entry points are included
-in Vite's multipage build configuration.
+`keycard/main.ts` mounts `KeycardPage.svelte` directly. Doppel's `src/App.svelte`
+mounts its original `Scene.svelte`. Both HTML entry points remain in Vite's
+multipage configuration. The obsolete Keycard-specific hub material/icon layer
+and variant branches were removed. Keycard does not load the hub GLB or mount
+the sphere renderer. It uses DOM, CSS 3D transforms, local SVG/PNG artwork, and
+self-hosted fonts. It has its own compact Back / Restart / Next playback stages,
+visibility pausing, reduced-motion support, and responsive stacked mobile layout.
 
 Research included the official site, brand assets, product documentation, launch
 article, current positioning article, public CSS/font references, and a visual
-inspection of the official homepage. No local app tests, production build,
-browser validation, or proof screenshots were run, following the user's workflow.
-No publication or deployment was performed.
+inspection of the official homepage. The corrected design also follows the two
+user-supplied screenshots of the credential flow and physical keycard hero.
+No local app tests, production build, browser validation, or proof screenshots
+were run, following the user's workflow. Nothing was pushed or deployed.

@@ -1,24 +1,20 @@
 import { Color, Mesh, MeshBasicMaterial, PlaneGeometry, Vector3 } from 'three'
 
 import { createGravityLensing, GRAVITY_LENS_GLSL } from './gravity-lensing'
-import { BRANDS } from './brand'
-import type { BrandVariant } from './brand'
 
 export const GRID_CARD_RATIO = 0.7
 
 /** Keep the floor color/grid independent of lighting and free of cast shadows. */
-export function createFloor(variant: BrandVariant = 'doppel') {
-  const brand = BRANDS[variant]
+export function createFloor() {
   const lensing = createGravityLensing()
   const cellSize = { value: 12 * 0.0254 * GRID_CARD_RATIO }
   const cameraPosition = { value: new Vector3() }
-  const material = new MeshBasicMaterial({ color: brand.floor })
+  const material = new MeshBasicMaterial({ color: '#182331' })
   material.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, lensing.uniforms)
     shader.uniforms.uFloorCellSize = cellSize
     shader.uniforms.uFloorCameraPosition = cameraPosition
-    shader.uniforms.uFloorGridColor = { value: new Color(brand.grid) }
-    shader.uniforms.uFloorGridOpacity = { value: brand.gridOpacity }
+    shader.uniforms.uFloorGridColor = { value: new Color('#43566F') }
     shader.vertexShader = 'varying vec3 vFloorWorldPosition;\n' + shader.vertexShader
     shader.vertexShader = shader.vertexShader.replace(
       '#include <begin_vertex>',
@@ -31,7 +27,6 @@ export function createFloor(variant: BrandVariant = 'doppel') {
       uniform float uFloorCellSize;
       uniform vec3 uFloorGridColor;
       uniform vec3 uFloorCameraPosition;
-      uniform float uFloorGridOpacity;
     ` + shader.fragmentShader
     shader.fragmentShader = shader.fragmentShader.replace(
       '#include <color_fragment>',
@@ -56,10 +51,10 @@ export function createFloor(variant: BrandVariant = 'doppel') {
         distance(uFloorCameraPosition.xz, vFloorWorldPosition.xz)
       );
       float grid = max(coverage.x, coverage.y) * pixelFade * distanceFade;
-      diffuseColor.rgb = mix(diffuseColor.rgb, uFloorGridColor, grid * uFloorGridOpacity);`,
+      diffuseColor.rgb = mix(diffuseColor.rgb, uFloorGridColor, grid * 0.32);`,
     )
   }
-  material.customProgramCacheKey = () => 'branded-world-floor-grid-v7-shockwave'
+  material.customProgramCacheKey = () => 'unlit-world-floor-grid-v6-shockwave'
 
   const geometry = new PlaneGeometry(200, 200)
   const mesh = new Mesh(geometry, material)
