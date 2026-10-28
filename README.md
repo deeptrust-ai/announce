@@ -5,14 +5,19 @@ A minimal Svelte + TypeScript + Vite app with a full-screen Three.js scene.
 ## Versions
 
 - `/`: original Doppel announcement.
-- `/keycard/`: independent Keycard acquisition concept with a floating,
-  pointer-tilting physical credential hero, staged announcement, and scrolling
-  translucent content blocks. It does not use Doppel's hub-and-spoke model.
+- `/keycard/`: independent Keycard opening. A card rests on a grid, receives the
+  DeepTrust etching, and emits one floor shockwave. It then lifts upright,
+  spins six times with a subtle blur trail, and holds on the Keycard hero.
+  Its KEYCARD.AI label is hidden until the final hero. Announcement copy and
+  content blocks are deferred.
 
-Use `http://localhost:5173/keycard/` on the existing dev server. Keycard has its own playback stages (`card`, `identity`, `join`, `release`),
-for example `/keycard/?start=release`; Doppel retains its existing stage IDs. Vite has separate
-HTML build entries for both pages. No tests, build, app browser verification,
-push, or deployment were run for this version, following the user's workflow.
+Use `http://localhost:5173/keycard/` on the existing dev server.
+Bottom-right Previous / Restart / Next controls step through `floor`, `etch`,
+`pulse`, `lift`, `spin`, and `hero`. R restarts the current stage.
+Shortcuts: `?start=etch`, `?start=spin`, `?start=hero`, `?start=complete`.
+Doppel retains its existing stage IDs. Vite has separate HTML build entries for
+both pages. No tests, build, app browser verification, push, or deployment were
+run for this version, following the user's workflow.
 
 The brand/product research and design decisions are in
 [`docs/keycard-brand-research.md`](docs/keycard-brand-research.md). This is an
@@ -58,7 +63,8 @@ The production build is written to `dist/`. Serve that directory with a static h
 - `src/lib/Scene.svelte`: editorial overlay, compact controls, and canvas lifecycle.
 - `src/App.svelte`: original Doppel page composition.
 - `keycard/main.ts`: independent Keycard entry point.
-- `src/lib/KeycardPage.svelte`: Keycard hero, content blocks, interaction, and playback.
+- `src/lib/KeycardPage.svelte`: isolated full-screen Keycard canvas and lifecycle.
+- `src/lib/keycard-scene.ts`: flat credential, SVG etching, grid shockwave, lift/spin, and hero hold.
 - `src/app.css`: full-screen layout.
 
 The scene starts focused on the DeepTrust logo, lying flat on a dark floor.

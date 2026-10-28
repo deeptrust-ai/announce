@@ -20,27 +20,41 @@ implementation, retaining the sphere interaction and all prior refinements.
 `src/lib/KeycardPage.svelte` directly. It does not import or mount the Three.js
 hub, GLBs, or sphere code. `vite.config.ts` keeps both HTML build inputs.
 
-The Keycard page is a scrolling, responsive layout with a grainy near-black
-field and fine grid. The hero pairs the staged DeepTrust/Keycard announcement
-with Keycard's authentic portrait NFC-card artwork. The card arrives in a soft
-3D turn, floats slowly, tilts toward pointer movement, responds to arrow keys,
-and resets its tilt on click. Foil highlights follow the pointer. The actual
-card art is self-hosted as `public/branding/keycard/credential-card.png`.
-The original commercial artwork and logos are not regenerated or altered.
+The user is building the Keycard story one transition at a time.
+`KeycardPage.svelte` mounts the independent `keycard-scene.ts` Three.js scene.
+Only the card, floor, and compact bottom-right playback controls are visible.
+The earlier announcement copy, header/footer, content blocks, and CTA are deferred.
+Do not restore them until the user requests the next part.
 
-Below the hero is a separate layered content-block composition: context fields,
-a wide iridescent issued-credential panel, chip/circuit rail, lime trust signals,
-fine tick separators, and resource tiles. The copy announces DeepTrust joining
-Keycard; it does not pretend to perform actual authentication or issue tokens.
-The point is Keycard's credential/object metaphor, not a renamed graph.
+The card has a thin extruded rounded body. Its face uses the authentic NFC-card
+artwork as a texture, with the baked-in K cleared at runtime inside its existing
+circuit frame. The source PNG is unchanged. The center starts empty. The actual
+DeepTrust SVG paths (without the navy background) become mask/time textures.
+A bright engraving front cuts their eight bars left to right, top to bottom.
+The finished mark is a recessed-looking surface treatment, not raised geometry.
+The KEYCARD.AI label is also masked during the etch, shockwave, lift, and spin.
+Circuit tracks remain visible throughout.
 
-The page has its own four playback stages (`card`, `identity`, `join`, `release`)
-in compact bottom-right Back / Restart / Next controls. Query shortcuts preserve
-the Keycard URL. Visibility pauses the reveal clock; reduced motion shows the
-completed copy and disables ambient float/foil animation. The keycard can still
-be tilted with keyboard input. Fonts are self-hosted Geist/Geist Mono with OFL
-notices. The CTA retains `https://deeptrust.ai/press-release` and reveals last,
-with a real arrow, transparent styling, and separation from the logos.
+Timeline: 0.8-second blank hold, 4.8-second engraving, 0.35-second cooling pause,
+1.7-second floor shockwave, 2-second lift upright, 3-second six-turn spin, and
+0.9-second hero settle. The card floats clear of the floor while standing up.
+The camera tracks its center and eases from the elevated floor view into a
+front-facing portrait-card hero. Five short shutter samples create a subtle
+blur trail only during the rapid spin. The hero retains the etched DeepTrust
+mark; the KEYCARD.AI label returns as the spin finishes. At second 13.55 all
+motion stops. No later text or content transition follows.
+
+Controls: Previous / Restart / Next, with the current stage label and 1–6 index.
+Stages are `floor`, `etch`, `pulse`, `lift`, `spin`, and `hero`. R restarts the
+current stage. Query shortcuts use `/keycard/?start=spin`, etc.; `?start=complete`
+shows the final state. Earlier announcement stage IDs no longer apply. Playback
+updates the query string without reloading. The clock pauses in hidden tabs;
+reduced motion displays the finished hero without etching, pulse, lift, or spin.
+Frames stop at the end; resize still refreshes the static view. Shadows stay
+disabled. GPU resources, observers, and listeners are disposed on unmount.
+
+No tests, builds, local browser checks, or proof screenshots were run.
+The user's dev server stays untouched. This is isolated from Doppel's scene.
 
 The obsolete Keycard hub rebranding files (`brand.ts`, `keycard-network.ts`) and
 shared scene variant branches were removed. Read

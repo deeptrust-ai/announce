@@ -11,7 +11,10 @@ https://www.keycard.ai/brand/
 - `credential-card.png`: https://www.keycard.ai/_astro/keycard-nfc.BbQl8DwC_WxzyM.png,
   the 504px NFC-card image referenced by Keycard’s current homepage.
 
-The SVG geometry and PNG artwork are unchanged. Assets are served locally, with no hotlinked logo
+The SVG geometry and PNG artwork are unchanged on disk. The Keycard opening
+uses the PNG as a material texture and masks its center K at runtime so the
+DeepTrust mark can be etched into the empty center. The KEYCARD.AI label is
+also masked during the opening and returns in the final upright hero. Assets are served locally, with no hotlinked logo
 requests. Typeface files in `public/fonts/keycard/` are Geist and Geist Mono,
 retrieved from the public font assets used on Keycard's homepage:
 
@@ -20,7 +23,7 @@ retrieved from the public font assets used on Keycard's homepage:
 
 Their SIL Open Font License notices are included alongside the files, sourced
 from the Google Fonts `ofl/geist` and `ofl/geistmono` directories. Commercial
-Mori/Supply files are not bundled. The resource and trust-signal line icons in the content blocks are original
-inline SVG drawings in `src/lib/KeycardPage.svelte`.
+Mori/Supply files are not bundled. The initial content-block composition is deferred while the first card-etching
+transition is developed.
 
 Research and design translation: `docs/keycard-brand-research.md`.

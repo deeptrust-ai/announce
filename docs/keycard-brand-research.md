@@ -39,8 +39,8 @@ They are implementation observations, not invented brand guidelines.
 | Role | Observed treatment | Translation in this page |
 | --- | --- | --- |
 | Background | Near-black, cool slate, fine dark grid | `#030a0e` backdrop and `#0c1419` floor |
-| Foil | Pale cyan, lilac, pink, warm pearl | Restrained cyan/lilac glass edges and iridescent node cards |
-| Verification | Acid/lime accents, including `#bdee63` | Small identity labels and breathing port lights |
+| Foil | Pale cyan, lilac, pink, warm pearl | Restrained cyan/lilac glass edges and iridescent credential surfaces |
+| Verification | Acid/lime accents, including `#bdee63` | Reserved for later identity/status accents |
 | Structure | Thin cool borders, small radii | Credential-style editorial frame and compact controls |
 | Type | Site preloads Mori, Supply, Geist, and Geist Mono | Self-hosted Geist for UI/copy, Geist Mono for metadata |
 
@@ -57,7 +57,7 @@ Sources: [live homepage](https://www.keycard.ai/),
 
 - **Credential as object.** Foil, chip geometry, and edge highlights turn identity
   into something that feels issued and held. Use it sparingly around the partner
-  announcement and node surfaces, rather than flooding the entire screen.
+  announcement and credential surfaces, rather than flooding the entire screen.
 - **Process as evidence.** Ordered request/verification/decision sequences help
   people understand what the infrastructure does. The existing timed join and
   staged typography already provide a useful process narrative.
@@ -68,9 +68,8 @@ Sources: [live homepage](https://www.keycard.ai/),
   status. Avoid importing Doppel's warm copper/amber as the dominant treatment.
 - **Fine structure, generous space.** Grids and hairlines make the page feel
   precise; quieter empty regions keep it from resembling a crowded dashboard.
-- **Visible connections.** Keep links and their anchors coherent while moving.
-  The interactive sphere can communicate a connected system, while the identity
-  icons explain what is connected.
+- **Layered context.** Let context panels, credential rails, and resource tiles
+  explain the access sequence. Keep the hub-and-spoke metaphor in Doppel only.
 
 These are design interpretations drawn from the
 [homepage](https://www.keycard.ai/) and the conceptual diagrams in the
@@ -81,33 +80,37 @@ These are design interpretations drawn from the
 The page lives at `/keycard/`. The original Doppel scene stays at `/`.
 The user explicitly corrected the first adaptation: the hub-and-spoke metaphor
 belongs to Doppel. Keycard must use its credential objects and layered content
-blocks instead. No hub, orbiting nodes, invisible sphere, or Three.js scene is
-mounted by the Keycard entry point.
+blocks instead. No hub, orbiting nodes, or invisible sphere is mounted by the
+Keycard entry point.
 
-The hero uses Keycard's actual NFC card artwork as a physical-looking portrait
-credential. It arrives with a soft turn, floats slowly, and responds to pointer
-or keyboard tilt with a foil highlight. A dark field, fine grid, grain, and cool
-ambient light follow the supplied references. DeepTrust fades in, the joining
-phrase types, the Keycard wordmark fades in, and the outlined press-release link
-appears last. The CTA retains `https://deeptrust.ai/press-release`.
-
-The page scrolls into a separate content-block composition: context above,
-a wide iridescent credential crossing the stack, chip/circuit rail, lime trust
-signals, tick-mark separators, and resource tiles below. Its announcement copy
-expresses a shared new chapter rather than pretending to execute real
-credential issuance. Typography and illustration are independent of the hero
-card's motion. The concept is Keycard's credential language, not a reskin of
-Doppel's network metaphor.
+The next corrections narrow implementation to the opening etch and hero reveal.
+The card starts lying flat on a dark grid with its chip center empty. DeepTrust's
+actual mark etches into that center. After the etching completes, a single
+shockwave expands through the floor. The card then lifts upright, spins rapidly,
+and settles into its front-facing hero view. The card retains the
+NFC artwork's circuit tracks. The K is masked in the runtime material,
+leaving the original PNG unchanged. The KEYCARD.AI label is hidden until the
+hero settles. Only the scene and playback controls are visible. The earlier
+scrolling announcement and content blocks are deferred until later transitions.
 
 ## Implementation and review status
 
-`keycard/main.ts` mounts `KeycardPage.svelte` directly. Doppel's `src/App.svelte`
-mounts its original `Scene.svelte`. Both HTML entry points remain in Vite's
-multipage configuration. The obsolete Keycard-specific hub material/icon layer
-and variant branches were removed. Keycard does not load the hub GLB or mount
-the sphere renderer. It uses DOM, CSS 3D transforms, local SVG/PNG artwork, and
-self-hosted fonts. It has its own compact Back / Restart / Next playback stages,
-visibility pausing, reduced-motion support, and responsive stacked mobile layout.
+`keycard/main.ts` mounts `KeycardPage.svelte`, which owns the independent
+`keycard-scene.ts`. This scene uses a rounded thin card body, the local NFC texture,
+the actual DeepTrust SVG paths as engraving maps, and a world-space grid shader.
+An elevated camera initially shows the card resting on the floor, then tracks
+its center as it lifts and settles into the hero view. The eight logo
+bars engrave left to right, top to bottom. An illuminated cutting front cools to
+a recessed-looking metal treatment. The shockwave distorts only the floor.
+
+The sequence is: 0.8-second hold, 4.8-second engraving, 0.35-second cooling pause,
+1.7-second shockwave, 2-second upright lift, 3-second six-turn spin, and
+0.9-second hero settle. A short shutter trail approximates motion blur during
+the spin. The etched DeepTrust mark remains in the finished hero. Previous,
+Restart, and Next controls cover all six stages; R restarts the current stage.
+Reduced motion shows the finished hero without animation; hidden tabs pause.
+DPR is capped at two; animation stops after the hero settles.
+The older content-block direction remains a reference for later transitions.
 
 Research included the official site, brand assets, product documentation, launch
 article, current positioning article, public CSS/font references, and a visual
