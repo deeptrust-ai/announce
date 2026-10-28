@@ -125,7 +125,7 @@ export function createCardConstruction(logo: Object3D, hub: Object3D) {
   bodyMaterial.customProgramCacheKey = () => 'deeptrust-tiled-card-v2-dark-fill'
   const body = new Mesh(sourceBody.mesh.geometry, bodyMaterial)
   body.name = 'DeepTrust_Card_Body'
-  body.receiveShadow = true
+  body.receiveShadow = false
   body.visible = false
   construction.add(body)
 
@@ -162,7 +162,7 @@ export function createCardConstruction(logo: Object3D, hub: Object3D) {
     geometry.setDrawRange(0, 0)
     const mesh = new Mesh(geometry, borderMaterial)
     mesh.name = sign < 0 ? 'Border_Left_Trace' : 'Border_Right_Trace'
-    mesh.castShadow = true
+    mesh.castShadow = false
     const head = new Mesh(headGeometry, headMaterial)
     head.name = sign < 0 ? 'Left_Trace_Head' : 'Right_Trace_Head'
     construction.add(mesh, head)
@@ -269,8 +269,8 @@ export function createCardConstruction(logo: Object3D, hub: Object3D) {
       if (head.visible) head.position.copy(path.getPointAt(outline))
     }
     body.visible = activeTime >= CARD_CONSTRUCTION.fillDelaySeconds
-    // Avoid a solid-card shadow before its cells have actually filled in.
-    body.castShadow = fill >= 1
+    // Keep the card shadow-free throughout its reveal and final state.
+    body.castShadow = false
     fillProgress.value = fill
 
     sparks.visible = effectsTime > 0 && effectsTime < CARD_CONSTRUCTION.outlineSeconds + 0.4

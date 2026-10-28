@@ -27,7 +27,7 @@ The production build is written to `dist/`. Serve that directory with a static h
 - `src/lib/opening-shot.ts`: opening camera path, timing, and distances.
 - `src/lib/card-construction.ts`: split border trace, sparks, and tiled card fill.
 - `src/lib/arrival-effect.ts`: floor shockwave and brief camera impact.
-- `src/lib/floor.ts`: unlit floor grid with a separate shadow receiver.
+- `src/lib/floor.ts`: unlit floor grid with no shadow receiver.
 - `src/lib/south-connection.ts`: outgoing port and southbound connection trace.
 - `src/lib/connection-camera.ts`: vertical camera rise that frames the logo and hub.
 - `src/lib/final-hub-camera.ts`: overlapping camera catch-up and final close overhead framing.
@@ -119,8 +119,8 @@ and border glow cool naturally during the arrival pulse.
 The solid dark floor has faint square grid lines aligned to world X/Z. Cells
 measure 70% of the actual hub card width: about 0.21336 m (8.4 inches) for a
 12-inch card. The grid uses an unlit color layer so its visibility does not depend on the
-lighting path. A separate, slightly raised transparent shadow receiver preserves
-the card shadow. Antialiasing and distance fading keep distant lines subdued;
+lighting path. Shadows are disabled across the scene; there is no floor shadow
+receiver. Logos, nodes, ports, and connections cast no shadows. Antialiasing and distance fading keep distant lines subdued;
 the fade distance grows with camera height. This fixes the missing grid observed
 in the browser, rather than only increasing its contrast.
 

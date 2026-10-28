@@ -43,7 +43,7 @@ export function createHubOrbits(hub: Object3D, card: Object3D, connection: Group
     if (!(source instanceof Mesh)) throw new Error(`The ${kind} orbit link is unavailable.`)
     const wire = new Mesh(wireGeometry, source.material)
     wire.name = `Orbital_Link_${kind}`
-    wire.castShadow = true
+    wire.castShadow = false
     wire.onBeforeRender = (renderer, _scene, camera) => {
       if (!(camera instanceof PerspectiveCamera)) return
       renderer.getSize(viewport)

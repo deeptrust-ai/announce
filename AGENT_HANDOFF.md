@@ -72,7 +72,10 @@ the later joining sequence was already approved or add unrelated page content.
 - `public/models/inner-truth.glb`: DeepTrust logo currently featured by the camera.
 
 The scene uses a dark floor, angled perspective camera, warm key light, cool
-fill light, hemisphere light, soft shadows, and subtle bloom on the lime ports.
+fill light, hemisphere light, and subtle bloom on the lime ports. The latest
+user instruction disables all cast shadows: renderer shadow maps are off, loaded
+and generated meshes have casting/receiving disabled, and the floor shadow
+receiver has been removed. Keep normal lighting, emission, and bloom.
 The camera follows the opening shot automatically. Manual OrbitControls were
 removed so they cannot compete with the exact overhead camera pose.
 
@@ -169,8 +172,7 @@ Card construction overlaps the camera shot:
 - Border glow cools to its final blue after closure. Sparks have deterministic
   birth times and fade naturally. The body uses a shader reveal on the original
   rounded geometry, so there are no final tile seams or square corner overhangs.
-- Shadows refresh during construction; the incomplete fill does not cast a
-  premature solid-card shadow. Generated meshes and spark resources are disposed
+- The card never casts or receives shadows, including during construction. Generated meshes and spark resources are disposed
   through the scene cleanup.
 
 At second 3, a soft bluish floor ring expands from the logo area and fades over
@@ -199,7 +201,8 @@ it. The browser now shows both the grid and the card shadow. Derivative
 antialiasing, pixel-density fading, and distance fading suppress distracting
 distant lines; fade distances scale with camera altitude. The grid uses a
 blue-gray 32% blend and a 0.7 mm nominal line half-width. Cell spacing is unchanged.
-Scene cleanup disposes both layers and the shared geometry. PCFShadowMap replaces
+The latest shadow-free iteration removes that separate shadow layer. Scene
+cleanup disposes the remaining unlit floor material and geometry. PCFShadowMap replaces
 the removed PCFSoftShadowMap constant to avoid its runtime warning.
 
 The hub's GLB scene is named `Doppel_Hub`. Its center is 15 floor-grid cells
@@ -363,8 +366,8 @@ not imply equal projected distances as points move through depth. Ports and
 spokes are rebuilt from the rotated anchors each frame. No tests or proof were
 run for this iteration.
 
-The shadow light follows the anchor with a constant offset and a wider shadow
-frustum. New geometry/materials are disposed through the normal scene cleanup.
+The directional light follows the anchor with a constant offset for consistent
+illumination. It does not cast shadows; no shadow frustum is allocated or updated. New geometry/materials are disposed through the normal scene cleanup.
 The preview stage `?start=orbits` seeks to orbital activation. The original GLB
 and Blender models are preserved. No tests, builds, browser validation, or proof
 screenshots were run for this iteration.

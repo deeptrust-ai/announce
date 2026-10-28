@@ -11,7 +11,6 @@ import {
   MathUtils,
   Mesh,
   Object3D,
-  PCFShadowMap,
   PerspectiveCamera,
   Scene,
   Texture,
@@ -76,9 +75,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
   const renderer = new WebGLRenderer({ canvas, antialias: true })
   renderer.toneMapping = ACESFilmicToneMapping
   renderer.toneMappingExposure = 1.05
-  renderer.shadowMap.enabled = true
-  renderer.shadowMap.type = PCFShadowMap
-  renderer.shadowMap.autoUpdate = false
+  renderer.shadowMap.enabled = false
 
   const scene = new Scene()
   scene.background = new Color('#080d14')
@@ -95,16 +92,6 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
   const key = new DirectionalLight('#fff0dc', 3)
   const keyOffset = new Vector3(-3, 6, 4)
   key.position.copy(keyOffset)
-  key.castShadow = true
-  key.shadow.mapSize.set(2048, 2048)
-  key.shadow.camera.left = -2.2
-  key.shadow.camera.right = 2.2
-  key.shadow.camera.top = 2.2
-  key.shadow.camera.bottom = -2.2
-  key.shadow.camera.near = 0.1
-  key.shadow.camera.far = 15
-  key.shadow.bias = -0.00001
-  key.shadow.normalBias = 0.0003
   scene.add(key, key.target)
   const fill = new DirectionalLight('#a5c8ff', 1)
   fill.position.set(4, 3, -3)
@@ -169,7 +156,6 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
     expansion?.reset()
     orbits?.reset()
     floor.lensing.reset()
-    renderer.shadowMap.needsUpdate = true
     reportTransition()
     requestRender()
   }
@@ -191,14 +177,12 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
       previousTime = time
     }
     applyOpeningShot(camera, logoFocus, elapsed)
-    if (card?.update(elapsed - CARD_CONSTRUCTION.startSeconds)) renderer.shadowMap.needsUpdate = true
-    if (approach?.update(elapsed - APPROACH_START)) renderer.shadowMap.needsUpdate = true
-    if (expansion?.update(elapsed - APPROACH_START)) renderer.shadowMap.needsUpdate = true
+    card?.update(elapsed - CARD_CONSTRUCTION.startSeconds)
+    approach?.update(elapsed - APPROACH_START)
+    expansion?.update(elapsed - APPROACH_START)
     arrival.update(ready ? elapsed - ARRIVAL_START : -1, camera, motionPreference.matches)
-    if (connection?.update(elapsed - CONNECTION_START)) renderer.shadowMap.needsUpdate = true
-    if (orbits?.update(animationOrigin + ambientElapsed - ORBITS_START, motionPreference.matches)) {
-      renderer.shadowMap.needsUpdate = true
-    }
+    connection?.update(elapsed - CONNECTION_START)
+    orbits?.update(animationOrigin + ambientElapsed - ORBITS_START, motionPreference.matches)
     if (card) {
       if (orbits?.active) orbits.center.getWorldPosition(key.target.position)
       else key.target.position.copy(card.root.position)
@@ -297,12 +281,11 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
         place(model)
         model.traverse((object) => {
           if (object instanceof Mesh) {
-            object.castShadow = true
-            object.receiveShadow = true
+            object.castShadow = false
+            object.receiveShadow = false
           }
         })
         scene.add(model)
-        renderer.shadowMap.needsUpdate = true
         loadedAssets += 1
         if (loadedAssets === 2 && logoModel && hubModel) {
           try {
@@ -363,7 +346,6 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
     document.removeEventListener('visibilitychange', updateVisibility)
     motionPreference.removeEventListener('change', updateMotionPreference)
     disposeModel(scene)
-    key.shadow.dispose()
     bloomPass.dispose()
     outputPass.dispose()
     renderPass.dispose()

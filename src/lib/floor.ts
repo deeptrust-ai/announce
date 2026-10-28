@@ -1,10 +1,10 @@
-import { Color, Mesh, MeshBasicMaterial, PlaneGeometry, ShadowMaterial, Vector3 } from 'three'
+import { Color, Mesh, MeshBasicMaterial, PlaneGeometry, Vector3 } from 'three'
 
 import { createGravityLensing, GRAVITY_LENS_GLSL } from './gravity-lensing'
 
 export const GRID_CARD_RATIO = 0.7
 
-/** Keep floor color/grid independent of lighting, with a separate shadow receiver. */
+/** Keep the floor color/grid independent of lighting and free of cast shadows. */
 export function createFloor() {
   const lensing = createGravityLensing()
   const cellSize = { value: 12 * 0.0254 * GRID_CARD_RATIO }
@@ -64,13 +64,6 @@ export function createFloor() {
   mesh.onBeforeRender = (_renderer, _scene, camera) => {
     camera.getWorldPosition(cameraPosition.value)
   }
-
-  const shadows = new Mesh(geometry, new ShadowMaterial({ color: '#000000', opacity: 0.3 }))
-  shadows.name = 'Floor_Shadows'
-  shadows.position.z = 0.0002
-  shadows.receiveShadow = true
-  shadows.material.depthWrite = false
-  mesh.add(shadows)
 
   function setCardWidth(width: number) {
     cellSize.value = width * GRID_CARD_RATIO

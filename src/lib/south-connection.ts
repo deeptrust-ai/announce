@@ -54,8 +54,8 @@ export function createSouthConnection(card: Object3D, width: number, hub: Object
 
   const wire = new Mesh(new CylinderGeometry(radius, radius, 1, 8), material)
   wire.name = 'South_Connection_Wire'
-  wire.castShadow = true
-  wire.receiveShadow = true
+  wire.castShadow = false
+  wire.receiveShadow = false
   const viewport = new Vector2()
   const viewPosition = new Vector3()
   // Preserve the thin connection when the camera lifts far enough to make its
