@@ -14,6 +14,7 @@
   const reveal = $derived(announcementState(announcementProgress))
   let controller: SceneController | undefined
   const brandingBase = `${import.meta.env.BASE_URL}branding/`
+  const pressReleaseUrl = 'https://deeptrust.ai/press-release'
   const transitionIndex = $derived(Math.max(0, TRANSITIONS.findIndex((item) => item.id === currentTransition)))
   const current = $derived(TRANSITIONS[transitionIndex]!)
 
@@ -81,6 +82,17 @@
         </span>
         <img class="doppel-logo" style:opacity={reveal.doppelOpacity} src={`${brandingBase}doppel-lockup.svg`} alt="" width="146" height="32" />
       </h1>
+      <a
+        class="press-release"
+        href={pressReleaseUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        style:opacity={reveal.pressReleaseOpacity}
+        style:visibility={reveal.pressReleaseOpacity > 0 ? 'visible' : 'hidden'}
+        style:pointer-events={reveal.pressReleaseOpacity === 1 ? 'auto' : 'none'}
+        tabindex={reveal.pressReleaseOpacity === 1 ? 0 : -1}
+      >Read the Press Release <span aria-hidden="true">=&gt;</span></a>
+
     </div>
   </section>
   <nav class="transition-controls" aria-label="Animation transitions">
@@ -170,6 +182,35 @@
     width: clamp(11.25rem, 21vw, 21.75rem);
     filter: brightness(0) invert(1);
   }
+
+  .press-release {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    max-width: 100%;
+    min-height: 3rem;
+    margin-top: clamp(1.5rem, 3.75vh, 3rem);
+    padding: 0.85rem 1.125rem;
+    border: 1px solid #e7eef6;
+    background: #e7eef6;
+    color: #080d14;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  .press-release:not(:disabled):hover {
+    background: #e6ffb5;
+    border-color: #e6ffb5;
+  }
+
+  .press-release:focus-visible {
+    outline: 2px solid #e6ffb5;
+    outline-offset: 4px;
+  }
+
 
   p {
     position: absolute;

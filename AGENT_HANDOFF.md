@@ -311,7 +311,7 @@ hub plate bounds can retain the pre-placement position near the origin and send
 the wire north through the logo. The world orientation itself is correct:
 north is screen up / -Z, south is screen down / +Z, east is +X, west is -X.
 
-The joining/camera/grid beat ends at 13.8 seconds and text completes at 15.55
+The joining/camera/grid beat ends at 13.8 seconds and text/button sequence completes at 16.4
 seconds. Rendering continues for shared sphere rotation and port/rim breathing. Hidden tabs pause both clocks. Reduced motion holds the
 final scene with baseline emission and renders on demand. Pixel density is capped at 2. Cleanup disposes geometry, materials,
 shadow maps, and postprocessing resources. Both GLBs must load before the shot
@@ -396,8 +396,9 @@ logo images do not duplicate it for screen readers. The visible middle line is
 `announcement.ts` defines an ordered reveal starting at 12.6 seconds. DeepTrust
 fades in over 0.65 seconds; after 0.15 seconds, “is now a part of” types at
 0.075 seconds per character. After the full phrase and a 0.2-second pause,
-Doppel fades in over 0.75 seconds. The whole reveal lasts 2.95 seconds and ends
-at 15.55 seconds. The connecting phrase uses a smaller 1.125–2 rem scale and
+Doppel fades in over 0.75 seconds. After a further 0.25-second pause, the final
+“Read the Press Release =>” button fades in over 0.6 seconds. The whole reveal
+now lasts 3.8 seconds and ends at 16.4 seconds. The connecting phrase uses a smaller 1.125–2 rem scale and
 lighter weight so the logos carry the hierarchy. An invisible full-text copy
 reserves its line; the typed characters do not shift the logos or layout.
 The accessible heading remains complete and the typing is not a live region.
@@ -405,7 +406,7 @@ The accessible heading remains complete and the typing is not a live region.
 `onAnnouncement(progress)` now reports linear progress over the complete text
 sequence; `announcementState` derives each logo opacity and visible character
 count. The editorial backdrop enters with DeepTrust, and the Doppel image
-has its own opacity. Replay and seeks use absolute scene time; there are no
+and press-release button each have their own opacity. Replay and seeks use absolute scene time; there are no
 independent timers. Reduced motion shows the complete message immediately.
 `SCENE_DURATION` includes the text tail. `HUB_SETTLE_TIME` still anchors the
 camera, card, grid shockwave, to second 13.8. Orbital framing caches after the three-second lift completes
@@ -413,6 +414,16 @@ with the entire orbit envelope included. Do not stretch
 the 3D movement to match the longer text sequence. Release preview also replays
 the whole announcement. The bottom-right Back / Restart / Next controls stay
 separate from the editorial grid and restart the active timeline entry.
+
+The press-release control is a locally styled anchor beneath the logos, outside
+the heading, aligned to the editorial left edge. The user supplied its exact
+URL: `https://deeptrust.ai/press-release`. It opens a new tab with
+`noopener noreferrer`. Space is reserved before reveal; visibility, pointer
+interaction, and keyboard tab order follow its final fade. Reduced motion shows
+it immediately; replay hides it and restarts the same ordered sequence. Final
+announcement progress snaps within a small epsilon of completion so float
+rounding cannot leave the button permanently non-interactive. No tests, builds,
+browser checks, or proof screenshots were run for this iteration.
 
 `hub-breathing.ts` gives every `Port_*` group (including DeepTrust) independent
 emissive materials, keeping dark sockets steady. The lime rim has its own slower

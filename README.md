@@ -190,10 +190,13 @@ underneath; the text does not track or sit inside the hub. A quiet left gradient
 keeps it legible. Mobile uses six columns with the copy toward the upper left. Beginning at 12.6 seconds, DeepTrust fades in over
 0.65 seconds. After a short pause, the smaller phrase types at 75 ms per
 character. Doppel then fades in after a 0.2-second pause. The reveal completes
-at 15.55 seconds. The joining/camera/grid beat completes at 13.8 seconds;
+at 16.4 seconds, including the final press-release button. The joining/camera/grid beat completes at 13.8 seconds;
 the node orbits continue indefinitely. Space is reserved
 for the full phrase to prevent layout shifts. Replay resets the sequence;
-reduced motion shows the complete message immediately. Brand asset provenance is in `public/branding/SOURCES.md`.
+reduced motion shows the complete message immediately. Last, after Doppel is
+fully visible and a 0.25-second pause, “Read the Press Release =>” fades in over
+0.6 seconds. It opens `https://deeptrust.ai/press-release` in a new tab. Its space
+is reserved from the start, and it only becomes interactive once fully revealed. Brand asset provenance is in `public/branding/SOURCES.md`.
 
 Each lime hub port has an independent breathing rhythm, with periods around
 4.6–6.8 seconds and offset phases. The rim breathes more slowly over 7.2 seconds.
