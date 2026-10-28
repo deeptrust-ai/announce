@@ -282,9 +282,11 @@ export async function createKeycardScene(
   const preference = window.matchMedia('(prefers-reduced-motion: reduce)')
   let elapsed = 0, frame = 0, previous: number | undefined, disposed = false
   let reportedStage = -1
-  let floorDistance = 10, heroDistance = 10
-  const floorDirection = new Vector3(0, 1, .62).normalize()
+  let floorDistance = 10, heroDistance = 10, closeDistance = 1.9
+  const closeDirection = new Vector3(0, 1, .62).normalize()
+  const floorDirection = new Vector3(0, 1, .32).normalize()
   const target = new Vector3()
+  const etchFocus = new Vector3()
   const heroOffset = new Vector3()
   const laserHit = new Vector3()
   const framingOffset = new Vector3()
@@ -300,6 +302,8 @@ export async function createKeycardScene(
     floorMaterial.uniforms.uPulseActive!.value = !preference.matches && elapsed > PULSE_START && elapsed < LIFT_START ? 1 : 0
     const spinProgress = clamp((elapsed - SPIN_START) / KEYCARD_OPENING.spin)
     applyCardPose(card, elapsed)
+    card.updateMatrixWorld(true)
+    const pullback = ease(faceMaterial.uniforms.uEtch!.value)
     const lift = ease((elapsed - LIFT_START) / KEYCARD_OPENING.lift)
     const layout = ease((elapsed - ANNOUNCEMENT_START) / 1.2)
     const stacked = camera.aspect <= .85
@@ -309,8 +313,11 @@ export async function createKeycardScene(
       WIDTH / (2 * tangent * camera.aspect * (stacked ? .65 : .38)),
     ) + .2
     heroOffset.z = heroDistance + (editorialDistance - heroDistance) * layout
-    target.copy(card.position)
-    camera.position.copy(floorDirection).multiplyScalar(floorDistance).lerp(heroOffset, lift).add(target)
+    etchFocus.set(0, (LOGO_CENTER_Y - .5) * HEIGHT, DEPTH / 2 + .001).applyMatrix4(card.matrixWorld)
+    target.copy(etchFocus).lerp(card.position, pullback)
+    camera.position.copy(closeDirection).lerp(floorDirection, pullback).normalize()
+      .multiplyScalar(closeDistance + (floorDistance - closeDistance) * pullback)
+      .lerp(heroOffset, lift).add(target)
     camera.lookAt(target)
     // Shift the optical center without rotating the card away from its hero pose.
     const halfHeight = camera.position.distanceTo(target) * tangent
@@ -321,7 +328,6 @@ export async function createKeycardScene(
     camera.position.add(framingOffset); target.add(framingOffset)
     camera.lookAt(target)
     camera.updateMatrixWorld()
-    card.updateMatrixWorld(true)
     // Match the quantized time map and the shader's .005 cutting-front offset.
     const cuttingTime = faceMaterial.uniforms.uEtch!.value - .005
     const segment = elapsed >= KEYCARD_OPENING.pause && elapsed < ETCH_END && !preference.matches
@@ -376,6 +382,7 @@ export async function createKeycardScene(
     // Perspective fit is conservative because the nearer corners enlarge at close range.
     floorDistance = Math.max(6.4, 10 * coverage + 1)
     const tangent = Math.tan(camera.fov * Math.PI / 360)
+    closeDistance = Math.max(1.9, 1.1 / (2 * tangent * camera.aspect * .8))
     heroDistance = Math.max(HEIGHT / (2 * tangent * .73), WIDTH / (2 * tangent * camera.aspect * .68)) + .2
     heroOffset.set(0, .18, heroDistance)
     render()
