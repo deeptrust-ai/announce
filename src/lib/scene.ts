@@ -32,7 +32,9 @@ import { applyConnectionView, fitConnectionView } from './connection-camera'
 import type { ConnectionView } from './connection-camera'
 import { createHubApproach } from './hub-approach'
 import { createHubExpansion } from './hub-expansion'
-import { APPROACH_START, ARRIVAL_START, CONNECTION_START, SCENE_DURATION, TRANSITIONS, startingTransition, transitionAt } from './timeline'
+import { applyFinalHubView, fitFinalHubView, FINAL_HUB_SHOT } from './final-hub-camera'
+import type { FinalHubView } from './final-hub-camera'
+import { APPROACH_START, ARRIVAL_START, CONNECTION_START, FINAL_HUB_START, SCENE_DURATION, TRANSITIONS, startingTransition, transitionAt } from './timeline'
 import type { TransitionId } from './timeline'
 
 type SceneCallbacks = {
@@ -131,6 +133,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
   let connectionBounds: Box3 | undefined
   let approach: ReturnType<typeof createHubApproach> | undefined
   let expansion: ReturnType<typeof createHubExpansion> | undefined
+  let finalHubView: FinalHubView | undefined
   let reportedTransition: TransitionId | undefined
 
   function reportTransition() {
@@ -153,6 +156,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
     approach?.reset()
     expansion?.reset()
     floor.lensing.reset()
+    finalHubView = undefined
     renderer.shadowMap.needsUpdate = true
     reportTransition()
     requestRender()
@@ -185,6 +189,14 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
     if (connectionView && elapsed >= CONNECTION_START) {
       applyConnectionView(camera, logoFocus, connectionView,
         (elapsed - CONNECTION_START) / SOUTH_CONNECTION.durationSeconds)
+    }
+    if (elapsed >= FINAL_HUB_START && connectionView && card && hubModel && logoModel) {
+      if (!finalHubView) {
+        finalHubView = fitFinalHubView(camera, hubModel,
+          card.root.getObjectByName('DeepTrust_Card_Body')!, logoModel)
+      }
+      applyFinalHubView(camera, connectionView.target, finalHubView,
+        (elapsed - FINAL_HUB_START) / FINAL_HUB_SHOT.durationSeconds)
     }
     // Keep the distant objects clear as the view widens; fog must not hide them at altitude.
     fog.near = Math.max(10, camera.position.y * 1.8)
@@ -219,6 +231,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
     composer.setSize(width, height)
     camera.aspect = width / height
     camera.updateProjectionMatrix()
+    finalHubView = undefined
     refreshConnectionView()
     requestRender()
   }

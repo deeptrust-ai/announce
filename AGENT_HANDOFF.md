@@ -59,6 +59,7 @@ the later joining sequence was already approved or add unrelated page content.
 - `src/lib/floor.ts`: solid floor with a faint, antialiased world-aligned grid.
 - `src/lib/south-connection.ts`: bottom-center port and southbound connection trace.
 - `src/lib/connection-camera.ts`: vertical rise and framing of both connection endpoints.
+- `src/lib/final-hub-camera.ts`: final overhead fit of the completed eight-node hub.
 - `src/lib/hub-approach.ts`: delayed card approach into the top orbit slot.
 - `src/lib/hub-expansion.ts`: clockwise node redistribution, links, and eighth port.
 - `src/lib/gravity-lensing.ts`: world-space lens centers and GLSL for only the floor-grid coordinates.
@@ -106,11 +107,12 @@ The shared timeline now overlaps the effects:
 - Arrival pulse: starts 3 s, lasts 0.8 s, ends 3.8 s.
 - South connection: starts 3.8 s, lasts 6 s, ends 9.8 s.
 - Hub attraction: starts 5.8 s, lasts 8 s, ends 13.8 s.
+- Final hub view: starts 13.8 s, lasts 3 s, ends 16.8 s.
 
 The user explicitly superseded the earlier sequential timing and the requirement
 to close the border before filling. Camera, outline, and fill all complete when
 the arrival impact begins. Offsets and durations are derived from shared values.
-The left-side preview menu lists all six effects. Clicking resets and seeks to
+The left-side preview menu lists all seven effects. Clicking resets and seeks to
 that entry, with correct partial camera/card state, then plays forward without
 a reload or model refetch. Camera rise replays all. The latest started stage is
 highlighted as playback advances. Native buttons provide keyboard activation.
@@ -123,7 +125,9 @@ with camera and card complete. `?start=connect` starts the south connection from
 its first frame after the pulse has ended. Refresh to replay. The default URL
 starts the whole sequence. `?start=approach` previews attraction with the line
 and camera already two seconds into the connection scene. Reduced motion shows
-the final approached card and wire without animated impact or lensing.
+the completed eight-node hub in its final close framing, without animated
+impact or lensing. `?start=framing` begins the final camera move after the
+card and existing nodes have settled.
 
 `createScene` returns a controller with `playFrom(transitionId)` and `dispose()`.
 Replays reset the logo's original pose/color, border draw ranges, body reveal,
@@ -236,6 +240,19 @@ and disposed with the loaded hub. Replay restores all original node, link, and
 port transforms and hides the eighth port. The Blender source and GLB are not
 modified; all redistribution happens in the runtime scene.
 
+After the full eight-node layout settles, a separate final camera transition
+runs from second 13.8 to 16.8. This was missing from the earlier implementation;
+the wide connection view previously held forever. `final-hub-camera.ts` now
+measures the completed hub plus DeepTrust body/logo, excluding the old logo
+origin and pulse plane. It calculates an overhead fit at the existing 40-degree
+lens with 84% viewport coverage in the limiting dimension, then eases from the
+wide view into that centered, closer pose over three seconds. The camera ends
+square overhead, north up, DeepTrust at the top. Fit is cached per replay/resize
+and recomputed from settled geometry. The shared timeline, render duration,
+preview menu, direct seeks (`?start=framing`), and reduced-motion endpoint all
+include this stage. No tests, builds, browser checks, or proof screenshots were
+run for this iteration, following the user's workflow.
+
 The user clarified that gravitational lensing must affect ONLY the grid. The
 first implementation used a full-scene postprocessing pass, which also warped
 the logo and hub. That pass has been removed. Do not restore whole-scene lensing.
@@ -254,7 +271,7 @@ hub plate bounds can retain the pre-placement position near the origin and send
 the wire north through the logo. The world orientation itself is correct:
 north is screen up / -Z, south is screen down / +Z, east is +X, west is -X.
 
-Rendering continues during the 13.8-second sequence including the south connection, then returns to rendering on
+Rendering continues during the 16.8-second sequence including the south connection, then returns to rendering on
 demand. Pixel density is capped at 2. Cleanup disposes geometry, materials,
 shadow maps, and postprocessing resources. Both GLBs must load before the shot
 starts; asynchronous loading handles unmounts and loading errors.
