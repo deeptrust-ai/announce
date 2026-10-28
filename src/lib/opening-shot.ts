@@ -8,8 +8,11 @@ export const OPENING_SHOT = {
   turnDegrees: 180,
   startElevation: 4,
   endElevation: 90,
-  startDistance: 0.68,
+  startDistance: 0.24,
+  pullbackRadius: 0.68,
   endDistance: 1.2,
+  startFov: 58,
+  endFov: 40,
 } as const
 
 export const OPENING_DURATION = OPENING_SHOT.durationSeconds
@@ -18,9 +21,10 @@ function ease(progress: number) {
   return (1 - Math.cos(Math.PI * MathUtils.clamp(progress, 0, 1))) / 2
 }
 
-/** Turn continuously, staying low for two seconds before the final overhead rise. */
+/** Dolly backward at fixed low height, then rise overhead while narrowing the lens. */
 export function applyOpeningShot(camera: PerspectiveCamera, focus: Vector3, elapsed: number) {
   const turnProgress = ease(elapsed / OPENING_DURATION)
+  const dollyProgress = ease(elapsed / OPENING_SHOT.riseDelaySeconds)
   const riseProgress = ease(
     (elapsed - OPENING_SHOT.riseDelaySeconds)
       / (OPENING_DURATION - OPENING_SHOT.riseDelaySeconds),
@@ -28,14 +32,31 @@ export function applyOpeningShot(camera: PerspectiveCamera, focus: Vector3, elap
   const azimuth = MathUtils.degToRad(
     OPENING_SHOT.startAzimuth + OPENING_SHOT.turnDegrees * turnProgress,
   )
-  const elevation = MathUtils.degToRad(
-    MathUtils.lerp(OPENING_SHOT.startElevation, OPENING_SHOT.endElevation, riseProgress),
+  const aspectScale = Math.max(1, 1 / camera.aspect)
+  const startElevation = MathUtils.degToRad(OPENING_SHOT.startElevation)
+  // Keep physical eye height fixed while pulling back, rather than letting a
+  // fixed gaze angle lift the camera as its distance increases.
+  const groundHeight = Math.sin(startElevation) * OPENING_SHOT.startDistance
+  const groundRadius = MathUtils.lerp(
+    Math.cos(startElevation) * OPENING_SHOT.startDistance,
+    OPENING_SHOT.pullbackRadius,
+    dollyProgress,
+  ) * aspectScale
+  const elevation = MathUtils.lerp(
+    Math.atan2(groundHeight, groundRadius),
+    MathUtils.degToRad(OPENING_SHOT.endElevation),
+    riseProgress,
   )
   const distance = MathUtils.lerp(
-    OPENING_SHOT.startDistance,
-    OPENING_SHOT.endDistance,
+    Math.hypot(groundRadius, groundHeight),
+    OPENING_SHOT.endDistance * aspectScale,
     riseProgress,
-  ) * Math.max(1, 1 / camera.aspect)
+  )
+  const fov = MathUtils.lerp(OPENING_SHOT.startFov, OPENING_SHOT.endFov, riseProgress)
+  if (camera.fov !== fov) {
+    camera.fov = fov
+    camera.updateProjectionMatrix()
+  }
 
   if (elapsed >= OPENING_DURATION) {
     // Exact overhead position, with no residual horizontal orbit radius.

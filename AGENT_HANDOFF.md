@@ -58,20 +58,24 @@ removed so they cannot compete with the exact overhead camera pose.
 Current opening shot choices:
 
 - Start at a -180-degree azimuth and a grazing 4-degree elevation, focused on the
-  flat logo. This puts the camera about 6 cm above the floor on landscape screens.
+  flat logo, 0.24 meters away. This puts the camera about 3 cm above the floor.
   The user requested this low start after seeing the first 35-degree version.
-- Turn 180 degrees continuously over 3 seconds. Hold the low 4-degree elevation
-  and camera distance for the first 2 seconds. Smoothly raise to 90 degrees and
-  increase distance during the final second, while the turn keeps progressing.
+- Turn 180 degrees continuously over 3 seconds. Dolly backward to a 0.68-meter
+  ground-plane radius during the first 2 seconds at fixed physical eye height.
+  The gaze angle decreases during the pullback so the camera does not lift.
+  Smoothly raise to 90 degrees during the final second while the turn continues.
   `riseDelaySeconds` controls the delay; azimuth uses the full transition time.
 - End the turn at azimuth 0. The logo finishes aligned with the screen, with
   horizontal bars and no 45-degree tilt. The orientation remains continuous
   through the spiral; there is no separate roll correction or snap.
-- Camera distance stays at 0.68 meters until second 2, then smoothly increases
-  to 1.2 meters overhead at second 3.
-- Increase distance for portrait viewports to keep the logo in frame.
-- The continuous turn has its own start/end easing. Elevation and distance use
-  a delayed smooth rise with no jump at second 2. There is no overall motion
+- Reach 1.2 meters overhead at second 3. FOV stays at 58 degrees during the
+  pullback, then smoothly narrows to 40 degrees during the ascent. The final
+  overhead framing is preserved. Every applied pose updates the projection
+  matrix when FOV changes, including direct-stage seeks and reduced motion.
+- Increase horizontal distance and final height for portrait viewports, while
+  keeping the initial eye height fixed.
+- The continuous turn and backward dolly have their own smooth easing. Elevation
+  and lens use a delayed smooth rise with no jump at second 2. There is no overall motion
   stop before overhead. Play once and hold the final view. Refresh to replay.
 - Keep a stable camera up vector at the overhead pole and focus on the logo.
 - Reduced motion skips to the final overhead shot and completed card, without

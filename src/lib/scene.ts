@@ -25,7 +25,7 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js'
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js'
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
-import { applyOpeningShot, OPENING_DURATION } from './opening-shot'
+import { applyOpeningShot, OPENING_DURATION, OPENING_SHOT } from './opening-shot'
 import { createCardConstruction } from './card-construction'
 import { SCENE_DURATION, TRANSITIONS, startingTransition, transitionAt } from './timeline'
 import type { TransitionId } from './timeline'
@@ -73,7 +73,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
   scene.background = new Color('#080d14')
   scene.fog = new Fog('#080d14', 10, 30)
 
-  const camera = new PerspectiveCamera(40, 1, 0.02, 80)
+  const camera = new PerspectiveCamera(OPENING_SHOT.endFov, 1, 0.02, 80)
   const logoFocus = new Vector3()
 
   const floor = new Mesh(
