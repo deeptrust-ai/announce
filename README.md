@@ -58,14 +58,15 @@ After the overhead camera settles, a blue card constructs around the logo:
 
 - The border traces from the top center down both sides simultaneously, meeting
   at the bottom center over 1 second. Bright heads emit blue spark trails.
-- Only after the border closes, a 24-by-24 grid reveals the interior over 2
+- Only after the border closes, a 12-by-12 grid reveals the interior over 2
   seconds. Cells appear top-to-bottom with deterministic variation near the fill
-  front and a brief blue flash. The finished surface is solid, without a checker
-  pattern or tile gaps.
+  front. Each cell fades from dark to its final fill, with no flash, glow, or
+  brightness overshoot. The finished surface is solid, without a checker pattern
+  or tile gaps.
 - The card reuses the hub's 12-inch rounded-square body, 2.4-inch corner radius,
-  1.5-inch depth, border thickness, and material roughness/metalness. Its navy
-  color is DeepTrust's `#061533`, sourced from `public/branding/logo-mark.svg`.
-  Border and spark emission use brighter versions of the same blue.
+  1.5-inch depth, border thickness, and material roughness/metalness. Its fill
+  uses a brighter related navy, `#102B55`, to stand out from the floor. Border
+  and spark emission retain DeepTrust's original `#061533` from the logo SVG.
 - As construction starts, the logo settles into a white icon: 52% of its original
   width and height, with 0.15-inch extrusion above the card surface. The original
   GLB remains unchanged. `Node_DeepTrust` parents the logo and construction parts

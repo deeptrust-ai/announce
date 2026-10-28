@@ -26,7 +26,8 @@ export const CARD_CONSTRUCTION = {
   outlineSeconds: 1,
   fillSeconds: 2,
   logoSettleSeconds: 0.9,
-  gridSize: 24,
+  gridSize: 12,
+  fillColor: '#102B55',
   logoScale: 0.52,
 } as const
 
@@ -69,6 +70,7 @@ export function createCardConstruction(logo: Object3D, hub: Object3D) {
   root.userData.type = 'DeepTrust'
   root.userData.sourceCard = 'Messages_Body'
   root.userData.brandBlue = DEEPTRUST_BLUE
+  root.userData.fillColor = CARD_CONSTRUCTION.fillColor
   root.add(logo)
   const construction = new Group()
   construction.name = 'DeepTrust_Card_Construction'
@@ -78,11 +80,12 @@ export function createCardConstruction(logo: Object3D, hub: Object3D) {
   const fillProgress = { value: 0 }
   const bodyMaterial = sourceBody.material.clone()
   bodyMaterial.name = 'DeepTrust navy card — tiled construction'
-  bodyMaterial.color.copy(blue)
+  bodyMaterial.color.set(CARD_CONSTRUCTION.fillColor)
+  bodyMaterial.emissive.setRGB(0, 0, 0)
+  bodyMaterial.emissiveIntensity = 0
   bodyMaterial.onBeforeCompile = (shader) => {
     shader.uniforms.uCardFill = fillProgress
     shader.uniforms.uCardSize = { value: new Vector2(size.x, size.z) }
-    shader.uniforms.uConstructionBlue = { value: blue.clone().multiplyScalar(95) }
     shader.vertexShader = 'varying vec2 vCardPosition;\n' + shader.vertexShader
     shader.vertexShader = shader.vertexShader.replace(
       '#include <begin_vertex>',
@@ -92,7 +95,6 @@ export function createCardConstruction(logo: Object3D, hub: Object3D) {
       varying vec2 vCardPosition;
       uniform float uCardFill;
       uniform vec2 uCardSize;
-      uniform vec3 uConstructionBlue;
       float cardHash(vec2 cell) {
         return fract(sin(dot(cell, vec2(127.1, 311.7))) * 43758.5453);
       }
@@ -109,14 +111,13 @@ export function createCardConstruction(logo: Object3D, hub: Object3D) {
       if (uCardFill < 1.0 && tileAge <= 0.0) discard;`,
     )
     shader.fragmentShader = shader.fragmentShader.replace(
-      '#include <emissivemap_fragment>',
-      `#include <emissivemap_fragment>
-      float constructionFlash = (1.0 - smoothstep(0.0, 0.065, tileAge))
-        * (1.0 - step(0.99999, uCardFill));
-      totalEmissiveRadiance += uConstructionBlue * constructionFlash;`,
+      '#include <opaque_fragment>',
+      `// Fade each cell from dark to its final shaded fill, without overshoot.
+      outgoingLight *= mix(0.18, 1.0, smoothstep(0.0, 0.06, tileAge));
+      #include <opaque_fragment>`,
     )
   }
-  bodyMaterial.customProgramCacheKey = () => 'deeptrust-tiled-card-v1'
+  bodyMaterial.customProgramCacheKey = () => 'deeptrust-tiled-card-v2-dark-fill'
   const body = new Mesh(sourceBody.mesh.geometry, bodyMaterial)
   body.name = 'DeepTrust_Card_Body'
   body.receiveShadow = true

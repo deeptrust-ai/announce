@@ -94,16 +94,20 @@ After the 3-second camera shot, the camera holds still while the card forms:
 
 - One second: outline starts at top center, grows around both sides at once,
   then joins at bottom center. Two blue luminous heads emit short spark trails.
-- Next 2 seconds: the interior appears as small cells, advancing top-to-bottom
-  with randomized activation near the advancing front. Cells briefly flash blue.
+- Next 2 seconds: a 12-by-12 grid reveals cells top-to-bottom with randomized
+  activation near the advancing front. Cells fade from dark to final fill;
+  no flashes, glow, or emissive pulse. Cells are twice the linear size of the
+  earlier 24-by-24 grid. Rounded clipping and the reveal direction are preserved.
   No fill is visible before border closure. Final fill is a solid navy surface,
   with no permanent checker pattern.
 - Geometry comes from the hub GLB's actual `Messages_Body`, with matching
   12-inch width, 2.4-inch corner radius, and 1.5-inch depth. The border uses the
   hub's 0.09-inch wire radius and material roughness/metalness.
 - The user specifically requested DeepTrust blue rather than the other nodes'
-  orange. `#061533` comes from `public/branding/logo-mark.svg`. Body uses this
-  navy; border, glow, and sparks use brighter emission of the same blue.
+  orange. `#061533` comes from `public/branding/logo-mark.svg` and remains the
+  basis for border glow and sparks. The body uses the modestly brighter related
+  navy `#102B55` so it can be distinguished from the scene floor. Body emission
+  is disabled; cell shading only darkens the final fill and never overshoots it.
 - The logo stays light for contrast. During the first 0.9 seconds of construction
   it settles to 52% of its source width/height and 0.15-inch extrusion, just above
   the body. This changes the runtime instance only, preserving the source GLB.
