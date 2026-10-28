@@ -184,6 +184,12 @@ transition. The connector uses separate absolute transforms and resets on menu
 replay. No card travel or node rearrangement occurs yet. Its path is fixed for
 this iteration; later movement will require updating connector endpoints.
 
+Refresh the card and hub world matrices before measuring nested endpoint meshes.
+The connection is created before the first render. Without that refresh, the
+hub plate bounds can retain the pre-placement position near the origin and send
+the wire north through the logo. The world orientation itself is correct:
+north is screen up / -Z, south is screen down / +Z, east is +X, west is -X.
+
 Rendering continues during the 6.8-second sequence including the south connection, then returns to rendering on
 demand. Pixel density is capped at 2. Cleanup disposes geometry, materials,
 shadow maps, and postprocessing resources. Both GLBs must load before the shot

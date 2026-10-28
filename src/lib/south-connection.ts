@@ -24,6 +24,10 @@ export function createSouthConnection(card: Object3D, width: number, hub: Object
   if (!(border instanceof Mesh) || !(border.material instanceof MeshStandardMaterial) || !plate) {
     throw new Error('The card border or central hub is unavailable for the south connection.')
   }
+  // Assets are positioned before their first render. Refresh the full parent
+  // chains before measuring descendants, or the hub endpoint stays near origin.
+  card.updateWorldMatrix(true, true)
+  hub.updateWorldMatrix(true, true)
   const borderBounds = new Box3().setFromObject(border)
   const hubBounds = new Box3().setFromObject(plate)
   const cardCenter = card.getWorldPosition(new Vector3())
