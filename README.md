@@ -36,7 +36,8 @@ The production build is written to `dist/`. Serve that directory with a static h
 - `src/lib/hub-breathing.ts`: independent slow glow rhythms for the lime ports and rim.
 - `src/lib/gravity-lensing.ts`: world-space distortion of only the floor-grid coordinates.
 - `src/lib/timeline.ts`: shared transition names, start times, and durations.
-- `src/lib/Scene.svelte`: canvas lifecycle and WebGL fallback.
+- `src/lib/announcement.ts`: staged logo fades and character-by-character copy timing.
+- `src/lib/Scene.svelte`: editorial overlay, compact controls, and canvas lifecycle.
 - `src/App.svelte`: page composition.
 - `src/app.css`: full-screen layout.
 
@@ -180,9 +181,12 @@ It uses a twelve-column grid, a shared left edge, large Helvetica-family type,
 a fine horizontal rule, and the actual DeepTrust and Doppel logo lockups. The
 accessible heading reads “Deep Trust is now a part of Doppel.” The scene plays
 underneath; the text does not track or sit inside the hub. A quiet left gradient
-keeps it legible. Mobile uses six columns. Reveal still runs during the final
-grid release, from 12.6 to 13.8 seconds. Replay resets it; reduced motion shows
-it immediately. Brand asset provenance is in `public/branding/SOURCES.md`.
+keeps it legible. Mobile uses six columns. Beginning at 12.6 seconds, DeepTrust fades in over
+0.65 seconds. After a short pause, the smaller phrase types at 75 ms per
+character. Doppel then fades in after a 0.2-second pause. The reveal completes
+at 15.55 seconds while the 3D scene settles at 13.8 seconds. Space is reserved
+for the full phrase to prevent layout shifts. Replay resets the sequence;
+reduced motion shows the complete message immediately. Brand asset provenance is in `public/branding/SOURCES.md`.
 
 Each lime hub port has an independent breathing rhythm, with periods around
 4.6–6.8 seconds and offset phases. The rim breathes more slowly over 7.2 seconds.

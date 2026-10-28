@@ -51,7 +51,8 @@ the later joining sequence was already approved or add unrelated page content.
 
 - Svelte 5, TypeScript, Vite 8, Three.js 0.186; npm and `package-lock.json`.
 - `src/App.svelte`: full-screen page composition.
-- `src/lib/Scene.svelte`: canvas lifecycle, model-loading status, and errors.
+- `src/lib/Scene.svelte`: editorial overlay, playback controls, and canvas lifecycle.
+- `src/lib/announcement.ts`: staged text/logo reveal with absolute timeline progress.
 - `src/lib/scene.ts`: GLB loading, floor, lights, shadows, and animation lifecycle.
 - `src/lib/opening-shot.ts`: camera choreography and configurable shot constants.
 - `src/lib/card-construction.ts`: matching node body, split border, sparks, tiled fill.
@@ -298,7 +299,8 @@ hub plate bounds can retain the pre-placement position near the origin and send
 the wire north through the logo. The world orientation itself is correct:
 north is screen up / -Z, south is screen down / +Z, east is +X, west is -X.
 
-The main sequence ends at 13.8 seconds, but rendering continues for the slow
+The 3D sequence ends at 13.8 seconds and the text reveal completes at 15.55
+seconds. Rendering continues afterward for the slow
 port/rim breathing. Hidden tabs pause both clocks. Reduced motion holds the
 final scene with baseline emission and renders on demand. Pixel density is capped at 2. Cleanup disposes geometry, materials,
 shadow maps, and postprocessing resources. Both GLBs must load before the shot
@@ -320,15 +322,27 @@ The DeepTrust logo lockup is the existing `logo-full.svg`. The Doppel lockup is
 `public/branding/SOURCES.md` records provenance. Both retain their aspect ratios.
 The heading's accessible name is “Deep Trust is now a part of Doppel”; decorative
 logo images do not duplicate it for screen readers. The visible middle line is
-“is now / a part of”. The layer does not intercept pointer events.
+“is now a part of”, set much smaller than the logos on one reserved line. The layer does not intercept pointer events.
 
-`onAnnouncement(progress)` still reports an eased reveal during grid release,
-from 12.6 to 13.8 seconds. CSS applies opacity and a small upward reveal. Replay
-resets progress, release preview reveals it with the final beat, and reduced
-motion shows the complete editorial layer immediately. The overlay never follows
-hub coordinates or receives lensing, bloom, or other 3D effects. The transition
-list is now a compact bottom-right Back / Restart / Next control, separate from
-the editorial grid. Restart always replays the currently active timeline entry.
+`announcement.ts` defines an ordered reveal starting at 12.6 seconds. DeepTrust
+fades in over 0.65 seconds; after 0.15 seconds, “is now a part of” types at
+0.075 seconds per character. After the full phrase and a 0.2-second pause,
+Doppel fades in over 0.75 seconds. The whole reveal lasts 2.95 seconds and ends
+at 15.55 seconds. The connecting phrase uses a smaller 1.125–2 rem scale and
+lighter weight so the logos carry the hierarchy. An invisible full-text copy
+reserves its line; the typed characters do not shift the logos or layout.
+The accessible heading remains complete and the typing is not a live region.
+
+`onAnnouncement(progress)` now reports linear progress over the complete text
+sequence; `announcementState` derives each logo opacity and visible character
+count. The editorial backdrop/rule enter with DeepTrust, and the Doppel image
+has its own opacity. Replay and seeks use absolute scene time; there are no
+independent timers. Reduced motion shows the complete message immediately.
+`SCENE_DURATION` includes the text tail. `HUB_SETTLE_TIME` still anchors the
+camera, card, grid shockwave, and cached final fit to second 13.8. Do not stretch
+the 3D movement to match the longer text sequence. Release preview also replays
+the whole announcement. The bottom-right Back / Restart / Next controls stay
+separate from the editorial grid and restart the active timeline entry.
 
 `hub-breathing.ts` gives every `Port_*` group (including DeepTrust) independent
 emissive materials, keeping dark sockets steady. The lime rim has its own slower

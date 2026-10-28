@@ -35,7 +35,8 @@ import { createHubApproach } from './hub-approach'
 import { createHubExpansion } from './hub-expansion'
 import { createHubBreathing } from './hub-breathing'
 import { applyFinalHubView, fitFinalHubView } from './final-hub-camera'
-import { APPROACH_START, ARRIVAL_START, CONNECTION_START, FINAL_HUB_START, FINAL_HUB_DURATION, LENS_RELEASE_START, SCENE_DURATION, TRANSITIONS, startingTransition, transitionAt } from './timeline'
+import { ANNOUNCEMENT_DURATION } from './announcement'
+import { ANNOUNCEMENT_START, APPROACH_START, ARRIVAL_START, CONNECTION_START, FINAL_HUB_START, FINAL_HUB_DURATION, HUB_SETTLE_TIME, LENS_RELEASE_START, SCENE_DURATION, TRANSITIONS, startingTransition, transitionAt } from './timeline'
 import type { TransitionId } from './timeline'
 
 type SceneCallbacks = {
@@ -141,7 +142,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
   let reportedTransition: TransitionId | undefined
 
   function reportTransition() {
-    callbacks.onAnnouncement?.(MathUtils.smootherstep(elapsed, LENS_RELEASE_START, SCENE_DURATION))
+    callbacks.onAnnouncement?.(MathUtils.clamp((elapsed - ANNOUNCEMENT_START) / ANNOUNCEMENT_DURATION, 0, 1))
     const current = transitionAt(elapsed)
     if (current !== reportedTransition) {
       reportedTransition = current
@@ -202,7 +203,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
       // Refit the moving card and hub each frame rather than caching an early pose.
       const finalHubView = settledHubView ?? fitFinalHubView(camera, hubModel,
         card.root.getObjectByName('DeepTrust_Card_Body')!, logoModel)
-      if (elapsed >= SCENE_DURATION) settledHubView = finalHubView
+      if (elapsed >= HUB_SETTLE_TIME) settledHubView = finalHubView
       applyFinalHubView(camera, connectionView.target, finalHubView,
         (elapsed - FINAL_HUB_START) / FINAL_HUB_DURATION)
     }

@@ -4,12 +4,14 @@
   import type { SceneController } from './scene'
   import { TRANSITIONS, startingTransition } from './timeline'
   import type { TransitionId } from './timeline'
+  import { ANNOUNCEMENT_TEXT, announcementState } from './announcement'
 
   let canvas: HTMLCanvasElement
   let status = $state<'loading' | 'ready' | 'error'>('loading')
   let errorMessage = $state('')
   let currentTransition = $state<TransitionId>('camera')
   let announcementProgress = $state(0)
+  const reveal = $derived(announcementState(announcementProgress))
   let controller: SceneController | undefined
   const brandingBase = `${import.meta.env.BASE_URL}branding/`
   const transitionIndex = $derived(Math.max(0, TRANSITIONS.findIndex((item) => item.id === currentTransition)))
@@ -66,15 +68,18 @@
   ></canvas>
   <section
     class="editorial"
-    style:--reveal={announcementProgress}
+    style:--reveal={reveal.deeptrustOpacity}
     aria-label="Announcement"
     aria-hidden={status !== 'ready' || announcementProgress === 0}
   >
     <div class="editorial-copy">
       <h1 aria-label="Deep Trust is now a part of Doppel">
         <img class="deeptrust-logo" src={`${brandingBase}logo-full.svg`} alt="" width="173" height="28" />
-        <span class="joining">is now<br />a part of</span>
-        <img class="doppel-logo" src={`${brandingBase}doppel-lockup.svg`} alt="" width="146" height="32" />
+        <span class="joining" aria-hidden="true">
+          <span class="joining-reserve">{ANNOUNCEMENT_TEXT}</span>
+          <span class="joining-typed">{ANNOUNCEMENT_TEXT.slice(0, reveal.characters)}</span>
+        </span>
+        <img class="doppel-logo" style:opacity={reveal.doppelOpacity} src={`${brandingBase}doppel-lockup.svg`} alt="" width="146" height="32" />
       </h1>
     </div>
   </section>
@@ -137,10 +142,10 @@
     color: #f3f7ff;
     text-align: left;
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    font-size: clamp(3rem, 6.8vw, 7.5rem);
+    font-size: clamp(1.125rem, 2.2vw, 2rem);
     font-weight: 500;
-    line-height: 0.98;
-    letter-spacing: -0.055em;
+    line-height: 1.25;
+    letter-spacing: -0.025em;
   }
 
   h1 img {
@@ -152,6 +157,16 @@
   .deeptrust-logo {
     width: clamp(11rem, 19vw, 19rem);
   }
+
+  .joining {
+    display: inline-grid;
+    color: #c6d0db;
+    font-weight: 400;
+    white-space: pre;
+  }
+
+  .joining span { grid-area: 1 / 1; }
+  .joining-reserve { visibility: hidden; }
 
   .doppel-logo {
     width: clamp(15rem, 28vw, 29rem);
@@ -236,7 +251,6 @@
     }
 
     h1 {
-      font-size: clamp(2.8rem, 11vw, 4.5rem);
       gap: 1.5rem;
     }
 
@@ -245,7 +259,7 @@
   }
 
   @media (max-height: 500px) {
-    h1 { font-size: clamp(2rem, 8vh, 3rem); gap: 1rem; }
+    h1 { font-size: 1.125rem; gap: 1rem; }
     .deeptrust-logo { width: 9rem; }
     .doppel-logo { width: 12rem; }
   }

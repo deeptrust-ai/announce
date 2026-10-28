@@ -6,6 +6,7 @@ import { HUB_APPROACH } from './hub-approach'
 import { FINAL_HUB_SHOT } from './final-hub-camera'
 import { GRID_LENS_RELEASE } from './gravity-lensing'
 import { CONNECTION_SHOT } from './connection-camera'
+import { ANNOUNCEMENT_DURATION } from './announcement'
 
 export const ARRIVAL_START = Math.max(
   OPENING_DURATION, CARD_CONSTRUCTION.startSeconds + CARD_DURATION,
@@ -14,9 +15,10 @@ export const CONNECTION_START = ARRIVAL_START + ARRIVAL_EFFECT.durationSeconds
 export const APPROACH_START = CONNECTION_START + HUB_APPROACH.delaySeconds
 export const FINAL_HUB_START = CONNECTION_START + CONNECTION_SHOT.riseSeconds
   + FINAL_HUB_SHOT.wideHoldSeconds
-const HUB_SETTLE_TIME = APPROACH_START + HUB_APPROACH.durationSeconds
+export const HUB_SETTLE_TIME = APPROACH_START + HUB_APPROACH.durationSeconds
 export const FINAL_HUB_DURATION = HUB_SETTLE_TIME - FINAL_HUB_START
 export const LENS_RELEASE_START = HUB_SETTLE_TIME - GRID_LENS_RELEASE.durationSeconds
+export const ANNOUNCEMENT_START = LENS_RELEASE_START
 
 export const TRANSITIONS = [
   { id: 'camera', name: 'Camera rise', start: 0, duration: OPENING_DURATION },
@@ -52,7 +54,7 @@ export const TRANSITIONS = [
 ] as const
 
 export type TransitionId = typeof TRANSITIONS[number]['id']
-export const SCENE_DURATION = HUB_SETTLE_TIME
+export const SCENE_DURATION = Math.max(HUB_SETTLE_TIME, ANNOUNCEMENT_START + ANNOUNCEMENT_DURATION)
 
 export function startingTransition(search: string): TransitionId {
   const requested = new URLSearchParams(search).get('start')
