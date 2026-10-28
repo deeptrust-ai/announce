@@ -49,8 +49,11 @@ Circuit tracks remain visible throughout.
 Timeline: 0.8-second blank hold, 4.8-second engraving, 0.35-second cooling pause,
 1.7-second floor shockwave, 2-second lift upright, 3-second six-and-a-half-turn spin, and
 0.9-second hero settle. The camera starts tight on the empty logo/chip area.
-During the 4.8-second etch it smoothly pulls back and rises, changing its floor
-angle from about 58 to 72 degrees and easing its target toward the card center.
+It begins at a 4-degree grazing angle from the card's left side. During the
+4.8-second etch it cranes upward and outward with only a 90-degree horizontal
+swing, ending at about 72 degrees above the floor and easing its target toward
+the card center. The user explicitly wants a restrained dolly/crane move, not
+a full spiral or repeated orbit.
 It reaches the full-card view before the shockwave. Close-up distance adapts
 to portrait width; the lens remains 38 degrees. The card floats clear of the
 floor while standing up. The camera then tracks its center and eases into a

@@ -283,7 +283,6 @@ export async function createKeycardScene(
   let elapsed = 0, frame = 0, previous: number | undefined, disposed = false
   let reportedStage = -1
   let floorDistance = 10, heroDistance = 10, closeDistance = 1.9
-  const closeDirection = new Vector3(0, 1, .62).normalize()
   const floorDirection = new Vector3(0, 1, .32).normalize()
   const target = new Vector3()
   const etchFocus = new Vector3()
@@ -315,7 +314,11 @@ export async function createKeycardScene(
     heroOffset.z = heroDistance + (editorialDistance - heroDistance) * layout
     etchFocus.set(0, (LOGO_CENTER_Y - .5) * HEIGHT, DEPTH / 2 + .001).applyMatrix4(card.matrixWorld)
     target.copy(etchFocus).lerp(card.position, pullback)
-    camera.position.copy(closeDirection).lerp(floorDirection, pullback).normalize()
+    // A restrained quarter-turn crane move, starting low from the card's side.
+    const swing = -Math.PI / 2 * (1 - pullback)
+    const startElevation = 4 * Math.PI / 180
+    const elevation = startElevation + (Math.atan2(floorDirection.y, floorDirection.z) - startElevation) * pullback
+    camera.position.set(Math.sin(swing) * Math.cos(elevation), Math.sin(elevation), Math.cos(swing) * Math.cos(elevation))
       .multiplyScalar(closeDistance + (floorDistance - closeDistance) * pullback)
       .lerp(heroOffset, lift).add(target)
     camera.lookAt(target)

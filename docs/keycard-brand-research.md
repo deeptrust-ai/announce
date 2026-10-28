@@ -105,8 +105,10 @@ Keycard.ai, and a press-release link. Scrolling content blocks remain deferred.
 `keycard/main.ts` mounts `KeycardPage.svelte`, which owns the independent
 `keycard-scene.ts`. This scene uses a rounded thin card body, the local NFC texture,
 the actual filled DeepTrust SVG paths as etching maps, and a world-space grid shader.
-The camera starts tight on the empty logo area, then slowly pulls back and
-rises through the etch, reaching a full-card floor view before the shockwave.
+The camera starts tight on the empty logo area at a low 4-degree floor angle
+from the side. It cranes upward and outward through a restrained 90-degree
+swing during the etch, reaching a full-card floor view before the shockwave.
+This follows the user's correction from a spiral to a quarter-turn crane move.
 It then tracks the card as it lifts and settles into the hero view. The eight original solid
 logo shapes etch left to right, top to bottom, with an illuminated front and a
 flat pearlescent finish. A glowing blue beam from outside the upper-left frame
