@@ -57,6 +57,25 @@ npm ci
 npm run dev
 ```
 
+## Export videos
+
+`scripts/render-videos.mjs` exports Doppel and Keycard to the Desktop as
+1920×1080, 30 fps H.264 MP4 files. It records the complete page composition,
+including the announcement overlay, and hides the debug controls. Each sequence
+includes a four-second final hold. Frames use a deterministic animation clock;
+rendering speed does not change playback timing. No audio is added.
+
+It uses the existing local dev server and does not restart it. Requires Chrome,
+ffmpeg, and Playwright. If Playwright is installed outside this project, point
+`PLAYWRIGHT_MODULE` to its `index.mjs` file. Optional environment settings are
+`CHROME_PATH`, `FFMPEG_PATH`, `RENDER_BASE_URL`, and `RENDER_OUTPUT_DIR`.
+
+```sh
+node scripts/render-videos.mjs
+```
+
+Existing completed videos are preserved; new exports receive unique names.
+
 ## Validate and build
 
 ```sh

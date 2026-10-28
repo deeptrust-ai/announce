@@ -158,6 +158,25 @@ push was performed. Hosting configuration and deployment outputs are committed
 locally. The user briefly paused and then explicitly resumed deployment;
 background audio in that voice segment did not change the site design.
 
+## Video exports
+
+The user requested 16:9 videos of both versions, saved to the Desktop.
+`scripts/render-videos.mjs` captures each complete DOM/WebGL composition at
+1920×1080, 30 fps, H.264 MP4 with no audio and a four-second final hold. It hides
+playback controls only in its isolated browser context, and uses a deterministic
+requestAnimationFrame clock so rendering time cannot introduce dropped animation
+frames. Existing completed videos are preserved. It uses the already-running
+local dev server and a separate headless Chrome process; it does not control the
+user's browser or change the app. Playwright comes from the bundled workspace
+runtime through `PLAYWRIGHT_MODULE`; no package dependencies were added.
+Completed exports on the Desktop:
+- `/Users/michaelbishop/Desktop/DeepTrust-Doppel-16x9.mp4` — 20.43 seconds.
+- `/Users/michaelbishop/Desktop/DeepTrust-Keycard-16x9.mp4` — 18.20 seconds.
+Both were verified as 1920×1080, 30 fps H.264, and their sampled frames include
+the complete announcement without playback controls.
+Exporting and inspecting output video files was explicitly requested. This does
+not change the default preference to skip routine tests and proof screenshots.
+
 ## User workflow
 
 - The user is a senior developer. Use short, direct updates and quick bullets.
