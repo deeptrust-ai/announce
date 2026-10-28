@@ -29,19 +29,18 @@ Do not restore them until the user requests the next part.
 The card has a thin extruded rounded body. Its face uses the authentic NFC-card
 artwork as a texture, with the baked-in K cleared at runtime inside its existing
 circuit frame. The source PNG is unchanged. The center starts empty. The actual
-DeepTrust SVG bar bounds become sixteen fine strokes: two parallel lines per
-original solid block. Each is 1.5 SVG units thick on a roughly 4.25-unit
-center-to-center pitch. Pair spacing now continues evenly into the next row,
-following the K reference's stroke-to-gap rhythm. The latest size is 0.72 world
-units for the map, another 15% smaller than the paired-line draft, leaving
-more empty space inside the circuit frame.
+DeepTrust SVG paths are filled directly, preserving all eight original solid
+blocks and their actual rounded corners. The user rejected the paired-line
+interpretation. The map remains 0.72 world units wide: the smaller size was
+explicitly approved. Do not restore thin-line or double-line geometry.
 A glowing blue laser enters from off-screen at the upper left and follows the
-cutting point along all sixteen lines within the existing 4.8 seconds.
+cutting point across each solid bar within the existing 4.8 seconds.
 `keycard-laser.ts` draws a bright beam core, soft blue halo, and contact glow.
 Its endpoint projects the actual card-local stroke point into camera space,
 using the same quantized time ranges as the etch maps. It switches off between
-strokes and after etching, and remains absent with reduced motion. The finished mark is flat pearl-colored linework, with no relief, bevel,
-bump, or edge shading, echoing the Keycard K's circuit-line treatment.
+bars and after etching, and remains absent with reduced motion. The finished
+mark is a flat pearlescent material treatment with no relief, bevel, bump, or
+edge shading.
 The KEYCARD.AI label is masked during the etch, shockwave, lift, and most of the spin.
 Circuit tracks remain visible throughout.
 

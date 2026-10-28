@@ -26,7 +26,7 @@
 <svelte:head><title>DeepTrust × Keycard</title></svelte:head>
 
 <main class="keycard-opening" aria-label="DeepTrust's next chapter with Keycard">
-  <canvas bind:this={canvas} role="img" aria-label="A Keycard lies on a dark grid while a glowing blue laser from off-screen etches DeepTrust into its center as flat circuit lines. A shockwave expands, the card lifts upright, spins six times, then reveals the original Keycard K and KEYCARD.AI artwork in its final hero view." />
+  <canvas bind:this={canvas} role="img" aria-label="A Keycard lies on a dark grid while a glowing blue laser from off-screen etches DeepTrust into its center using its original solid shapes. A shockwave expands, the card lifts upright, spins six times, then reveals the original Keycard K and KEYCARD.AI artwork in its final hero view." />
   {#if failed}<p class="error" role="alert">The card could not load. Please refresh to try again.</p>{/if}
   <nav class="playback" aria-label="Keycard scene playback">
     <div class="playback-label"><span>{String(stage + 1).padStart(2, '0')} / {String(KEYCARD_STAGES.length).padStart(2, '0')}</span><span>{KEYCARD_STAGES[stage]!.name}</span></div>

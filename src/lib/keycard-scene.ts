@@ -76,8 +76,8 @@ function roundedCard() {
   return shape
 }
 
-/** Translate each of the mark's eight bars into a close pair of circuit lines.
- * The time map draws each line left to right, top to bottom. */
+/** Preserve the eight original SVG shapes, including their rounded corners.
+ * The time map etches each solid bar left to right, top to bottom. */
 function createEtchMaps(source: string) {
   const svg = new DOMParser().parseFromString(source, 'image/svg+xml')
   const paths = [...svg.querySelectorAll('path')].map((element) => {
@@ -89,7 +89,7 @@ function createEtchMaps(source: string) {
       top = Math.min(top, point.y)
       bottom = Math.max(bottom, point.y)
     }
-    return { left, right, top, bottom }
+    return { path: new Path2D(element.getAttribute('d')!), left, right, top, bottom }
   }).sort((a, b) => a.top - b.top || a.left - b.left)
   if (!paths.length) throw new Error('The DeepTrust SVG has no paths.')
 
@@ -97,35 +97,18 @@ function createEtchMaps(source: string) {
   mask.width = mask.height = timing.width = timing.height = 512
   const maskContext = mask.getContext('2d')!, timeContext = timing.getContext('2d')!
   maskContext.scale(8, 8); timeContext.scale(8, 8)
-  // The K reference uses a stroke about one third of its center-to-center pitch.
-  // A 4.25-unit pitch continues evenly across pairs and between original rows.
-  const lineWidth = 1.5
-  const lineOffsets = [-2.125, 2.125]
-  const lineCount = paths.length * lineOffsets.length
   const segments: { left: number; right: number; y: number; start: number; end: number }[] = []
-  for (const context of [maskContext, timeContext]) {
-    context.lineWidth = lineWidth
-    context.lineCap = 'round'
-  }
-  maskContext.strokeStyle = 'white'
+  maskContext.fillStyle = 'white'
   timeContext.fillStyle = 'white'; timeContext.fillRect(0, 0, 64, 64)
-  paths.forEach(({ left, right, top, bottom }, blockIndex) => {
-    lineOffsets.forEach((offset, lineIndex) => {
-      const path = new Path2D()
-      const center = (top + bottom) / 2 + offset
-      path.moveTo(left + lineWidth / 2, center)
-      path.lineTo(right - lineWidth / 2, center)
-      maskContext.stroke(path)
-      const gradient = timeContext.createLinearGradient(left, 0, right, 0)
-      const index = blockIndex * lineOffsets.length + lineIndex
-      // Trace all sixteen lines in order within the existing etch duration.
-      const start = Math.round((0.015 + index / lineCount * 0.97) * 255)
-      const end = Math.round((0.015 + (index + 0.94) / lineCount * 0.97) * 255)
-      segments.push({ left, right, y: center, start: start / 255, end: end / 255 })
-      gradient.addColorStop(0, `rgb(${start},${start},${start})`)
-      gradient.addColorStop(1, `rgb(${end},${end},${end})`)
-      timeContext.strokeStyle = gradient; timeContext.stroke(path)
-    })
+  paths.forEach(({ path, left, right, top, bottom }, index) => {
+    maskContext.fill(path)
+    const gradient = timeContext.createLinearGradient(left, 0, right, 0)
+    const start = Math.round((0.015 + index / paths.length * 0.97) * 255)
+    const end = Math.round((0.015 + (index + 0.94) / paths.length * 0.97) * 255)
+    segments.push({ left, right, y: (top + bottom) / 2, start: start / 255, end: end / 255 })
+    gradient.addColorStop(0, `rgb(${start},${start},${start})`)
+    gradient.addColorStop(1, `rgb(${end},${end},${end})`)
+    timeContext.fillStyle = gradient; timeContext.fill(path)
   })
   return { mask: new CanvasTexture(mask), timing: new CanvasTexture(timing), segments }
 }
@@ -174,7 +157,7 @@ const cardFragment = /* glsl */`
     cut = mix(cut, mask, step(1., uEtch));
     float head = exp(-pow((uEtch - arrival - .005) / .006, 2.)) * mask;
     head *= step(.001, uEtch) * (1. - step(1., uEtch));
-    // Flat pearlescent linework: no relief, bevel, bump, or edge shading.
+    // Flat original logo shapes: no relief, bevel, bump, or edge shading.
     vec3 lineColor = mix(vec3(.55, .64, .67), vec3(.68, .57, .68), logoUv.x);
     color = mix(color, lineColor, cut);
     color += vec3(.5, .85, 1.) * head * 2.;
