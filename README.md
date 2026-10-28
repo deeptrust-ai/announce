@@ -156,9 +156,9 @@ The camera reaches its wide view over the first four seconds of the connection
 scene, then holds for 0.4 seconds. It begins a 5.6-second move closer while
 DeepTrust is still approaching. Framing measures the moving hub, DeepTrust card,
 and logo each frame, keeping the pair together as the gap shrinks. It finishes
-square overhead with the hub centered at 73% of the screen width. Framing
-limits the layout to 74% of viewport height and 46% of viewport width, giving
-the left-hand typography room. Portrait places the hub lower at 62% height. The old
+square overhead in an oversized crop. The hub center sits beyond the lower-right
+corner so only its northwest portion is visible, leaving the left-hand type
+clear. Portrait uses the same crop with adjusted horizontal coverage. The old
 logo position and pulse plane are excluded; resize uses the current layout.
 During the approach, the seven original nodes slide clockwise into seven
 evenly spaced slots, leaving the top slot for DeepTrust. The final eight-node
@@ -200,8 +200,8 @@ Each lime hub port has an independent breathing rhythm, with periods around
 Small secondary variations make the glow less uniform. A separate ambient clock
 continues these rhythms and the independent node orbits while the camera,
 normalized grid, and completed text hold their final state. Hidden tabs pause it; reduced motion uses steady glow. The final camera
-fit includes the entire orbital envelope and is cached after the lift, then
-refreshed on replay or resize.
+crop uses the fixed orbital envelope instead of chasing individual nodes and
+is cached after the lift, then refreshed on replay or resize.
 
 The sphere is a permanent invisible coordinate anchor, with no reflective
 surface, meridians, or added equator lines. The original glowing ring remains
@@ -210,8 +210,11 @@ and graphite floor rings are hidden at runtime. Once DeepTrust is close (78% of
 the approach duration, around second 12.04), the eight nodes lift over three
 seconds into individual tilted orbits. Speeds, directions, phases, and gentle
 precession vary independently. All cards stay parallel to the camera; only
-their anchor positions move through 3D. Ports follow the spherical surface and
-live spokes remain attached. Motion continues after the text finishes, pauses
+their anchor positions move through 3D. A soft repelling force and projected
+card-rectangle constraints keep neighbors apart, including nodes that are far
+apart in 3D but overlap from the camera. Repulsion offsets relax back toward each
+node’s own orbit. Ports and live spokes update after separation so they remain
+attached. Motion continues after the text finishes, pauses
 in hidden tabs, and becomes static under reduced motion. `?start=orbits`
 previews this transition. Source Blender and GLB assets remain unchanged.
 

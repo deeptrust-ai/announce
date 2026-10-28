@@ -2,9 +2,9 @@ import { Box3, MathUtils, Object3D, PerspectiveCamera, Vector3 } from 'three'
 
 export const FINAL_HUB_SHOT = {
   wideHoldSeconds: 0.4,
-  frameCoverage: 0.74,
-  maxWidthFraction: 0.46,
-  screenCenterX: 0.73,
+  frameCoverage: 1.45,
+  maxWidthFraction: 1.35,
+  screenCenterX: 1.04,
 } as const
 
 export type FinalHubView = { position: Vector3; target: Vector3 }
@@ -19,23 +19,26 @@ export function fitFinalHubView(
   const bounds = new Box3().setFromObject(hub)
     .union(new Box3().setFromObject(cardBody))
     .union(new Box3().setFromObject(logo))
-  if (orbitBounds) bounds.union(orbitBounds)
+  // Keep the final crop stable as individual nodes repel and orbit off-screen.
+  if (orbitBounds) bounds.copy(orbitBounds)
   const target = bounds.getCenter(new Vector3())
   const size = bounds.getSize(new Vector3())
   const halfFov = Math.tan(MathUtils.degToRad(camera.fov / 2))
-  const screenCenterY = camera.aspect < 1 ? 0.62 : 0.5
+  const screenCenterY = camera.aspect < 1 ? 1.06 : 1.04
   const ndcX = FINAL_HUB_SHOT.screenCenterX * 2 - 1
   const ndcY = 1 - screenCenterY * 2
-  const coverageX = Math.min(FINAL_HUB_SHOT.maxWidthFraction, 1 - Math.abs(ndcX) - 0.08)
-  const coverageY = Math.min(FINAL_HUB_SHOT.frameCoverage, 1 - Math.abs(ndcY) - 0.08)
-  const height = Math.max(size.z / (2 * coverageY), size.x / (2 * camera.aspect * coverageX)) / halfFov
-  const distance = height + size.y / 2
-  // Move the camera and its gaze together to keep the hub square overhead,
-  // with its screen position clear of the left-hand editorial columns.
+  const coverageX = camera.aspect < 1 ? 1.6 : FINAL_HUB_SHOT.maxWidthFraction
+  const coverageY = FINAL_HUB_SHOT.frameCoverage
+  const distance = Math.max(
+    Math.max(size.z / (2 * coverageY), size.x / (2 * camera.aspect * coverageX)) / halfFov,
+    size.y / 2 + camera.near + 0.35,
+  )
+  // Put the sphere center beyond the lower-right corner: only its northwest
+  // portion remains in view, with the left side available for the typography.
   target.x -= ndcX * distance * halfFov * camera.aspect
   target.z += ndcY * distance * halfFov
   const position = target.clone()
-  position.y = bounds.max.y + height
+  position.y = target.y + distance
   return { position, target }
 }
 

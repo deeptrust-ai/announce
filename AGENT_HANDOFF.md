@@ -260,13 +260,16 @@ camera tail after the logo settles.
 excluding the old logo origin and pulse plane. This replaces the former cached
 settled fit, which would become stale during overlapping motion. The target
 tracks the closing gap while the camera eases away from the wide pose. It ends
-square overhead, north up, with DeepTrust at the top. The hub is now smaller
-and shifted right to leave room for the typography: center X is 73% of the
-viewport, height coverage is capped at 74%, and width coverage at 46%. Fitting
-accounts for the off-center position with an edge margin, so nodes stay inside
-the frame. Camera position and gaze shift together, keeping the view overhead.
-Portrait moves the hub lower to 62% screen height while the copy sits upper left. Replay, resize, direct seeks, timeline duration, and
-reduced motion all use the same absolute time and current geometry.
+square overhead, north up. The final composition is now deliberately oversized
+and cropped: the virtual sphere center is just beyond the lower-right corner
+(screen X 104%, Y 104% desktop / 106% portrait), revealing only the northwest
+portion. Vertical coverage is 145%; desktop width coverage is 135%, portrait
+160%. Distance also respects clearance above the orbital volume. This replaces
+the earlier small full-hub fit at 73% X. Do not restore automatic fit-to-all-nodes
+or viewport-edge clamping: nodes should orbit into and out of the crop. The
+camera and gaze translate together to preserve the overhead view and the left
+editorial space. Replay, resize, direct seeks, timeline duration, and reduced
+motion use absolute time and the same crop.
 
 Grid release overlaps the final 1.2 seconds of attraction and camera movement,
 from second 12.6 to 13.8. All three derive their endpoint from the same settle
@@ -342,8 +345,20 @@ links during orbital motion, preserving blue DeepTrust and amber existing links.
 The original DeepTrust draw connection is hidden once its orbital spoke takes
 over. Replay restores the original transforms, visibility, and planar links.
 
-Framing includes a conservative envelope for all eight orbits, and only caches
-after the lift completes. The camera then stays steady as nodes continue moving.
+Final framing crops a fixed orbital envelope, and only caches after the lift
+completes. It deliberately ignores individual node bounds once orbital motion
+is active, so repulsion and off-screen motion do not pump the camera zoom.
+Nodes now repel one another in the camera projection as well as moving through
+3D. Each node carries a persistent world-space avoidance offset which decays
+smoothly toward its own nominal orbit. A broad soft force starts separating
+neighbors before contact. Up to 24 position-constraint passes then enforce card
+rectangle clearance with extra space (1.44 card widths at equal depth), handling
+nodes that align on screen despite being far apart in depth. Corrections move
+along camera right/up, retaining depth and billboard orientation. Port anchors
+and live spokes are rebuilt after separation each frame, so no connection lags
+behind. Avoidance offsets reset on replay. The camera crop stays fixed instead
+of following these corrections. No tests or visual proof were run.
+
 The shadow light follows the anchor with a constant offset and a wider shadow
 frustum. New geometry/materials are disposed through the normal scene cleanup.
 The preview stage `?start=orbits` seeks to orbital activation. The original GLB
