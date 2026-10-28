@@ -4,7 +4,7 @@ export const OPENING_SHOT = {
   orbitSeconds: 18,
   overheadSeconds: 6,
   startAzimuth: 45,
-  startElevation: 35,
+  startElevation: 4,
   orbitEndElevation: 65,
   startDistance: 0.68,
   orbitEndDistance: 0.92,

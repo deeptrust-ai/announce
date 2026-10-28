@@ -52,9 +52,11 @@ fill light, hemisphere light, soft shadows, and subtle bloom on the lime ports.
 The camera follows the opening shot automatically. Manual OrbitControls were
 removed so they cannot compete with the exact overhead camera pose.
 
-Opening shot choices for the first visual iteration:
+Current opening shot choices:
 
-- Start at a 45-degree azimuth and 35-degree elevation, focused on the flat logo.
+- Start at a 45-degree azimuth and a grazing 4-degree elevation, focused on the
+  flat logo. This puts the camera about 6 cm above the floor on landscape screens.
+  The user requested this low start after seeing the first 35-degree version.
 - Orbit a full 360 degrees over 18 seconds while rising to 65-degree elevation.
 - Rise for 6 more seconds to an exact overhead position, looking down 90 degrees.
 - Camera distances: 0.68 meters initially, 0.92 after the orbit, 1.2 overhead.
