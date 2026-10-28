@@ -55,3 +55,29 @@ To regenerate on macOS with Blender installed:
 
 The generator reads `public/branding/logo-mark.svg`. The exported meshes have no
 external file dependencies.
+
+## Hub network model
+
+- `models/hub-network.blend`: floor-level hub, nodes, icons, ports, and radial links.
+- `public/models/hub-network.glb`: model-only Three.js export, in meters with Y up.
+- `models/hub-network-preview.png`: rendered view on a preview floor.
+- `models/references/hub-reference.png`: supplied diagram reference.
+
+The circular hub is 48 inches across. Seven 12-inch nodes sit on a 48-inch-radius
+orbit, with two thin orbit rings and lime connection ports. The layout lies in
+Blender's XY floor plane, with shallow geometry above Z=0. Labels and the center
+phone are omitted. The small phone icon on the outer Telco node is retained.
+
+`Hub_Network` is the export root. `Central_Hub`, `Outer_Nodes`,
+`Radial_Connections`, and `Orbit_Rings` retain separate transforms. Each outer
+node and its icon share a parent. Links identify their node and hub port through
+custom properties. The separate DeepTrust logo can join this system in a later
+animation; no acquisition animation is baked into this asset.
+
+The preview studio contains the floor, lights, and camera. It is excluded from
+the GLB. Regenerate with:
+
+```sh
+/Applications/Blender.app/Contents/MacOS/Blender --background --factory-startup \
+  --python scripts/create-hub-network.py
+```
