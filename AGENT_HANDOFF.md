@@ -280,7 +280,11 @@ only the coordinates used to sample the grid pattern. It does not change floor
 geometry, model rendering, connection geometry, shadows, lighting, or bloom.
 The two lens centers track the objects in world X/Z, with radii of 0.65 m around
 DeepTrust and 1.7 m around the hub. The same soft annular profile and two-second
-strength ramp are retained. Reduced motion disables the grid distortion; replay
+strength ramp are retained. The user requested stronger, faster lensing:
+`GRID_LENS` now sets strength to 0.3 (2.5 times the original 0.12), pulse depth
+to 0.22, and temporal pulse frequency to 0.75 Hz (previously about 0.22 Hz).
+Only grid distortion is strengthened. The shared endpoint, release shockwave,
+and normalized final grid remain unchanged. Reduced motion disables distortion; replay
 resets it. Uniforms are owned by the floor material, with no separate GPU pass.
 
 

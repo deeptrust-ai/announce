@@ -1,6 +1,11 @@
 import { MathUtils, Object3D, Vector2, Vector3 } from 'three'
 
 export const GRID_LENS_RELEASE = { durationSeconds: 1.2 } as const
+export const GRID_LENS = {
+  strength: 0.3,
+  pulseDepth: 0.22,
+  pulseFrequencyHz: 0.75,
+} as const
 
 /** Applied only to floor-grid lookup coordinates, never to the rendered scene. */
 export const GRAVITY_LENS_GLSL = `
@@ -61,8 +66,10 @@ export function createGravityLensing() {
     const release = releaseTime >= GRID_LENS_RELEASE.durationSeconds - 1e-6
       ? 1 : MathUtils.clamp(releaseTime / GRID_LENS_RELEASE.durationSeconds, 0, 1)
     uniforms.uGridLensRelease.value = release
-    uniforms.uGridLensStrength.value = 0.12 * MathUtils.smootherstep(time, 0, 2)
-      * (1 + 0.08 * Math.sin(time * 1.4)) * (1 - MathUtils.smootherstep(release, 0, 1))
+    const pulse = 1 + GRID_LENS.pulseDepth
+      * Math.sin(time * Math.PI * 2 * GRID_LENS.pulseFrequencyHz)
+    uniforms.uGridLensStrength.value = GRID_LENS.strength * MathUtils.smootherstep(time, 0, 2)
+      * pulse * (1 - MathUtils.smootherstep(release, 0, 1))
     uniforms.uGridShockStrength.value = 0.22 * MathUtils.smootherstep(release, 0, 0.12)
       * (1 - MathUtils.smootherstep(release, 0.55, 1))
   }

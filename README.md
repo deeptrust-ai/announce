@@ -162,7 +162,9 @@ at the top for DeepTrust. Replaying restores the original seven-node layout.
 As attraction begins, the floor shader gradually bends only its grid lookup
 coordinates around each object. The logo, hub, connection, lighting, shadows,
 and bloom retain their normal rendering. The grid lenses follow the objects in
-world X/Z with fixed world radii. Reduced motion omits the grid distortion and
+world X/Z with fixed world radii. The lens is 2.5 times stronger than the initial
+version and pulses at 0.75 Hz with 22% modulation. `GRID_LENS` exposes these
+settings. Reduced motion omits the grid distortion and
 shows the completed approach. During the last 1.2 seconds of attraction, the two lenses fade while a single
 shockwave expands from the hub through the grid. A narrow compression front and
 trailing rebound give it a sharper wave shape. The camera, DeepTrust movement,
