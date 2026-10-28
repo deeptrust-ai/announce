@@ -1,7 +1,7 @@
 import { MathUtils, PerspectiveCamera, Vector3 } from 'three'
 
 export const OPENING_SHOT = {
-  durationSeconds: 12,
+  durationSeconds: 3,
   // Finish the half-turn at azimuth 0, aligning the flat logo with the screen.
   startAzimuth: -180,
   turnDegrees: 180,

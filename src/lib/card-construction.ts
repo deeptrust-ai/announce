@@ -23,8 +23,8 @@ import {
 } from 'three'
 
 export const CARD_CONSTRUCTION = {
-  outlineSeconds: 3,
-  fillSeconds: 3.5,
+  outlineSeconds: 1,
+  fillSeconds: 2,
   logoSettleSeconds: 0.9,
   gridSize: 24,
   logoScale: 0.52,

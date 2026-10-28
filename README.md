@@ -32,7 +32,7 @@ The production build is written to `dist/`. Serve that directory with a static h
 - `src/app.css`: full-screen layout.
 
 The scene starts focused on the DeepTrust logo, lying flat on a dark floor.
-The camera makes a continuous 180-degree rising spiral over 12 seconds, from
+The camera makes a continuous 180-degree rising spiral over 3 seconds, from
 4 degrees above the floor to directly overhead at 90 degrees, then holds there.
 Turning, elevation, and camera distance share one easing curve. The camera eases
 only at the beginning and end, with no midpoint stop or separate squaring stage.
@@ -40,8 +40,8 @@ The turn ends at azimuth 0 so the logo finishes aligned with the screen, with
 horizontal bars and no diagonal tilt. The camera keeps looking at the logo
 throughout. The shot plays once after both GLBs load; refresh the page to replay it.
 
-The left-side preview menu lists Camera rise (12 s), Border draw (3 s), and Tiled
-fill (3.5 s). Click an entry to reset and replay from its beginning, then continue
+The left-side preview menu lists Camera rise (3 s), Border draw (1 s), and Tiled
+fill (2 s). Click an entry to reset and replay from its beginning, then continue
 the following transitions. Camera rise also replays the whole sequence. The
 active entry follows playback. Buttons support normal keyboard focus and
 activation; the canvas stays full-screen beneath the overlay. Menu names,
@@ -57,8 +57,8 @@ the completed card.
 After the overhead camera settles, a blue card constructs around the logo:
 
 - The border traces from the top center down both sides simultaneously, meeting
-  at the bottom center over 3 seconds. Bright heads emit blue spark trails.
-- Only after the border closes, a 24-by-24 grid reveals the interior over 3.5
+  at the bottom center over 1 second. Bright heads emit blue spark trails.
+- Only after the border closes, a 24-by-24 grid reveals the interior over 2
   seconds. Cells appear top-to-bottom with deterministic variation near the fill
   front and a brief blue flash. The finished surface is solid, without a checker
   pattern or tile gaps.
@@ -76,7 +76,7 @@ landscape viewport. Camera distance rises continuously from 0.68 to 1.2 meters,
 with extra distance for portrait viewports. The logo stays still during the
 camera shot. Reduced motion skips to the completed card and overhead camera,
 without sparks. Hidden tabs pause the timeline. Rendering stops after the full
-18.5-second sequence until a resize or visibility change. Pixel density is
+6-second sequence until a resize or visibility change. Pixel density is
 capped at 2. GPU resources and event listeners are released on unmount.
 
 The existing hub network sits at `(12, 0, -12)` meters, outside the opening shot.

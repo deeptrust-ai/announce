@@ -61,7 +61,7 @@ Current opening shot choices:
   flat logo. This puts the camera about 6 cm above the floor on landscape screens.
   The user requested this low start after seeing the first 35-degree version.
 - Turn 180 degrees while rising from 4 to 90 degrees over one continuous
-  12-second motion. Azimuth, elevation, and distance share the same progress.
+  3-second motion. Azimuth, elevation, and distance share the same progress.
 - End the turn at azimuth 0. The logo finishes aligned with the screen, with
   horizontal bars and no 45-degree tilt. The orientation remains continuous
   through the spiral; there is no separate roll correction or snap.
@@ -73,8 +73,8 @@ Current opening shot choices:
 - Reduced motion skips to the final overhead shot and completed card, without
   sparks. Hidden tabs pause elapsed time.
 
-The left-side preview menu offers Camera rise (12 s), Border draw (3 s), and
-Tiled fill (3.5 s), derived from shared timeline constants. Clicking replays from
+The left-side preview menu offers Camera rise (3 s), Border draw (1 s), and
+Tiled fill (2 s), derived from shared timeline constants. Clicking replays from
 that stage's beginning and naturally continues the following stages, without a
 reload or model refetch. Camera rise replays all. The current stage is highlighted
 as playback advances. Native buttons provide keyboard activation and focus.
@@ -90,11 +90,11 @@ Replays reset the logo's original pose/color, border draw ranges, body reveal,
 sparks, and shadow state before seeking. Do not remove this reset when adding
 later transitions, or replaying the camera shot can retain a completed card.
 
-After the 12-second camera shot, the camera holds still while the card forms:
+After the 3-second camera shot, the camera holds still while the card forms:
 
-- Three seconds: outline starts at top center, grows around both sides at once,
+- One second: outline starts at top center, grows around both sides at once,
   then joins at bottom center. Two blue luminous heads emit short spark trails.
-- Next 3.5 seconds: the interior appears as small cells, advancing top-to-bottom
+- Next 2 seconds: the interior appears as small cells, advancing top-to-bottom
   with randomized activation near the advancing front. Cells briefly flash blue.
   No fill is visible before border closure. Final fill is a solid navy surface,
   with no permanent checker pattern.
@@ -121,7 +121,7 @@ about 17 meters from the logo. It stays outside the opening frame. Its existing
 groups remain intact for later animation. Neither the logo nor the hub moves
 during this first camera transition.
 
-Rendering continues during the full 18.5-second sequence, then returns to rendering on
+Rendering continues during the full 6-second sequence, then returns to rendering on
 demand. Pixel density is capped at 2. Cleanup disposes geometry, materials,
 shadow maps, and postprocessing resources. Both GLBs must load before the shot
 starts; asynchronous loading handles unmounts and loading errors.
