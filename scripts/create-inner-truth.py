@@ -1,14 +1,16 @@
-"""Create the ䷼ glyph as a 12-inch-wide, 1-inch-deep extrusion.
+"""Extrude the original DeepTrust SVG mark to 12 inches wide and 1 inch deep.
 
 Run in a separate Blender process:
   /Applications/Blender.app/Contents/MacOS/Blender --background --factory-startup \
     --python scripts/create-inner-truth.py
 
-The source outline uses macOS Apple Symbols. The saved assets contain mesh
-geometry only; no font file is embedded or required when opening them.
+The SVG's cubic curves preserve its rounded outer corners. Only the white mark
+paths are extruded; the navy background rectangle is excluded.
 """
 
 import json
+import re
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 import bmesh
@@ -20,31 +22,112 @@ ROOT = Path(__file__).resolve().parents[1]
 INCH = 0.0254
 WIDTH = 12 * INCH
 DEPTH = INCH
-FONT_PATH = Path('/System/Library/Fonts/Apple Symbols.ttf')
+SVG_PATH = ROOT / 'public' / 'branding' / 'logo-mark.svg'
 
 if not bpy.app.background:
     raise RuntimeError('Run this generator in a separate background Blender process.')
-if not FONT_PATH.is_file():
-    raise FileNotFoundError(f'The glyph outline font is missing: {FONT_PATH}')
+
+def parse_path(path):
+    """Read the M/L/H/V/C/Z SVG commands used by the original logo paths.
+
+    Retain cubic Bezier control points instead of approximating rounded corners
+    with straight edges. Unsupported commands fail explicitly.
+    """
+    tokens = re.findall(r'[A-Za-z]|[-+]?(?:\d*\.\d+|\d+\.?)(?:[eE][-+]?\d+)?', path)
+    index = 0
+    command = None
+    points = []
+    current = Vector((0, 0, 0))
+
+    def number():
+        nonlocal index
+        value = float(tokens[index])
+        index += 1
+        return value
+
+    def point(relative):
+        value = Vector((number(), number(), 0))
+        return current + value if relative else value
+
+    def append(position, left=None):
+        points.append({
+            'co': position.copy(),
+            'left': left.copy() if left is not None else position.copy(),
+            'right': position.copy(),
+        })
+
+    while index < len(tokens):
+        if tokens[index].isalpha():
+            command = tokens[index]
+            index += 1
+        relative = command.islower()
+        kind = command.upper()
+        if kind == 'M':
+            if points:
+                raise ValueError('Each logo path must have one closed contour.')
+            current = point(relative)
+            append(current)
+            command = 'l' if relative else 'L'
+        elif kind == 'L':
+            current = point(relative)
+            append(current)
+        elif kind == 'H':
+            value = number()
+            current = Vector((current.x + value if relative else value, current.y, 0))
+            append(current)
+        elif kind == 'V':
+            value = number()
+            current = Vector((current.x, current.y + value if relative else value, 0))
+            append(current)
+        elif kind == 'C':
+            handle_right = point(relative)
+            handle_left = point(relative)
+            endpoint = point(relative)
+            points[-1]['right'] = handle_right
+            current = endpoint
+            append(current, handle_left)
+        elif kind == 'Z':
+            if (points[-1]['co'] - points[0]['co']).length < 1e-6:
+                points[0]['left'] = points.pop()['left']
+            if index != len(tokens):
+                raise ValueError('Unexpected data after closed logo path.')
+            return points
+        else:
+            raise ValueError(f'Unsupported SVG command: {command}')
+    raise ValueError('Logo paths must be closed.')
 
 # This is the isolated factory-startup scene, not the user's open Blender file.
 for obj in list(bpy.data.objects):
     bpy.data.objects.remove(obj, do_unlink=True)
 scene = bpy.context.scene
-scene.name = 'Inner Truth — ䷼'
+scene.name = 'DeepTrust logo mark'
 scene.unit_settings.system = 'IMPERIAL'
 scene.unit_settings.scale_length = 1
 scene.unit_settings.length_unit = 'INCHES'
 
-curve = bpy.data.curves.new('Inner Truth outline', type='FONT')
-curve.body = '䷼'
-curve.font = bpy.data.fonts.load(str(FONT_PATH))
-curve.align_x = 'CENTER'
-curve.align_y = 'CENTER'
+curve = bpy.data.curves.new('Original SVG logo outline', type='CURVE')
+curve.dimensions = '2D'
+curve.resolution_u = 24
 curve.fill_mode = 'BOTH'
 curve.extrude = 0.05
 curve.bevel_depth = 0
-obj = bpy.data.objects.new('Inner Truth — ䷼', curve)
+svg = ET.parse(SVG_PATH).getroot()
+for path in svg.findall('{http://www.w3.org/2000/svg}path'):
+    if path.get('class') != 'st0':
+        continue
+    points = parse_path(path.attrib['d'])
+    spline = curve.splines.new('BEZIER')
+    spline.bezier_points.add(len(points) - 1)
+    spline.use_cyclic_u = True
+    for target, source in zip(spline.bezier_points, points):
+        # SVG Y points down; Blender's face coordinates point up.
+        target.handle_left_type = 'FREE'
+        target.handle_right_type = 'FREE'
+        target.co = (source['co'].x, -source['co'].y, 0)
+        target.handle_left = (source['left'].x, -source['left'].y, 0)
+        target.handle_right = (source['right'].x, -source['right'].y, 0)
+
+obj = bpy.data.objects.new('DeepTrust logo mark', curve)
 scene.collection.objects.link(obj)
 bpy.context.view_layer.objects.active = obj
 obj.select_set(True)
@@ -52,7 +135,7 @@ bpy.ops.object.convert(target='MESH')
 obj = bpy.context.object
 bpy.context.view_layer.update()
 
-# Retain the glyph's face proportions while setting its exact physical size.
+# Retain the logo's original face proportions and curved outer corners.
 face_scale = WIDTH / obj.dimensions.x
 obj.scale = (face_scale, face_scale, DEPTH / obj.dimensions.z)
 bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
@@ -77,7 +160,8 @@ obj['character'] = '䷼'
 obj['unicode'] = 'U+4DFC'
 obj['width_inches'] = 12.0
 obj['depth_inches'] = 1.0
-obj['outline_source'] = 'Apple Symbols glyph outline, converted to mesh'
+obj['outline_source'] = 'public/branding/logo-mark.svg — original white paths'
+obj['corner_style'] = 'Original SVG Bezier curves; no added bevel'
 
 material = bpy.data.materials.new('Neutral satin')
 material.diffuse_color = (0.65, 0.69, 0.72, 1)
@@ -148,7 +232,7 @@ scene.render.resolution_percentage = 100
 scene.render.image_settings.file_format = 'PNG'
 scene.render.filepath = str(model_dir / 'inner-truth-preview.png')
 
-# Store a useful viewport and select only the glyph when opening the file.
+# Store a useful viewport and select only the logo when opening the file.
 for item in bpy.context.selected_objects:
     item.select_set(False)
 obj.select_set(True)
@@ -165,10 +249,7 @@ for screen in bpy.data.screens:
             space.overlay.show_axis_x = False
             space.overlay.show_axis_y = False
 
-# Meshes retain their shape without external font dependencies.
-for font in list(bpy.data.fonts):
-    if font.users == 0 and font.filepath:
-        bpy.data.fonts.remove(font)
+# The saved mesh has no external file dependencies.
 for unused_curve in list(bpy.data.curves):
     if unused_curve.users == 0:
         bpy.data.curves.remove(unused_curve)

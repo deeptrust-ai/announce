@@ -35,11 +35,13 @@ are released when the component unmounts.
 
 ## Blender model
 
-- `models/inner-truth.blend`: the ䷼ glyph extruded to 1 inch deep and 12 inches wide.
+- `models/inner-truth.blend`: the DeepTrust SVG mark extruded to 1 inch deep and 12 inches wide.
 - `public/models/inner-truth.glb`: mesh-only export for Three.js, in meters with Y up.
 - `models/inner-truth-preview.png`: rendered preview.
 
-The original glyph proportions give a height of approximately 13.73 inches.
+The original logo proportions give a height of approximately 11.63 inches.
+The rounded outer corners follow the SVG's original Bezier curves. The navy
+background rectangle is excluded. No bevel is added to the other edges.
 The mesh is centered at the origin. The Blender file includes a separate preview
 studio collection; the GLB contains only the glyph. The landing-page scene does
 not load the model yet.
@@ -51,5 +53,5 @@ To regenerate on macOS with Blender installed:
   --python scripts/create-inner-truth.py
 ```
 
-The generator uses the Apple Symbols font installed with macOS. The exported
-meshes have no external font dependencies.
+The generator reads `public/branding/logo-mark.svg`. The exported meshes have no
+external file dependencies.
