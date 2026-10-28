@@ -1,39 +1,35 @@
 import { MathUtils, PerspectiveCamera, Vector3 } from 'three'
 
 export const OPENING_SHOT = {
-  orbitSeconds: 6,
-  overheadSeconds: 6,
+  durationSeconds: 12,
   // Finish the half-turn at azimuth 0, aligning the flat logo with the screen.
   startAzimuth: -180,
   turnDegrees: 180,
   startElevation: 4,
-  orbitEndElevation: 65,
+  endElevation: 90,
   startDistance: 0.68,
-  orbitEndDistance: 0.92,
-  overheadDistance: 1.2,
+  endDistance: 1.2,
 } as const
 
-export const OPENING_DURATION = OPENING_SHOT.orbitSeconds + OPENING_SHOT.overheadSeconds
+export const OPENING_DURATION = OPENING_SHOT.durationSeconds
 
 function ease(progress: number) {
   return (1 - Math.cos(Math.PI * MathUtils.clamp(progress, 0, 1))) / 2
 }
 
-/** Keep the camera focused on the logo through a half-turn and the overhead rise. */
+/** One continuous rising half-turn, easing only at the start and final overhead pose. */
 export function applyOpeningShot(camera: PerspectiveCamera, focus: Vector3, elapsed: number) {
-  const orbit = ease(elapsed / OPENING_SHOT.orbitSeconds)
-  const rise = ease((elapsed - OPENING_SHOT.orbitSeconds) / OPENING_SHOT.overheadSeconds)
+  const progress = ease(elapsed / OPENING_DURATION)
   const azimuth = MathUtils.degToRad(
-    OPENING_SHOT.startAzimuth + OPENING_SHOT.turnDegrees * orbit,
+    OPENING_SHOT.startAzimuth + OPENING_SHOT.turnDegrees * progress,
   )
   const elevation = MathUtils.degToRad(
-    MathUtils.lerp(OPENING_SHOT.startElevation, OPENING_SHOT.orbitEndElevation, orbit)
-      + (90 - OPENING_SHOT.orbitEndElevation) * rise,
+    MathUtils.lerp(OPENING_SHOT.startElevation, OPENING_SHOT.endElevation, progress),
   )
   const distance = MathUtils.lerp(
-    MathUtils.lerp(OPENING_SHOT.startDistance, OPENING_SHOT.orbitEndDistance, orbit),
-    OPENING_SHOT.overheadDistance,
-    rise,
+    OPENING_SHOT.startDistance,
+    OPENING_SHOT.endDistance,
+    progress,
   ) * Math.max(1, 1 / camera.aspect)
 
   if (elapsed >= OPENING_DURATION) {

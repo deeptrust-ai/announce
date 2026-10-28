@@ -27,7 +27,8 @@ Treat this as the user's creative brief, not evidence of a public acquisition.
 
 Two assets have been created: the DeepTrust logo and a hub network based on the
 user's supplied image. Both are loaded into the same Three.js floor scene.
-The first logo/camera transition is implemented: an orbit, then an overhead rise.
+The first logo/camera transition is implemented: one continuous rising spiral
+from near the floor to an overhead view.
 Logo travel, hub joining, and node rearrangement have not been implemented.
 The travel route, joining timing, arrival point, and final logo placement have
 not been decided.
@@ -57,14 +58,15 @@ Current opening shot choices:
 - Start at a -180-degree azimuth and a grazing 4-degree elevation, focused on the
   flat logo. This puts the camera about 6 cm above the floor on landscape screens.
   The user requested this low start after seeing the first 35-degree version.
-- Turn 180 degrees over 6 seconds while rising to 65-degree elevation.
-- Rise for 6 more seconds to an exact overhead position, looking down 90 degrees.
+- Turn 180 degrees while rising from 4 to 90 degrees over one continuous
+  12-second motion. Azimuth, elevation, and distance share the same progress.
 - End the turn at azimuth 0. The logo finishes aligned with the screen, with
   horizontal bars and no 45-degree tilt. The orientation remains continuous
-  through the overhead rise; there is no separate roll correction or snap.
-- Camera distances: 0.68 meters initially, 0.92 after the orbit, 1.2 overhead.
+  through the spiral; there is no separate roll correction or snap.
+- Camera distance rises continuously from 0.68 meters initially to 1.2 overhead.
 - Increase distance for portrait viewports to keep the logo in frame.
-- Ease each phase, play once, and hold the final view. Refresh to replay.
+- Ease only at the overall start and finish. There is no stage boundary or
+  midpoint stop. Play once and hold the final view. Refresh to replay.
 - Keep a stable camera up vector at the overhead pole and focus on the logo.
 - Reduced motion skips to the final shot. Hidden tabs pause elapsed time.
 
