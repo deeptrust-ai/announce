@@ -156,9 +156,9 @@ The camera reaches its wide view over the first four seconds of the connection
 scene, then holds for 0.4 seconds. It begins a 5.6-second move closer while
 DeepTrust is still approaching. Framing measures the moving hub, DeepTrust card,
 and logo each frame, keeping the pair together as the gap shrinks. It finishes
-square overhead in an oversized crop. The hub center sits beyond the lower-right
-corner so only its northwest portion is visible, leaving the left-hand type
-clear. Portrait uses the same crop with adjusted horizontal coverage. The old
+square overhead in an oversized crop. The hub center sits inside the lower-right
+area so more of the sphere is visible, with its right and bottom edges allowed
+to overflow. Portrait uses the same composition with adjusted coverage. The old
 logo position and pulse plane are excluded; resize uses the current layout.
 During the approach, the seven original nodes slide clockwise into seven
 evenly spaced slots, leaving the top slot for DeepTrust. The final eight-node
