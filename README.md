@@ -155,7 +155,7 @@ scene, then holds for 0.4 seconds. It begins a 5.6-second move closer while
 DeepTrust is still approaching. Framing measures the moving hub, DeepTrust card,
 and logo each frame, keeping the pair together as the gap shrinks. It finishes
 square overhead with the hub centered at 73% of the screen width. Framing
-limits the layout to 68% of viewport height and 42% of viewport width, giving
+limits the layout to 74% of viewport height and 46% of viewport width, giving
 the left-hand typography room. Portrait places the hub lower at 62% height. The old
 logo position and pulse plane are excluded; resize uses the current layout.
 During the approach, the seven original nodes slide clockwise into seven

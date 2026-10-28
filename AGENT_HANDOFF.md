@@ -260,7 +260,7 @@ settled fit, which would become stale during overlapping motion. The target
 tracks the closing gap while the camera eases away from the wide pose. It ends
 square overhead, north up, with DeepTrust at the top. The hub is now smaller
 and shifted right to leave room for the typography: center X is 73% of the
-viewport, height coverage is capped at 68%, and width coverage at 42%. Fitting
+viewport, height coverage is capped at 74%, and width coverage at 46%. Fitting
 accounts for the off-center position with an edge margin, so nodes stay inside
 the frame. Camera position and gaze shift together, keeping the view overhead.
 Portrait moves the hub lower to 62% screen height while the copy sits upper left. Replay, resize, direct seeks, timeline duration, and
