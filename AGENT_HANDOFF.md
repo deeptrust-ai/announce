@@ -29,10 +29,11 @@ Do not restore them until the user requests the next part.
 The card has a thin extruded rounded body. Its face uses the authentic NFC-card
 artwork as a texture, with the baked-in K cleared at runtime inside its existing
 circuit frame. The source PNG is unchanged. The center starts empty. The actual
-DeepTrust SVG paths (without the navy background) become mask/time textures.
-A bright engraving front cuts their eight bars left to right, top to bottom.
-The finished mark is a recessed-looking surface treatment, not raised geometry.
-The KEYCARD.AI label is also masked during the etch, shockwave, lift, and spin.
+DeepTrust SVG bar bounds become eight fine 1.8-unit centerline strokes in
+mask/time textures. A bright drawing front traces them left to right, top to
+bottom. The finished mark is flat pearl-colored linework, with no relief, bevel,
+bump, or edge shading, echoing the Keycard K's circuit-line treatment.
+The KEYCARD.AI label is masked during the etch, shockwave, lift, and most of the spin.
 Circuit tracks remain visible throughout.
 
 Timeline: 0.8-second blank hold, 4.8-second engraving, 0.35-second cooling pause,
@@ -40,8 +41,9 @@ Timeline: 0.8-second blank hold, 4.8-second engraving, 0.35-second cooling pause
 0.9-second hero settle. The card floats clear of the floor while standing up.
 The camera tracks its center and eases from the elevated floor view into a
 front-facing portrait-card hero. Five short shutter samples create a subtle
-blur trail only during the rapid spin. The hero retains the etched DeepTrust
-mark; the KEYCARD.AI label returns as the spin finishes. At second 13.55 all
+blur trail only during the rapid spin. While the card faces away during its
+last revolution, its face switches to the untouched original NFC artwork. The
+finale shows the original Keycard K and KEYCARD.AI label, not the DeepTrust mark. At second 13.55 all
 motion stops. No later text or content transition follows.
 
 Controls: Previous / Restart / Next, with the current stage label and 1–6 index.

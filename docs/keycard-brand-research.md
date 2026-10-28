@@ -85,28 +85,30 @@ Keycard entry point.
 
 The next corrections narrow implementation to the opening etch and hero reveal.
 The card starts lying flat on a dark grid with its chip center empty. DeepTrust's
-actual mark etches into that center. After the etching completes, a single
+eight-bar mark draws into that center as thin, flat circuit-style lines. After the etching completes, a single
 shockwave expands through the floor. The card then lifts upright, spins rapidly,
 and settles into its front-facing hero view. The card retains the
 NFC artwork's circuit tracks. The K is masked in the runtime material,
 leaving the original PNG unchanged. The KEYCARD.AI label is hidden until the
-hero settles. Only the scene and playback controls are visible. The earlier
+last turn reveals the original Keycard artwork. Only the scene and playback
+controls are visible. The earlier
 scrolling announcement and content blocks are deferred until later transitions.
 
 ## Implementation and review status
 
 `keycard/main.ts` mounts `KeycardPage.svelte`, which owns the independent
 `keycard-scene.ts`. This scene uses a rounded thin card body, the local NFC texture,
-the actual DeepTrust SVG paths as engraving maps, and a world-space grid shader.
+the actual DeepTrust SVG bar bounds as thin centerline maps, and a world-space grid shader.
 An elevated camera initially shows the card resting on the floor, then tracks
 its center as it lifts and settles into the hero view. The eight logo
-bars engrave left to right, top to bottom. An illuminated cutting front cools to
-a recessed-looking metal treatment. The shockwave distorts only the floor.
+lines draw left to right, top to bottom, with an illuminated front and a flat
+pearlescent finish. There is no relief, bevel, or simulated edge shading. The shockwave distorts only the floor.
 
 The sequence is: 0.8-second hold, 4.8-second engraving, 0.35-second cooling pause,
 1.7-second shockwave, 2-second upright lift, 3-second six-turn spin, and
 0.9-second hero settle. A short shutter trail approximates motion blur during
-the spin. The etched DeepTrust mark remains in the finished hero. Previous,
+the spin. The face changes while pointing away in the last revolution, so the
+finished hero reveals the original Keycard K and KEYCARD.AI label. Previous,
 Restart, and Next controls cover all six stages; R restarts the current stage.
 Reduced motion shows the finished hero without animation; hidden tabs pause.
 DPR is capped at two; animation stops after the hero settles.

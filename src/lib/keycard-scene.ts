@@ -73,19 +73,20 @@ function roundedCard() {
   return shape
 }
 
-/** Two maps preserve the actual rounded SVG paths, without its navy background.
- * The time map gives each bar a left-to-right engraving pass, top to bottom. */
+/** Translate the actual mark's eight bars into fine circuit-style centerlines.
+ * The time map draws each line left to right, top to bottom. */
 function createEtchMaps(source: string) {
   const svg = new DOMParser().parseFromString(source, 'image/svg+xml')
   const paths = [...svg.querySelectorAll('path')].map((element) => {
     const length = element.getTotalLength()
-    let left = Infinity, top = Infinity, right = -Infinity
+    let left = Infinity, top = Infinity, right = -Infinity, bottom = -Infinity
     for (let index = 0; index <= 256; index++) {
       const point = element.getPointAtLength(length * index / 256)
       left = Math.min(left, point.x); right = Math.max(right, point.x)
       top = Math.min(top, point.y)
+      bottom = Math.max(bottom, point.y)
     }
-    return { path: new Path2D(element.getAttribute('d')!), left, right, top }
+    return { left, right, top, bottom }
   }).sort((a, b) => a.top - b.top || a.left - b.left)
   if (!paths.length) throw new Error('The DeepTrust SVG has no paths.')
 
@@ -93,17 +94,26 @@ function createEtchMaps(source: string) {
   mask.width = mask.height = timing.width = timing.height = 512
   const maskContext = mask.getContext('2d')!, timeContext = timing.getContext('2d')!
   maskContext.scale(8, 8); timeContext.scale(8, 8)
-  maskContext.fillStyle = 'white'
+  const lineWidth = 1.8
+  for (const context of [maskContext, timeContext]) {
+    context.lineWidth = lineWidth
+    context.lineCap = 'round'
+  }
+  maskContext.strokeStyle = 'white'
   timeContext.fillStyle = 'white'; timeContext.fillRect(0, 0, 64, 64)
-  paths.forEach(({ path, left, right }, index) => {
-    maskContext.fill(path)
+  paths.forEach(({ left, right, top, bottom }, index) => {
+    const path = new Path2D()
+    const center = (top + bottom) / 2
+    path.moveTo(left + lineWidth / 2, center)
+    path.lineTo(right - lineWidth / 2, center)
+    maskContext.stroke(path)
     const gradient = timeContext.createLinearGradient(left, 0, right, 0)
     // Avoid exact zero/one to leave a clean blank start and completed last frame.
     const start = Math.round((0.015 + index / paths.length * 0.97) * 255)
     const end = Math.round((0.015 + (index + 0.94) / paths.length * 0.97) * 255)
     gradient.addColorStop(0, `rgb(${start},${start},${start})`)
     gradient.addColorStop(1, `rgb(${end},${end},${end})`)
-    timeContext.fillStyle = gradient; timeContext.fill(path)
+    timeContext.strokeStyle = gradient; timeContext.stroke(path)
   })
   return { mask: new CanvasTexture(mask), timing: new CanvasTexture(timing) }
 }
@@ -123,7 +133,7 @@ const cardFragment = /* glsl */`
   uniform sampler2D uMask;
   uniform sampler2D uTiming;
   uniform float uEtch;
-  uniform float uLabel;
+  uniform float uOriginal;
   uniform float uOpacity;
   varying vec2 vUv;
   float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
@@ -137,11 +147,11 @@ const cardFragment = /* glsl */`
     vec3 unmarkedMetal = texture2D(uCard, vec2(.5, 1. - 215. / 792.)).rgb;
     color = mix(color, unmarkedMetal + grain, blank);
 
-    // The website label is absent during the DeepTrust etch; return it at the hero.
+    // The website label is absent on the DeepTrust face.
     vec2 labelBounds = abs(vUv - vec2(.5, .08)) - vec2(.25, .055);
     float label = 1. - smoothstep(-.002, .002, max(labelBounds.x, labelBounds.y));
     vec3 blankLabel = texture2D(uCard, vec2(.5, .16)).rgb;
-    color = mix(color, blankLabel + grain, label * (1. - uLabel));
+    color = mix(color, blankLabel + grain, label);
 
     // The mark is in the face's material, not a raised or floating logo mesh.
     vec2 logoUv = (vUv - center) / vec2(1.06 / 2.52, 1.06 / 3.96) + .5;
@@ -152,13 +162,12 @@ const cardFragment = /* glsl */`
     cut = mix(cut, mask, step(1., uEtch));
     float head = exp(-pow((uEtch - arrival - .005) / .006, 2.)) * mask;
     head *= step(.001, uEtch) * (1. - step(1., uEtch));
-    vec2 texel = vec2(1. / 512.);
-    float upper = texture2D(uMask, logoUv + vec2(0., texel.y)).a;
-    float lower = texture2D(uMask, logoUv - vec2(0., texel.y)).a;
-    float bevel = clamp(lower - upper, -1., 1.);
-    vec3 engraving = vec3(.27, .32, .35) + bevel * .22;
-    color = mix(color, engraving + grain, cut * .96);
+    // Flat pearlescent linework: no relief, bevel, bump, or edge shading.
+    vec3 lineColor = mix(vec3(.55, .64, .67), vec3(.68, .57, .68), logoUv.x);
+    color = mix(color, lineColor, cut);
     color += vec3(.5, .85, 1.) * head * 2.;
+    // The final rotation reveals the untouched original K and KEYCARD.AI label.
+    color = mix(color, texture2D(uCard, vUv).rgb, uOriginal);
     gl_FragColor = vec4(color, uOpacity);
     #include <tonemapping_fragment>
     #include <colorspace_fragment>
@@ -237,7 +246,7 @@ export async function createKeycardScene(canvas: HTMLCanvasElement, signal: Abor
   const faceGeometry = new PlaneGeometry(WIDTH, HEIGHT)
   const faceMaterial = new ShaderMaterial({
     vertexShader, fragmentShader: cardFragment,
-    uniforms: { uCard: { value: cardTexture }, uMask: { value: maps.mask }, uTiming: { value: maps.timing }, uEtch: { value: 0 }, uLabel: { value: 0 }, uOpacity: { value: 1 } },
+    uniforms: { uCard: { value: cardTexture }, uMask: { value: maps.mask }, uTiming: { value: maps.timing }, uEtch: { value: 0 }, uOriginal: { value: 0 }, uOpacity: { value: 1 } },
   })
   const face = new Mesh(faceGeometry, faceMaterial)
   face.position.z = DEPTH / 2 + .001
@@ -283,20 +292,21 @@ export async function createKeycardScene(canvas: HTMLCanvasElement, signal: Abor
     faceMaterial.uniforms.uEtch!.value = Math.max(0, Math.min(1, (elapsed - KEYCARD_OPENING.pause) / KEYCARD_OPENING.etch))
     floorMaterial.uniforms.uPulse!.value = Math.max(0, Math.min(1, (elapsed - PULSE_START) / KEYCARD_OPENING.pulse))
     floorMaterial.uniforms.uPulseActive!.value = !preference.matches && elapsed > PULSE_START && elapsed < LIFT_START ? 1 : 0
-    faceMaterial.uniforms.uLabel!.value = ease((elapsed - HERO_START) / KEYCARD_OPENING.hero)
+    const spinProgress = clamp((elapsed - SPIN_START) / KEYCARD_OPENING.spin)
+    const turns = ease(spinProgress) * KEYCARD_OPENING.turns
+    // Swap while the face points away during the last revolution, before it lands.
+    faceMaterial.uniforms.uOriginal!.value = ease((turns - (KEYCARD_OPENING.turns - .7)) / .3)
     applyCardPose(card, elapsed)
     const lift = ease((elapsed - LIFT_START) / KEYCARD_OPENING.lift)
     target.copy(card.position)
     camera.position.copy(floorDirection).multiplyScalar(floorDistance).lerp(heroOffset, lift).add(target)
     camera.lookAt(target)
-    const spinProgress = clamp((elapsed - SPIN_START) / KEYCARD_OPENING.spin)
     const blur = elapsed >= SPIN_START && elapsed <= HERO_START ? Math.pow(Math.sin(spinProgress * Math.PI), 2) : 0
     trails.forEach(({ root, material, delay }, index) => {
       root.visible = blur > .001
       if (!root.visible) return
       applyCardPose(root, Math.max(SPIN_START, elapsed - delay))
       material.uniforms.uEtch!.value = faceMaterial.uniforms.uEtch!.value
-      material.uniforms.uLabel!.value = faceMaterial.uniforms.uLabel!.value
       material.uniforms.uOpacity!.value = blur * .055 * (1 - index / 6)
     })
     const stage = KEYCARD_STAGES.reduce<number>((index, candidate, next) => elapsed >= candidate.start ? next : index, 0)
