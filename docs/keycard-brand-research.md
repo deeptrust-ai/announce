@@ -83,7 +83,8 @@ belongs to Doppel. Keycard must use its credential objects and layered content
 blocks instead. No hub, orbiting nodes, or invisible sphere is mounted by the
 Keycard entry point.
 
-The next corrections narrow implementation to the opening etch and hero reveal.
+The implementation now includes the opening etch, spinning hero, and final
+editorial acquisition announcement.
 The card starts lying flat on a dark grid with its chip center empty. DeepTrust's
 eight-block mark is etched into that center using the original solid SVG paths,
 including their rounded corners. The paired-line experiment was rejected. The
@@ -95,8 +96,9 @@ NFC artwork's circuit tracks. The K is masked in the runtime material,
 leaving the original PNG unchanged. The front KEYCARD.AI label is hidden.
 A separate reverse face always carries the original Keycard K and KEYCARD.AI
 artwork, visible whenever that side turns toward the camera. Only the scene and playback
-controls are visible. The earlier
-scrolling announcement and content blocks are deferred until later transitions.
+controls are visible during the opening. After the hero settles, the editorial
+announcement reveals on the left, with DeepTrust, the typed joining phrase,
+Keycard.ai, and a press-release link. Scrolling content blocks remain deferred.
 
 ## Implementation and review status
 
@@ -120,9 +122,15 @@ sharp canvas rendering. Accumulation resets every frame, including after replay
 or a stage jump. Blur-buffer resolution is capped to bound its GPU cost. The front and back keep their respective artwork
 throughout. The final half turn leaves the original Keycard reverse facing
 the camera. Previous,
-Restart, and Next controls cover all six stages; R restarts the current stage.
-Reduced motion shows the finished hero without animation; hidden tabs pause.
-DPR is capped at two; animation stops after the hero settles.
+Restart, and Next controls cover all seven stages; R restarts the current stage.
+The seventh stage starts after the hero
+settles, sharing the Doppel announcement's staged timing through `announcement.ts`.
+The original wordmarks carry the announcement; the Keycard wordmark has a small
+.ai suffix. The transparent outlined press-release CTA reveals last and opens
+`https://deeptrust.ai/press-release`. The card eases right to leave room for the
+left-aligned copy, or above the copy on a narrow portrait screen, following the user's correction. Reduced motion
+shows the final hero and complete announcement; hidden tabs pause. DPR is capped
+at two; animation stops when the final CTA finishes at 17.35 seconds.
 The older content-block direction remains a reference for later transitions.
 
 Research included the official site, brand assets, product documentation, launch

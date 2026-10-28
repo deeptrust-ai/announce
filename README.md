@@ -9,13 +9,15 @@ A minimal Svelte + TypeScript + Vite app with a full-screen Three.js scene.
   original solid DeepTrust logo etching from an off-screen blue laser, and emits one floor shockwave. It then lifts upright,
   spins six and a half times with shutter-sampled motion blur, and holds on the Keycard hero.
   Its back always carries the original Keycard K and KEYCARD.AI artwork,
-  and faces the camera in the finale. Announcement copy and
-  content blocks are deferred.
+  and faces the camera in the finale. A left-aligned overlay then reveals
+  “DeepTrust is now a part of Keycard.ai” and the press-release link.
+  Narrow screens place the announcement beneath the card.
+  Content blocks remain deferred.
 
 Use `http://localhost:5173/keycard/` on the existing dev server.
 Bottom-right Previous / Restart / Next controls step through `floor`, `etch`,
-`pulse`, `lift`, `spin`, and `hero`. R restarts the current stage.
-Shortcuts: `?start=etch`, `?start=spin`, `?start=hero`, `?start=complete`.
+`pulse`, `lift`, `spin`, `hero`, and `announcement`. R restarts the current stage.
+Shortcuts: `?start=etch`, `?start=spin`, `?start=hero`, `?start=announcement`, `?start=complete`.
 Doppel retains its existing stage IDs. Vite has separate HTML build entries for
 both pages. No tests, build, app browser verification, push, or deployment were
 run for this version, following the user's workflow.
@@ -64,8 +66,8 @@ The production build is written to `dist/`. Serve that directory with a static h
 - `src/lib/Scene.svelte`: editorial overlay, compact controls, and canvas lifecycle.
 - `src/App.svelte`: original Doppel page composition.
 - `keycard/main.ts`: independent Keycard entry point.
-- `src/lib/KeycardPage.svelte`: isolated full-screen Keycard canvas and lifecycle.
-- `src/lib/keycard-scene.ts`: flat credential, SVG etching, grid shockwave, lift/spin, and hero hold.
+- `src/lib/KeycardPage.svelte`: Keycard canvas lifecycle, editorial announcement, and playback controls.
+- `src/lib/keycard-scene.ts`: flat credential, SVG etching, grid shockwave, lift/spin, hero framing, and announcement timing.
 - `src/lib/keycard-laser.ts`: glowing off-screen beam synchronized to each engraving stroke.
 - `src/lib/keycard-motion-blur.ts`: temporal shutter sampling during the spin, with a sharp final hold.
 - `src/app.css`: full-screen layout.

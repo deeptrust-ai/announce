@@ -20,8 +20,9 @@ import {
 } from 'three'
 import { createKeycardLaser } from './keycard-laser'
 import { createKeycardMotionBlur } from './keycard-motion-blur'
+import { ANNOUNCEMENT_DURATION } from './announcement'
 
-/** The opening etch and hero reveal stop before any announcement copy. */
+/** The card story resolves before the editorial announcement appears. */
 export const KEYCARD_OPENING = {
   pause: 0.8,
   etch: 4.8,
@@ -37,7 +38,8 @@ const PULSE_START = ETCH_END + KEYCARD_OPENING.cool
 const LIFT_START = PULSE_START + KEYCARD_OPENING.pulse
 const SPIN_START = LIFT_START + KEYCARD_OPENING.lift
 const HERO_START = SPIN_START + KEYCARD_OPENING.spin
-const END = HERO_START + KEYCARD_OPENING.hero
+const ANNOUNCEMENT_START = HERO_START + KEYCARD_OPENING.hero
+const END = ANNOUNCEMENT_START + ANNOUNCEMENT_DURATION
 export const KEYCARD_STAGES = [
   { id: 'floor', name: 'Card on grid', start: 0 },
   { id: 'etch', name: 'DeepTrust etching', start: KEYCARD_OPENING.pause },
@@ -45,6 +47,7 @@ export const KEYCARD_STAGES = [
   { id: 'lift', name: 'Lift upright', start: LIFT_START },
   { id: 'spin', name: 'Rapid spin', start: SPIN_START },
   { id: 'hero', name: 'Keycard hero', start: HERO_START },
+  { id: 'announcement', name: 'Acquisition announcement', start: ANNOUNCEMENT_START },
 ] as const
 const clamp = (value: number) => Math.max(0, Math.min(1, value))
 function ease(value: number) { const t = clamp(value); return t * t * t * (t * (t * 6 - 15) + 10) }
@@ -202,7 +205,12 @@ const floorFragment = /* glsl */`
   }
 `
 
-export async function createKeycardScene(canvas: HTMLCanvasElement, signal: AbortSignal, onStage: (index: number) => void) {
+export async function createKeycardScene(
+  canvas: HTMLCanvasElement,
+  signal: AbortSignal,
+  onStage: (index: number) => void,
+  onAnnouncement: (progress: number) => void,
+) {
   const assets = `${import.meta.env.BASE_URL}branding/`
   // Load the SVG before creating any GPU resources, so failures cannot leak a renderer.
   const response = await fetch(`${assets}logo-mark.svg`, { signal })
@@ -279,6 +287,9 @@ export async function createKeycardScene(canvas: HTMLCanvasElement, signal: Abor
   const target = new Vector3()
   const heroOffset = new Vector3()
   const laserHit = new Vector3()
+  const framingOffset = new Vector3()
+  const cameraUp = new Vector3()
+  const cameraRight = new Vector3()
   const start = new URLSearchParams(window.location.search).get('start')
   elapsed = start === 'complete' ? END : KEYCARD_STAGES.find((stage) => stage.id === start)?.start ?? 0
   if (preference.matches) elapsed = END
@@ -290,8 +301,24 @@ export async function createKeycardScene(canvas: HTMLCanvasElement, signal: Abor
     const spinProgress = clamp((elapsed - SPIN_START) / KEYCARD_OPENING.spin)
     applyCardPose(card, elapsed)
     const lift = ease((elapsed - LIFT_START) / KEYCARD_OPENING.lift)
+    const layout = ease((elapsed - ANNOUNCEMENT_START) / 1.2)
+    const stacked = camera.aspect <= .85
+    const tangent = Math.tan(camera.fov * Math.PI / 360)
+    const editorialDistance = Math.max(
+      HEIGHT / (2 * tangent * (stacked ? .42 : .66)),
+      WIDTH / (2 * tangent * camera.aspect * (stacked ? .65 : .38)),
+    ) + .2
+    heroOffset.z = heroDistance + (editorialDistance - heroDistance) * layout
     target.copy(card.position)
     camera.position.copy(floorDirection).multiplyScalar(floorDistance).lerp(heroOffset, lift).add(target)
+    camera.lookAt(target)
+    // Shift the optical center without rotating the card away from its hero pose.
+    const halfHeight = camera.position.distanceTo(target) * tangent
+    cameraRight.set(1, 0, 0).applyQuaternion(camera.quaternion)
+    cameraUp.set(0, 1, 0).applyQuaternion(camera.quaternion)
+    framingOffset.copy(cameraRight).multiplyScalar((stacked ? 0 : -.46) * halfHeight * camera.aspect * layout)
+      .addScaledVector(cameraUp, (stacked ? -.48 : 0) * halfHeight * layout)
+    camera.position.add(framingOffset); target.add(framingOffset)
     camera.lookAt(target)
     camera.updateMatrixWorld()
     card.updateMatrixWorld(true)
@@ -313,6 +340,7 @@ export async function createKeycardScene(canvas: HTMLCanvasElement, signal: Abor
     const blur = elapsed >= SPIN_START && elapsed <= HERO_START ? Math.pow(Math.sin(spinProgress * Math.PI), 2) : 0
     const stage = KEYCARD_STAGES.reduce<number>((index, candidate, next) => elapsed >= candidate.start ? next : index, 0)
     if (stage !== reportedStage) { reportedStage = stage; onStage(stage) }
+    onAnnouncement(clamp((elapsed - ANNOUNCEMENT_START) / ANNOUNCEMENT_DURATION))
     if (blur > .01 && !preference.matches) {
       // Integrate the complete two-sided card over a short exposure.
       motionBlur.render(elapsed, blur / 30, SPIN_START, (time) => {

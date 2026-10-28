@@ -22,9 +22,9 @@ hub, GLBs, or sphere code. `vite.config.ts` keeps both HTML build inputs.
 
 The user is building the Keycard story one transition at a time.
 `KeycardPage.svelte` mounts the independent `keycard-scene.ts` Three.js scene.
-Only the card, floor, and compact bottom-right playback controls are visible.
-The earlier announcement copy, header/footer, content blocks, and CTA are deferred.
-Do not restore them until the user requests the next part.
+The card/floor opening now leads into a Swiss-style editorial announcement
+overlay after the Keycard hero settles. Header/footer and scrolling content
+blocks remain deferred. Compact bottom-right playback controls stay visible.
 
 The card has a thin extruded rounded body. Its face uses the authentic NFC-card
 artwork as a texture, with the baked-in K cleared at runtime inside its existing
@@ -59,15 +59,23 @@ the long edge and 1.5 DPR. Each frame starts a fresh running average, so replay
 and stage jumps cannot retain trails. The static floor stays sharp. The final
 hero bypasses the blur at the normal canvas resolution. The front retains
 DeepTrust and the back retains Keycard throughout; there is no artwork swap.
-The extra half turn lands with the original Keycard reverse facing the camera. At second 13.55 all
-motion stops. No later text or content transition follows.
+The extra half turn lands with the original Keycard reverse facing the camera.
+At second 13.55, a seventh stage reveals “DeepTrust is now a part of Keycard.ai”
+using the original DeepTrust and Keycard wordmarks, with a small .ai suffix.
+This shares the original Doppel `announcement.ts` timing: DeepTrust fades in,
+the smaller joining phrase types, Keycard.ai fades in, and the outlined
+“Read the Press Release →” link appears last. It points to
+`https://deeptrust.ai/press-release`, opens a new tab, and cannot receive focus
+or clicks until fully revealed. The camera eases right and slightly wider over
+1.2 seconds to leave the left column clear. In portrait the card occupies the upper half of the screen, with the
+announcement and CTA beneath it in the lower half. Everything holds after 17.35 seconds; no content blocks follow.
 
-Controls: Previous / Restart / Next, with the current stage label and 1–6 index.
-Stages are `floor`, `etch`, `pulse`, `lift`, `spin`, and `hero`. R restarts the
+Controls: Previous / Restart / Next, with the current stage label and 1–7 index.
+Stages are `floor`, `etch`, `pulse`, `lift`, `spin`, `hero`, and `announcement`. R restarts the
 current stage. Query shortcuts use `/keycard/?start=spin`, etc.; `?start=complete`
 shows the final state. Earlier announcement stage IDs no longer apply. Playback
 updates the query string without reloading. The clock pauses in hidden tabs;
-reduced motion displays the finished hero without etching, pulse, lift, or spin.
+reduced motion displays the finished hero and announcement without animation.
 Frames stop at the end; resize still refreshes the static view. Shadows stay
 disabled. GPU resources, observers, and listeners are disposed on unmount.
 
