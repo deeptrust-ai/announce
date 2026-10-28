@@ -1,10 +1,14 @@
 import { Box3, MathUtils, Object3D, PerspectiveCamera, Vector3 } from 'three'
 
-export const FINAL_HUB_SHOT = { durationSeconds: 3, frameCoverage: 0.84 } as const
+export const FINAL_HUB_SHOT = {
+  wideHoldSeconds: 0.4,
+  durationSeconds: 6,
+  frameCoverage: 0.84,
+} as const
 
 export type FinalHubView = { position: Vector3; target: Vector3 }
 
-/** Measure the settled eight-node layout, excluding the old logo origin and pulse. */
+/** Fit the live layout as the gap closes, excluding the old logo origin and pulse. */
 export function fitFinalHubView(
   camera: PerspectiveCamera, hub: Object3D, cardBody: Object3D, logo: Object3D,
 ): FinalHubView {

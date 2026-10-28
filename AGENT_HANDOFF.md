@@ -107,12 +107,13 @@ The shared timeline now overlaps the effects:
 - Arrival pulse: starts 3 s, lasts 0.8 s, ends 3.8 s.
 - South connection: starts 3.8 s, lasts 6 s, ends 9.8 s.
 - Hub attraction: starts 5.8 s, lasts 8 s, ends 13.8 s.
-- Final hub view: starts 13.8 s, lasts 3 s, ends 16.8 s.
+- Final hub view: starts 8.2 s, lasts 6 s, ends 14.2 s.
+- Grid release: starts 14.2 s, lasts 1.2 s, ends 15.4 s.
 
 The user explicitly superseded the earlier sequential timing and the requirement
 to close the border before filling. Camera, outline, and fill all complete when
 the arrival impact begins. Offsets and durations are derived from shared values.
-The left-side preview menu lists all seven effects. Clicking resets and seeks to
+The left-side preview menu lists all eight effects. Clicking resets and seeks to
 that entry, with correct partial camera/card state, then plays forward without
 a reload or model refetch. Camera rise replays all. The latest started stage is
 highlighted as playback advances. Native buttons provide keyboard activation.
@@ -126,8 +127,9 @@ its first frame after the pulse has ended. Refresh to replay. The default URL
 starts the whole sequence. `?start=approach` previews attraction with the line
 and camera already two seconds into the connection scene. Reduced motion shows
 the completed eight-node hub in its final close framing, without animated
-impact or lensing. `?start=framing` begins the final camera move after the
-card and existing nodes have settled.
+impact or lensing. `?start=framing` begins the camera catch-up while the
+card and existing nodes are still moving. `?start=release` begins the outward
+grid pulse with the eight-node layout and final camera already complete.
 
 `createScene` returns a controller with `playFrom(transitionId)` and `dispose()`.
 Replays reset the logo's original pose/color, border draw ranges, body reveal,
@@ -240,18 +242,27 @@ and disposed with the loaded hub. Replay restores all original node, link, and
 port transforms and hides the eighth port. The Blender source and GLB are not
 modified; all redistribution happens in the runtime scene.
 
-After the full eight-node layout settles, a separate final camera transition
-runs from second 13.8 to 16.8. This was missing from the earlier implementation;
-the wide connection view previously held forever. `final-hub-camera.ts` now
-measures the completed hub plus DeepTrust body/logo, excluding the old logo
-origin and pulse plane. It calculates an overhead fit at the existing 40-degree
-lens with 84% viewport coverage in the limiting dimension, then eases from the
-wide view into that centered, closer pose over three seconds. The camera ends
-square overhead, north up, DeepTrust at the top. Fit is cached per replay/resize
-and recomputed from settled geometry. The shared timeline, render duration,
-preview menu, direct seeks (`?start=framing`), and reduced-motion endpoint all
-include this stage. No tests, builds, browser checks, or proof screenshots were
-run for this iteration, following the user's workflow.
+The camera return overlaps the attraction rather than waiting for it to finish.
+`CONNECTION_SHOT.riseSeconds` gives a four-second pullback from second 3.8 to
+7.8. It reaches the wide composition while DeepTrust is still near its original
+position, then holds for 0.4 seconds. From second 8.2 to 14.2, it catches up and
+moves closer over six seconds, overlapping attraction (which ends at 13.8).
+`final-hub-camera.ts` measures the live hub and DeepTrust body/logo every frame,
+excluding the old logo origin and pulse plane. This replaces the former cached
+settled fit, which would become stale during overlapping motion. The target
+tracks the closing gap while the camera eases away from the wide pose. It ends
+square overhead, north up, with DeepTrust at the top and 84% viewport coverage
+in the limiting dimension. Replay, resize, direct seeks, timeline duration, and
+reduced motion all use the same absolute time and current geometry.
+
+After both the camera and attraction finish, grid lensing releases from second
+14.2 to 15.4. `GRID_LENS_RELEASE.durationSeconds` controls the 1.2-second pulse.
+The annular deflection moves outward from each lens center while its strength
+smoothly fades to exactly zero. The final floor grid is straight and stays that
+way on resize. No bright ring or model distortion is added. The new Grid release
+preview stage seeks to this pulse; replay resets the release uniform. This
+supersedes the earlier indefinitely sustained lensing and sequential camera
+return. No tests, builds, browser checks, or proof screenshots were run.
 
 The user clarified that gravitational lensing must affect ONLY the grid. The
 first implementation used a full-scene postprocessing pass, which also warped
@@ -271,7 +282,7 @@ hub plate bounds can retain the pre-placement position near the origin and send
 the wire north through the logo. The world orientation itself is correct:
 north is screen up / -Z, south is screen down / +Z, east is +X, west is -X.
 
-Rendering continues during the 16.8-second sequence including the south connection, then returns to rendering on
+Rendering continues during the 15.4-second sequence including the south connection, then returns to rendering on
 demand. Pixel density is capped at 2. Cleanup disposes geometry, materials,
 shadow maps, and postprocessing resources. Both GLBs must load before the shot
 starts; asynchronous loading handles unmounts and loading errors.

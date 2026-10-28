@@ -2,6 +2,7 @@ import { Box3, MathUtils, PerspectiveCamera, Vector3 } from 'three'
 import { applyOpeningShot, OPENING_DURATION } from './opening-shot'
 
 export type ConnectionView = { target: Vector3; height: number }
+export const CONNECTION_SHOT = { riseSeconds: 4 } as const
 
 /** Fit both endpoints while lifting vertically above the logo's original position. */
 export function fitConnectionView(

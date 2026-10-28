@@ -53,7 +53,7 @@ export function createFloor() {
       diffuseColor.rgb = mix(diffuseColor.rgb, uFloorGridColor, grid * 0.32);`,
     )
   }
-  material.customProgramCacheKey = () => 'unlit-world-floor-grid-v4-grid-lensing'
+  material.customProgramCacheKey = () => 'unlit-world-floor-grid-v5-lens-release'
 
   const geometry = new PlaneGeometry(200, 200)
   const mesh = new Mesh(geometry, material)

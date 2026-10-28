@@ -28,13 +28,12 @@ import { CARD_CONSTRUCTION, createCardConstruction } from './card-construction'
 import { createArrivalEffect } from './arrival-effect'
 import { createFloor, GRID_CARD_RATIO } from './floor'
 import { createSouthConnection, SOUTH_CONNECTION } from './south-connection'
-import { applyConnectionView, fitConnectionView } from './connection-camera'
+import { applyConnectionView, fitConnectionView, CONNECTION_SHOT } from './connection-camera'
 import type { ConnectionView } from './connection-camera'
 import { createHubApproach } from './hub-approach'
 import { createHubExpansion } from './hub-expansion'
 import { applyFinalHubView, fitFinalHubView, FINAL_HUB_SHOT } from './final-hub-camera'
-import type { FinalHubView } from './final-hub-camera'
-import { APPROACH_START, ARRIVAL_START, CONNECTION_START, FINAL_HUB_START, SCENE_DURATION, TRANSITIONS, startingTransition, transitionAt } from './timeline'
+import { APPROACH_START, ARRIVAL_START, CONNECTION_START, FINAL_HUB_START, LENS_RELEASE_START, SCENE_DURATION, TRANSITIONS, startingTransition, transitionAt } from './timeline'
 import type { TransitionId } from './timeline'
 
 type SceneCallbacks = {
@@ -133,7 +132,6 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
   let connectionBounds: Box3 | undefined
   let approach: ReturnType<typeof createHubApproach> | undefined
   let expansion: ReturnType<typeof createHubExpansion> | undefined
-  let finalHubView: FinalHubView | undefined
   let reportedTransition: TransitionId | undefined
 
   function reportTransition() {
@@ -156,7 +154,6 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
     approach?.reset()
     expansion?.reset()
     floor.lensing.reset()
-    finalHubView = undefined
     renderer.shadowMap.needsUpdate = true
     reportTransition()
     requestRender()
@@ -188,13 +185,12 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
     if (connection?.update(elapsed - CONNECTION_START)) renderer.shadowMap.needsUpdate = true
     if (connectionView && elapsed >= CONNECTION_START) {
       applyConnectionView(camera, logoFocus, connectionView,
-        (elapsed - CONNECTION_START) / SOUTH_CONNECTION.durationSeconds)
+        (elapsed - CONNECTION_START) / CONNECTION_SHOT.riseSeconds)
     }
     if (elapsed >= FINAL_HUB_START && connectionView && card && hubModel && logoModel) {
-      if (!finalHubView) {
-        finalHubView = fitFinalHubView(camera, hubModel,
-          card.root.getObjectByName('DeepTrust_Card_Body')!, logoModel)
-      }
+      // Refit the moving card and hub each frame rather than caching an early pose.
+      const finalHubView = fitFinalHubView(camera, hubModel,
+        card.root.getObjectByName('DeepTrust_Card_Body')!, logoModel)
       applyFinalHubView(camera, connectionView.target, finalHubView,
         (elapsed - FINAL_HUB_START) / FINAL_HUB_SHOT.durationSeconds)
     }
@@ -202,7 +198,8 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
     fog.near = Math.max(10, camera.position.y * 1.8)
     fog.far = Math.max(30, camera.position.y * 4)
     if (card && hubModel) {
-      floor.lensing.update(elapsed - APPROACH_START, card.root, hubModel, motionPreference.matches)
+      floor.lensing.update(elapsed - APPROACH_START, elapsed - LENS_RELEASE_START,
+        card.root, hubModel, motionPreference.matches)
     }
     if (ready) reportTransition()
     composer.render()
@@ -231,7 +228,6 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
     composer.setSize(width, height)
     camera.aspect = width / height
     camera.updateProjectionMatrix()
-    finalHubView = undefined
     refreshConnectionView()
     requestRender()
   }
