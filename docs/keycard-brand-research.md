@@ -98,7 +98,7 @@ A separate reverse face always carries the original Keycard K and KEYCARD.AI
 artwork, visible whenever that side turns toward the camera. Only the scene and playback
 controls are visible during the opening. After the hero settles, the editorial
 announcement reveals on the left, with DeepTrust, the typed joining phrase,
-Keycard.ai, and a press-release link. Scrolling content blocks remain deferred.
+Keycard, and a press-release link. Scrolling content blocks remain deferred.
 
 ## Implementation and review status
 
@@ -139,10 +139,14 @@ the camera. Previous,
 Restart, and Next controls cover all seven stages; R restarts the current stage.
 The seventh stage starts after the hero
 settles, sharing the Doppel announcement's staged timing through `announcement.ts`.
-The original wordmarks carry the announcement; the Keycard wordmark has a small
-.ai suffix. The transparent outlined press-release CTA reveals last and opens
+The original wordmarks carry the announcement. The Keycard logo has no added
+.ai suffix, following the user's explicit brand correction. The transparent outlined press-release CTA reveals last and opens
 `https://deeptrust.ai/press-release`. The card eases right to leave room for the
-left-aligned copy, or above the copy on a narrow portrait screen, following the user's correction. Reduced motion
+left-aligned copy on desktop. On narrow screens, the copy is centered below
+the card and uses the full available width, clearing the inherited desktop
+grid span. The outlined CTA is wide, and playback uses three equal buttons
+along the bottom. Short portrait screens move a slightly smaller card upward
+to preserve room for the copy, CTA, and controls. Reduced motion
 shows the final hero and complete announcement; hidden tabs pause. DPR is capped
 at two; animation stops when the final CTA finishes at 14.17 seconds.
 The older content-block direction remains a reference for later transitions.

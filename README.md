@@ -14,8 +14,10 @@ A minimal Svelte + TypeScript + Vite app with a full-screen Three.js scene.
   overlapping a six-and-a-half-turn spin with shutter-sampled motion blur, and holds on the Keycard hero.
   Its back always carries the original Keycard K and KEYCARD.AI artwork,
   and faces the camera in the finale. A left-aligned overlay then reveals
-  “DeepTrust is now a part of Keycard.ai” and the press-release link.
-  Narrow screens place the announcement beneath the card.
+  “DeepTrust is now a part of Keycard” and the press-release link.
+  Narrow screens center the announcement beneath the card, with a wide CTA
+  and three equal playback buttons along the bottom. The official Keycard
+  wordmark has no added .ai suffix.
   Content blocks remain deferred.
 
 Use `http://localhost:5173/keycard/` on the existing dev server.

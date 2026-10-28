@@ -40,10 +40,10 @@
   <canvas bind:this={canvas} style:opacity={openingOpacity} role="img" aria-label="A moving side view fades in over a Keycard on a dark grid. A glowing blue laser etches the original DeepTrust mark while the camera cranes upward. The shockwave gives the card a small rattle and a brief orange-and-yellow launch flash, then it jumps and spins, finishing with the original Keycard artwork facing the camera." />
   <section class="editorial" style:--reveal={reveal.deeptrustOpacity} aria-label="Acquisition announcement" aria-hidden={!ready || announcementProgress === 0}>
     <div class="editorial-copy">
-      <h1 aria-label="DeepTrust is now a part of Keycard.ai">
+      <h1 aria-label="DeepTrust is now a part of Keycard">
         <img class="deeptrust-wordmark" src={`${assets}logo-full.svg`} width="173" height="28" alt="" />
         <span class="joining" aria-hidden="true"><span class="reserve">{ANNOUNCEMENT_TEXT}</span><span>{ANNOUNCEMENT_TEXT.slice(0, reveal.characters)}</span></span>
-        <span class="keycard-lockup" style:opacity={reveal.doppelOpacity} aria-hidden="true"><img src={`${assets}keycard/wordmark.svg`} width="599" height="158" alt="" /><span class="domain">.ai</span></span>
+        <span class="keycard-lockup" style:opacity={reveal.doppelOpacity} aria-hidden="true"><img src={`${assets}keycard/wordmark.svg`} width="599" height="158" alt="" /></span>
       </h1>
       <a class="press-release" href={pressRelease} target="_blank" rel="noopener noreferrer" style:opacity={reveal.pressReleaseOpacity} style:visibility={reveal.pressReleaseOpacity > 0 ? 'visible' : 'hidden'} style:pointer-events={reveal.pressReleaseOpacity === 1 ? 'auto' : 'none'} tabindex={reveal.pressReleaseOpacity === 1 ? 0 : -1}>Read the Press Release <span aria-hidden="true">→</span></a>
     </div>
@@ -70,31 +70,30 @@
   .joining { display: inline-grid; white-space: pre; color: #b8c8d2; }
   .joining span { grid-area: 1 / 1; }
   .reserve { visibility: hidden; }
-  .keycard-lockup { display: flex; align-items: center; gap: .15em; max-width: 100%; font-size: clamp(2rem, 4.3vw, 4rem); letter-spacing: -.055em; }
+  .keycard-lockup { display: block; max-width: 100%; }
   .keycard-lockup img { width: clamp(12rem, 23vw, 21rem); min-width: 0; }
-  .domain { flex-shrink: 0; }
   .press-release { display: inline-flex; align-items: center; justify-content: space-between; gap: 1.5rem; max-width: 100%; min-height: 3rem; margin-top: clamp(3rem, 7vh, 5rem); padding: .85rem 1.125rem; border: 1px solid #c5d6df88; background: transparent; color: #e1edf2; font: 400 .875rem 'Keycard Geist', Arial, sans-serif; text-decoration: none; }
   .press-release:hover { border-color: #c3e677; color: #c3e677; }
   .press-release:focus-visible { outline: 2px solid #c3e677; outline-offset: 4px; }
   @media (max-aspect-ratio: 17/20) {
-    .editorial { padding: max(1.5rem, env(safe-area-inset-top)) 1.5rem; background: linear-gradient(transparent 45%, #030b1073); }
-    .editorial-copy { position: absolute; left: 1.5rem; right: 1.5rem; top: 50%; }
-    h1 { gap: clamp(.8rem, 2vh, 1.25rem); font-size: 1.125rem; }
-    .deeptrust-wordmark { width: clamp(10rem, 48vw, 13rem); }
-    .keycard-lockup { font-size: 2rem; }
-    .keycard-lockup img { width: clamp(11rem, 52vw, 14rem); }
-    .press-release { margin-top: clamp(1.25rem, 3vh, 2rem); min-height: 2.75rem; padding: .7rem .9rem; font-size: .8125rem; }
+    .editorial { --mobile-gutter: clamp(1.25rem, 5vw, 2rem); display: flex; padding: 0; background: linear-gradient(transparent 45%, #030b1073); }
+    .editorial-copy { grid-column: auto; position: absolute; left: var(--mobile-gutter); right: var(--mobile-gutter); top: 50%; max-width: 30rem; margin-inline: auto; display: flex; flex-direction: column; align-items: center; text-align: center; }
+    h1 { width: 100%; justify-items: center; gap: clamp(.65rem, 1.7dvh, 1.05rem); font-size: clamp(1rem, 4vw, 1.3rem); }
+    .deeptrust-wordmark { width: clamp(10.5rem, 52vw, 15rem); max-width: 85%; }
+    .keycard-lockup { display: flex; justify-content: center; width: min(100%, 20rem); }
+    .keycard-lockup img { width: min(66vw, 16rem); }
+    .press-release { width: min(100%, 22rem); margin-top: clamp(1.25rem, 3dvh, 2rem); min-height: 3rem; padding: .8rem 1rem; font-size: .875rem; }
   }
   @media (max-height: 700px) and (max-aspect-ratio: 17/20) {
+    .editorial-copy { top: 43%; }
     h1 { gap: .8rem; }
-    .deeptrust-wordmark { width: 10rem; }
-    .keycard-lockup img { width: 11rem; }
+    .deeptrust-wordmark { width: 10.5rem; }
+    .keycard-lockup img { width: 12rem; }
     .press-release { margin-top: 1.25rem; }
   }
   @media (max-height: 600px) and (min-aspect-ratio: 17/20) {
     h1 { gap: .8rem; }
     .deeptrust-wordmark { width: 11rem; }
-    .keycard-lockup { font-size: 2rem; }
     .keycard-lockup img { width: 12rem; }
     .press-release { margin-top: 1.5rem; }
   }
@@ -108,4 +107,10 @@
   button:disabled { opacity: .3; cursor: default; }
   button:focus-visible { outline: 2px solid #c3e677; outline-offset: 3px; }
   @media (max-width: 480px) { .playback { padding: .7rem; } button { min-height: 2.75rem; } }
+  @media (max-aspect-ratio: 17/20) {
+    .playback { left: max(1rem, env(safe-area-inset-left)); right: max(1rem, env(safe-area-inset-right)); bottom: max(.75rem, env(safe-area-inset-bottom)); max-width: 28rem; margin-inline: auto; padding: .65rem .75rem; }
+    .playback-label { gap: .75rem; font-size: .5625rem; }
+    .playback-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem; margin-top: .5rem; }
+    .playback-actions button { min-width: 0; min-height: 2.5rem; padding-inline: .4rem; }
+  }
 </style>

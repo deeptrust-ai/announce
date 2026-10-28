@@ -344,9 +344,10 @@ export async function createKeycardScene(
     const lift = ease((elapsed - LIFT_START) / KEYCARD_OPENING.lift)
     const layout = ease((elapsed - ANNOUNCEMENT_START) / 1.2)
     const stacked = camera.aspect <= .85
+    const compactStack = stacked && canvas.clientHeight <= 700
     const tangent = Math.tan(camera.fov * Math.PI / 360)
     const editorialDistance = Math.max(
-      HEIGHT / (2 * tangent * (stacked ? .42 : .66)),
+      HEIGHT / (2 * tangent * (stacked ? (compactStack ? .35 : .42) : .66)),
       WIDTH / (2 * tangent * camera.aspect * (stacked ? .65 : .38)),
     ) + .2
     heroOffset.z = heroDistance + (editorialDistance - heroDistance) * layout
@@ -365,7 +366,7 @@ export async function createKeycardScene(
     cameraRight.set(1, 0, 0).applyQuaternion(camera.quaternion)
     cameraUp.set(0, 1, 0).applyQuaternion(camera.quaternion)
     framingOffset.copy(cameraRight).multiplyScalar((stacked ? 0 : -.46) * halfHeight * camera.aspect * layout)
-      .addScaledVector(cameraUp, (stacked ? -.48 : 0) * halfHeight * layout)
+      .addScaledVector(cameraUp, (stacked ? (compactStack ? -.56 : -.48) : 0) * halfHeight * layout)
     camera.position.add(framingOffset); target.add(framingOffset)
     camera.lookAt(target)
     camera.updateMatrixWorld()

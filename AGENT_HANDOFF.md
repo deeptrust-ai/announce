@@ -85,15 +85,21 @@ and stage jumps cannot retain trails. The static floor stays sharp. The final
 hero bypasses the blur at the normal canvas resolution. The front retains
 DeepTrust and the back retains Keycard throughout; there is no artwork swap.
 The extra half turn lands with the original Keycard reverse facing the camera.
-At second 10.37, a seventh stage reveals “DeepTrust is now a part of Keycard.ai”
-using the original DeepTrust and Keycard wordmarks, with a small .ai suffix.
+At second 10.37, a seventh stage reveals “DeepTrust is now a part of Keycard”
+using the original DeepTrust and Keycard wordmarks without any added suffix.
+The user explicitly corrected the logo: do not append .ai to Keycard.
 This shares the original Doppel `announcement.ts` timing: DeepTrust fades in,
-the smaller joining phrase types, Keycard.ai fades in, and the outlined
+the smaller joining phrase types, Keycard fades in, and the outlined
 “Read the Press Release →” link appears last. It points to
 `https://deeptrust.ai/press-release`, opens a new tab, and cannot receive focus
 or clicks until fully revealed. The camera eases right and slightly wider over
 1.2 seconds to leave the left column clear. In portrait the card occupies the upper half of the screen, with the
-announcement and CTA beneath it in the lower half. Everything holds after 14.17 seconds; no content blocks follow.
+announcement and CTA beneath it in the lower half. Mobile now uses a full-width
+centered layout, explicitly clearing the inherited desktop grid-column span.
+Both logos and the joining phrase are centered; the outlined CTA fills the
+available width up to 22rem. Debug controls span the bottom with three equal
+buttons. Short portrait screens (700px high or less) place a slightly smaller
+card higher and begin the text at 43%, preserving room for the controls. Everything holds after 14.17 seconds; no content blocks follow.
 
 Controls: Previous / Restart / Next, with the current stage label and 1–7 index.
 Stages are `floor`, `etch`, `pulse`, `lift`, `spin`, `hero`, and `announcement`. R restarts the
