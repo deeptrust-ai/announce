@@ -14,10 +14,9 @@ export const CONNECTION_START = ARRIVAL_START + ARRIVAL_EFFECT.durationSeconds
 export const APPROACH_START = CONNECTION_START + HUB_APPROACH.delaySeconds
 export const FINAL_HUB_START = CONNECTION_START + CONNECTION_SHOT.riseSeconds
   + FINAL_HUB_SHOT.wideHoldSeconds
-export const LENS_RELEASE_START = Math.max(
-  FINAL_HUB_START + FINAL_HUB_SHOT.durationSeconds,
-  APPROACH_START + HUB_APPROACH.durationSeconds,
-)
+const HUB_SETTLE_TIME = APPROACH_START + HUB_APPROACH.durationSeconds
+export const FINAL_HUB_DURATION = HUB_SETTLE_TIME - FINAL_HUB_START
+export const LENS_RELEASE_START = HUB_SETTLE_TIME - GRID_LENS_RELEASE.durationSeconds
 
 export const TRANSITIONS = [
   { id: 'camera', name: 'Camera rise', start: 0, duration: OPENING_DURATION },
@@ -44,7 +43,7 @@ export const TRANSITIONS = [
   },
   {
     id: 'framing', name: 'Final hub view', start: FINAL_HUB_START,
-    duration: FINAL_HUB_SHOT.durationSeconds,
+    duration: FINAL_HUB_DURATION,
   },
   {
     id: 'release', name: 'Grid release', start: LENS_RELEASE_START,
@@ -53,7 +52,7 @@ export const TRANSITIONS = [
 ] as const
 
 export type TransitionId = typeof TRANSITIONS[number]['id']
-export const SCENE_DURATION = LENS_RELEASE_START + GRID_LENS_RELEASE.durationSeconds
+export const SCENE_DURATION = HUB_SETTLE_TIME
 
 export function startingTransition(search: string): TransitionId {
   const requested = new URLSearchParams(search).get('start')

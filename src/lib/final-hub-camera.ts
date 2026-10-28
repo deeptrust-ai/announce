@@ -2,7 +2,6 @@ import { Box3, MathUtils, Object3D, PerspectiveCamera, Vector3 } from 'three'
 
 export const FINAL_HUB_SHOT = {
   wideHoldSeconds: 0.4,
-  durationSeconds: 6,
   frameCoverage: 0.84,
 } as const
 

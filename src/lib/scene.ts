@@ -32,8 +32,8 @@ import { applyConnectionView, fitConnectionView, CONNECTION_SHOT } from './conne
 import type { ConnectionView } from './connection-camera'
 import { createHubApproach } from './hub-approach'
 import { createHubExpansion } from './hub-expansion'
-import { applyFinalHubView, fitFinalHubView, FINAL_HUB_SHOT } from './final-hub-camera'
-import { APPROACH_START, ARRIVAL_START, CONNECTION_START, FINAL_HUB_START, LENS_RELEASE_START, SCENE_DURATION, TRANSITIONS, startingTransition, transitionAt } from './timeline'
+import { applyFinalHubView, fitFinalHubView } from './final-hub-camera'
+import { APPROACH_START, ARRIVAL_START, CONNECTION_START, FINAL_HUB_START, FINAL_HUB_DURATION, LENS_RELEASE_START, SCENE_DURATION, TRANSITIONS, startingTransition, transitionAt } from './timeline'
 import type { TransitionId } from './timeline'
 
 type SceneCallbacks = {
@@ -192,7 +192,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
       const finalHubView = fitFinalHubView(camera, hubModel,
         card.root.getObjectByName('DeepTrust_Card_Body')!, logoModel)
       applyFinalHubView(camera, connectionView.target, finalHubView,
-        (elapsed - FINAL_HUB_START) / FINAL_HUB_SHOT.durationSeconds)
+        (elapsed - FINAL_HUB_START) / FINAL_HUB_DURATION)
     }
     // Keep the distant objects clear as the view widens; fog must not hide them at altitude.
     fog.near = Math.max(10, camera.position.y * 1.8)

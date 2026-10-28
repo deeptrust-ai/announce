@@ -61,8 +61,8 @@ The connection starts after the arrival pulse:
 | Arrival pulse | 3 s | 0.8 s | 3.8 s |
 | South connection | 3.8 s | 6 s | 9.8 s |
 | Hub attraction | 5.8 s | 8 s | 13.8 s |
-| Final hub view | 8.2 s | 6 s | 14.2 s |
-| Grid release | 14.2 s | 1.2 s | 15.4 s |
+| Final hub view | 8.2 s | 5.6 s | 13.8 s |
+| Grid release | 12.6 s | 1.2 s | 13.8 s |
 
 The left-side preview menu derives names, durations, and entry points from these
 shared values. Clicking resets and replays from that point, with the camera and
@@ -78,7 +78,7 @@ and the camera at second 2. `?start=arrival` previews the completed-card impact.
 `?start=approach` starts the attraction, with the wire and camera already two
 seconds into the connection scene. `?start=framing` starts the final camera
 catch-up while DeepTrust is still approaching. `?start=release` previews the
-outward grid pulse and normalization with the eight-node layout complete.
+outward grid shockwave while the final camera and DeepTrust movement settle.
 Refresh to replay that starting point and the remaining sequence.
 The default URL still plays the full sequence. Reduced motion still skips to
 the completed card.
@@ -129,7 +129,7 @@ eye height. Replay and direct-stage shortcuts also restore the proper lens.
 The logo stays centered while settling into the forming card. Reduced
 motion skips to the completed card and overhead camera, without sparks,
 shockwave, or jolt. Hidden tabs pause the timeline. Rendering stops after the
-15.4-second sequence until a resize or visibility change. Pixel density is
+13.8-second sequence until a resize or visibility change. Pixel density is
 capped at 2. GPU resources and event listeners are released on unmount.
 
 The hub center sits 30 floor-grid cells directly south of the logo center,
@@ -148,7 +148,7 @@ toward the hub. Its logo, body, border, and source port move together. It stops
 at the top of the existing node orbit, at the same radius as the other cards. The
 wire stays attached as its source moves and continues drawing to the hub.
 The camera reaches its wide view over the first four seconds of the connection
-scene, then holds for 0.4 seconds. It begins a six-second move closer while
+scene, then holds for 0.4 seconds. It begins a 5.6-second move closer while
 DeepTrust is still approaching. Framing measures the moving hub, DeepTrust card,
 and logo each frame, keeping the pair together as the gap shrinks. It finishes
 square overhead with 84% coverage in the limiting viewport dimension. The old
@@ -163,9 +163,11 @@ As attraction begins, the floor shader gradually bends only its grid lookup
 coordinates around each object. The logo, hub, connection, lighting, shadows,
 and bloom retain their normal rendering. The grid lenses follow the objects in
 world X/Z with fixed world radii. Reduced motion omits the grid distortion and
-shows the completed approach. After the camera and nodes settle, the distortion
-travels outward over 1.2 seconds while its strength fades to exactly zero. The
-final grid is straight. Replays reset the pulse and distortion. There is no
+shows the completed approach. During the last 1.2 seconds of attraction, the two lenses fade while a single
+shockwave expands from the hub through the grid. A narrow compression front and
+trailing rebound give it a sharper wave shape. The camera, DeepTrust movement,
+and grid release all finish together at second 13.8. Both lens and shockwave
+strength reach exactly zero, leaving a straight grid. Replays reset the pulse and distortion. There is no
 full-scene lensing pass.
 
 

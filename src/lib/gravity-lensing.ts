@@ -8,14 +8,25 @@ export const GRAVITY_LENS_GLSL = `
   uniform vec2 uGridHubCenter;
   uniform float uGridLensStrength;
   uniform float uGridLensRelease;
+  uniform float uGridShockStrength;
 
   vec2 gridDeflection(vec2 position, vec2 center, float radius) {
     vec2 delta = position - center;
     float r = length(delta) / radius;
-    float ringRadius = mix(0.72, 3.0, uGridLensRelease);
-    float ringWidth = mix(0.38, 0.56, uGridLensRelease);
-    float band = exp(-pow((r - ringRadius) / ringWidth, 2.0));
+    float band = exp(-pow((r - 0.72) / 0.38, 2.0));
     return -delta * band * uGridLensStrength;
+  }
+
+  vec2 gridShockwave(vec2 position) {
+    vec2 delta = position - uGridHubCenter;
+    float distanceToHub = length(delta);
+    float travel = 1.0 - pow(1.0 - uGridLensRelease, 2.0);
+    float radius = mix(0.45, 3.4, travel);
+    float front = (distanceToHub - radius) / 0.14;
+    // A narrow compression front followed by a rebound reads as a wave
+    // travelling through the grid, rather than a widening magnifying lens.
+    float compression = -front * exp(-2.0 * front * front);
+    return delta / max(distanceToHub, 0.00001) * compression * uGridShockStrength;
   }
 `
 
@@ -26,12 +37,14 @@ export function createGravityLensing() {
     uGridHubCenter: { value: new Vector2() },
     uGridLensStrength: { value: 0 },
     uGridLensRelease: { value: 0 },
+    uGridShockStrength: { value: 0 },
   }
   const position = new Vector3()
 
   function reset() {
     uniforms.uGridLensStrength.value = 0
     uniforms.uGridLensRelease.value = 0
+    uniforms.uGridShockStrength.value = 0
   }
 
   function update(
@@ -50,6 +63,8 @@ export function createGravityLensing() {
     uniforms.uGridLensRelease.value = release
     uniforms.uGridLensStrength.value = 0.12 * MathUtils.smootherstep(time, 0, 2)
       * (1 + 0.08 * Math.sin(time * 1.4)) * (1 - MathUtils.smootherstep(release, 0, 1))
+    uniforms.uGridShockStrength.value = 0.22 * MathUtils.smootherstep(release, 0, 0.12)
+      * (1 - MathUtils.smootherstep(release, 0.55, 1))
   }
 
   return { uniforms, update, reset }

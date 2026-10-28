@@ -64,7 +64,7 @@
             onclick={() => playTransition(transition.id)}
           >
             <span>{transition.name}</span>
-            <span class="duration">{transition.duration} s</span>
+            <span class="duration">{Number(transition.duration.toFixed(1))} s</span>
           </button>
         </li>
       {/each}

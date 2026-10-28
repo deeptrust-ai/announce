@@ -34,7 +34,8 @@ export function createFloor() {
       vec2 gridPosition = vFloorWorldPosition.xz;
       vec2 warpedGridPosition = gridPosition
         + gridDeflection(gridPosition, uGridLogoCenter, 0.65)
-        + gridDeflection(gridPosition, uGridHubCenter, 1.7);
+        + gridDeflection(gridPosition, uGridHubCenter, 1.7)
+        + gridShockwave(gridPosition);
       vec2 gridUV = warpedGridPosition / uFloorCellSize;
       vec2 footprint = max(fwidth(gridUV), vec2(0.000001));
       vec2 edgeDistance = abs(fract(gridUV + 0.5) - 0.5);
@@ -53,7 +54,7 @@ export function createFloor() {
       diffuseColor.rgb = mix(diffuseColor.rgb, uFloorGridColor, grid * 0.32);`,
     )
   }
-  material.customProgramCacheKey = () => 'unlit-world-floor-grid-v5-lens-release'
+  material.customProgramCacheKey = () => 'unlit-world-floor-grid-v6-shockwave'
 
   const geometry = new PlaneGeometry(200, 200)
   const mesh = new Mesh(geometry, material)
