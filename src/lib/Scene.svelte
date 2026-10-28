@@ -127,17 +127,15 @@
   }
 
   .editorial-copy {
-    grid-column: 1 / span 6;
+    grid-column: 1 / span 5;
     align-self: center;
-    padding-top: clamp(1.25rem, 2.5vh, 2.5rem);
-    border-top: 1px solid rgb(243 247 255 / 35%);
     transform: translateY(calc(16px - var(--reveal) * 16px));
   }
 
   h1 {
     display: grid;
     justify-items: start;
-    gap: clamp(1.5rem, 4vh, 3.5rem);
+    gap: clamp(2rem, 5vh, 4rem);
     margin: 0;
     color: #f3f7ff;
     text-align: left;
@@ -248,6 +246,8 @@
     .editorial-copy {
       grid-column: 1 / -1;
       max-width: 85%;
+      align-self: start;
+      margin-top: 8vh;
     }
 
     h1 {

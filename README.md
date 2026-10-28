@@ -154,7 +154,9 @@ The camera reaches its wide view over the first four seconds of the connection
 scene, then holds for 0.4 seconds. It begins a 5.6-second move closer while
 DeepTrust is still approaching. Framing measures the moving hub, DeepTrust card,
 and logo each frame, keeping the pair together as the gap shrinks. It finishes
-square overhead with 84% coverage in the limiting viewport dimension. The old
+square overhead with the hub centered at 73% of the screen width. Framing
+limits the layout to 68% of viewport height and 42% of viewport width, giving
+the left-hand typography room. Portrait places the hub lower at 62% height. The old
 logo position and pulse plane are excluded; resize uses the current layout.
 During the approach, the seven original nodes slide clockwise into seven
 evenly spaced slots, leaving the top slot for DeepTrust. The final eight-node
@@ -177,11 +179,12 @@ full-scene lensing pass.
 
 
 The text layer is a separate Swiss-style editorial layout above the canvas.
-It uses a twelve-column grid, a shared left edge, large Helvetica-family type,
-a fine horizontal rule, and the actual DeepTrust and Doppel logo lockups. The
+It uses a twelve-column grid, a five-column copy block, shared left edges,
+Helvetica-family type, generous vertical spacing, and the actual DeepTrust and
+Doppel logo lockups. The line above the logos has been removed. The
 accessible heading reads “Deep Trust is now a part of Doppel.” The scene plays
 underneath; the text does not track or sit inside the hub. A quiet left gradient
-keeps it legible. Mobile uses six columns. Beginning at 12.6 seconds, DeepTrust fades in over
+keeps it legible. Mobile uses six columns with the copy toward the upper left. Beginning at 12.6 seconds, DeepTrust fades in over
 0.65 seconds. After a short pause, the smaller phrase types at 75 ms per
 character. Doppel then fades in after a 0.2-second pause. The reveal completes
 at 15.55 seconds while the 3D scene settles at 13.8 seconds. Space is reserved

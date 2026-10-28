@@ -258,8 +258,12 @@ camera tail after the logo settles.
 excluding the old logo origin and pulse plane. This replaces the former cached
 settled fit, which would become stale during overlapping motion. The target
 tracks the closing gap while the camera eases away from the wide pose. It ends
-square overhead, north up, with DeepTrust at the top and 84% viewport coverage
-in the limiting dimension. Replay, resize, direct seeks, timeline duration, and
+square overhead, north up, with DeepTrust at the top. The hub is now smaller
+and shifted right to leave room for the typography: center X is 73% of the
+viewport, height coverage is capped at 68%, and width coverage at 42%. Fitting
+accounts for the off-center position with an edge margin, so nodes stay inside
+the frame. Camera position and gaze shift together, keeping the view overhead.
+Portrait moves the hub lower to 62% screen height while the copy sits upper left. Replay, resize, direct seeks, timeline duration, and
 reduced motion all use the same absolute time and current geometry.
 
 Grid release overlaps the final 1.2 seconds of attraction and camera movement,
@@ -312,8 +316,10 @@ The original rotating wireframe sculpture and stars have been removed.
 
 `Scene.svelte` now renders a Swiss-style editorial layer independently of the
 Three.js scene. The user explicitly rejected text centered inside the hub.
-A full-screen twelve-column grid holds a left-aligned text block spanning six
-columns, with shared logo/type edges, a thin horizontal rule, generous spacing,
+A full-screen twelve-column grid holds a left-aligned text block spanning five
+columns, with shared logo/type edges and generous spacing. The user asked to
+remove the line above the logos; the border and its padding are gone. Logo/type
+gaps are now slightly larger,
 and large Helvetica-family type. Mobile uses six columns. A restrained dark
 left gradient supports legibility while the animated scene continues underneath.
 The DeepTrust logo lockup is the existing `logo-full.svg`. The Doppel lockup is
@@ -335,7 +341,7 @@ The accessible heading remains complete and the typing is not a live region.
 
 `onAnnouncement(progress)` now reports linear progress over the complete text
 sequence; `announcementState` derives each logo opacity and visible character
-count. The editorial backdrop/rule enter with DeepTrust, and the Doppel image
+count. The editorial backdrop enters with DeepTrust, and the Doppel image
 has its own opacity. Replay and seeks use absolute scene time; there are no
 independent timers. Reduced motion shows the complete message immediately.
 `SCENE_DURATION` includes the text tail. `HUB_SETTLE_TIME` still anchors the
