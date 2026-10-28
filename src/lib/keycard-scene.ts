@@ -19,6 +19,7 @@ import {
   WebGLRenderer,
 } from 'three'
 import { createKeycardLaser } from './keycard-laser'
+import { createKeycardMotionBlur } from './keycard-motion-blur'
 
 /** The opening etch and hero reveal stop before any announcement copy. */
 export const KEYCARD_OPENING = {
@@ -260,27 +261,6 @@ export async function createKeycardScene(canvas: HTMLCanvasElement, signal: Abor
   back.rotation.y = Math.PI
   card.add(back)
 
-  // Short shutter samples smear only the fast-spinning card; the grid stays crisp.
-  const trails = Array.from({ length: 5 }, (_, index) => {
-    const material = new ShaderMaterial({
-      vertexShader, fragmentShader: faceMaterial.fragmentShader,
-      uniforms: { ...faceMaterial.uniforms, uOpacity: { value: 0 } },
-      transparent: true, depthWrite: false,
-    })
-    const root = new Group()
-    const mesh = new Mesh(faceGeometry, material)
-    mesh.position.z = face.position.z
-    const backTrailMaterial = new ShaderMaterial({
-      vertexShader, fragmentShader: backMaterial.fragmentShader,
-      uniforms: { ...backMaterial.uniforms, uOpacity: material.uniforms.uOpacity! },
-      transparent: true, depthWrite: false,
-    })
-    const backMesh = new Mesh(faceGeometry, backTrailMaterial)
-    backMesh.position.z = back.position.z
-    backMesh.rotation.y = Math.PI
-    root.add(mesh, backMesh); scene.add(root)
-    return { root, material, backTrailMaterial, delay: (index + 1) * .014 }
-  })
 
   const floorGeometry = new PlaneGeometry(100, 100)
   const floorMaterial = new ShaderMaterial({ vertexShader, fragmentShader: floorFragment, uniforms: { uPulse: { value: 0 }, uPulseActive: { value: 0 } } })
@@ -289,6 +269,7 @@ export async function createKeycardScene(canvas: HTMLCanvasElement, signal: Abor
   scene.add(floor)
   const laser = createKeycardLaser()
   scene.add(laser.mesh)
+  const motionBlur = createKeycardMotionBlur(renderer)
 
   const preference = window.matchMedia('(prefers-reduced-motion: reduce)')
   let elapsed = 0, frame = 0, previous: number | undefined, disposed = false
@@ -330,16 +311,16 @@ export async function createKeycardScene(canvas: HTMLCanvasElement, signal: Abor
     }
     laser.update(segment ? laserHit : undefined, camera, elapsed)
     const blur = elapsed >= SPIN_START && elapsed <= HERO_START ? Math.pow(Math.sin(spinProgress * Math.PI), 2) : 0
-    trails.forEach(({ root, material, delay }, index) => {
-      root.visible = blur > .001
-      if (!root.visible) return
-      applyCardPose(root, Math.max(SPIN_START, elapsed - delay))
-      material.uniforms.uEtch!.value = faceMaterial.uniforms.uEtch!.value
-      material.uniforms.uOpacity!.value = blur * .055 * (1 - index / 6)
-    })
     const stage = KEYCARD_STAGES.reduce<number>((index, candidate, next) => elapsed >= candidate.start ? next : index, 0)
     if (stage !== reportedStage) { reportedStage = stage; onStage(stage) }
-    renderer.render(scene, camera)
+    if (blur > .01 && !preference.matches) {
+      // Integrate the complete two-sided card over a short exposure.
+      motionBlur.render(elapsed, blur / 30, SPIN_START, (time) => {
+        applyCardPose(card, time)
+        renderer.render(scene, camera)
+      })
+      applyCardPose(card, elapsed)
+    } else renderer.render(scene, camera)
   }
   function requestFrame() { if (!disposed && !frame && !document.hidden && elapsed < END) frame = requestAnimationFrame(tick) }
   function tick(time: number) {
@@ -352,6 +333,7 @@ export async function createKeycardScene(canvas: HTMLCanvasElement, signal: Abor
     const width = Math.max(1, canvas.clientWidth), height = Math.max(1, canvas.clientHeight)
     renderer.setSize(width, height, false)
     laser.resize(canvas.width, canvas.height, renderer.getPixelRatio())
+    motionBlur.resize(width, height)
     camera.aspect = width / height
     // Fit the card's projected corners with room for the shockwave on every aspect.
     camera.position.copy(floorDirection).multiplyScalar(10)
@@ -410,7 +392,7 @@ export async function createKeycardScene(canvas: HTMLCanvasElement, signal: Abor
       preference.removeEventListener('change', motion)
       window.removeEventListener('keydown', restart)
       bodyGeometry.dispose(); bodyMaterial.dispose(); faceGeometry.dispose(); faceMaterial.dispose(); backMaterial.dispose()
-      trails.forEach(({ material, backTrailMaterial }) => { material.dispose(); backTrailMaterial.dispose() })
+      motionBlur.dispose()
       laser.dispose()
       floorGeometry.dispose(); floorMaterial.dispose(); cardTexture.dispose(); maps.mask.dispose(); maps.timing.dispose()
       renderer.dispose()

@@ -7,7 +7,7 @@ A minimal Svelte + TypeScript + Vite app with a full-screen Three.js scene.
 - `/`: original Doppel announcement.
 - `/keycard/`: independent Keycard opening. A card rests on a grid, receives the
   original solid DeepTrust logo etching from an off-screen blue laser, and emits one floor shockwave. It then lifts upright,
-  spins six and a half times with a subtle blur trail, and holds on the Keycard hero.
+  spins six and a half times with shutter-sampled motion blur, and holds on the Keycard hero.
   Its back always carries the original Keycard K and KEYCARD.AI artwork,
   and faces the camera in the finale. Announcement copy and
   content blocks are deferred.
@@ -67,6 +67,7 @@ The production build is written to `dist/`. Serve that directory with a static h
 - `src/lib/KeycardPage.svelte`: isolated full-screen Keycard canvas and lifecycle.
 - `src/lib/keycard-scene.ts`: flat credential, SVG etching, grid shockwave, lift/spin, and hero hold.
 - `src/lib/keycard-laser.ts`: glowing off-screen beam synchronized to each engraving stroke.
+- `src/lib/keycard-motion-blur.ts`: temporal shutter sampling during the spin, with a sharp final hold.
 - `src/app.css`: full-screen layout.
 
 The scene starts focused on the DeepTrust logo, lying flat on a dark floor.

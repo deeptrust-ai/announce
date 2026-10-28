@@ -112,8 +112,12 @@ bevel, or simulated edge shading. The shockwave distorts only the floor.
 
 The sequence is: 0.8-second hold, 4.8-second engraving, 0.35-second cooling pause,
 1.7-second shockwave, 2-second upright lift, 3-second six-and-a-half-turn spin, and
-0.9-second hero settle. A short shutter trail approximates motion blur during
-the spin, on both sides. The front and back keep their respective artwork
+0.9-second hero settle. During the spin, 8–12 freshly rendered shutter samples
+are averaged over an exposure of up to 1/30 second. This replaces the earlier
+transparent ghost surfaces and captures both faces, the body, and occlusion.
+Exposure tapers toward zero as the spin ends; the final hero uses the normal
+sharp canvas rendering. Accumulation resets every frame, including after replay
+or a stage jump. Blur-buffer resolution is capped to bound its GPU cost. The front and back keep their respective artwork
 throughout. The final half turn leaves the original Keycard reverse facing
 the camera. Previous,
 Restart, and Next controls cover all six stages; R restarts the current stage.

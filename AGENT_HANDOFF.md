@@ -50,8 +50,14 @@ Timeline: 0.8-second blank hold, 4.8-second engraving, 0.35-second cooling pause
 1.7-second floor shockwave, 2-second lift upright, 3-second six-and-a-half-turn spin, and
 0.9-second hero settle. The card floats clear of the floor while standing up.
 The camera tracks its center and eases from the elevated floor view into a
-front-facing portrait-card hero. Five short shutter samples create a subtle
-blur trails for both faces only during the rapid spin. The front retains
+front-facing portrait-card hero. `keycard-motion-blur.ts` averages freshly
+rendered shutter samples during the rapid spin: 12 on desktop, 8 on narrow
+viewports, with a maximum 1/30-second exposure scaled by the spin envelope.
+It includes both artwork faces, the body, and their occlusion, replacing the
+old transparent ghost meshes. Working buffers are capped at 1600 pixels on
+the long edge and 1.5 DPR. Each frame starts a fresh running average, so replay
+and stage jumps cannot retain trails. The static floor stays sharp. The final
+hero bypasses the blur at the normal canvas resolution. The front retains
 DeepTrust and the back retains Keycard throughout; there is no artwork swap.
 The extra half turn lands with the original Keycard reverse facing the camera. At second 13.55 all
 motion stops. No later text or content transition follows.
