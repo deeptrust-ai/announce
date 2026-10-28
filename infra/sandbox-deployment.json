@@ -1,0 +1,11 @@
+{
+  "AccountId": "272183979614",
+  "Profile": "deeptrust-sandbox",
+  "Region": "us-east-1",
+  "StackName": "deeptrust-announcement-mocks",
+  "BucketName": "deeptrust-announcement-mocks-272183979614-us-east-1",
+  "KeycardURL": "https://deie4jwv7t2oo.cloudfront.net/keycard/",
+  "WebsiteURL": "https://deie4jwv7t2oo.cloudfront.net/",
+  "DoppelURL": "https://deie4jwv7t2oo.cloudfront.net/doppel/",
+  "DistributionId": "E20F3EIRWXKOUA"
+}

@@ -39,6 +39,10 @@ The user confirmed DeepTrust sandbox account `272183979614`, profile
 `deeptrust-sandbox`, region `us-east-1`. Hosting uses a private S3 bucket behind
 an HTTPS CloudFront distribution. All three routes have independent HTML files.
 
+Live: [root](https://deie4jwv7t2oo.cloudfront.net/), [Doppel](https://deie4jwv7t2oo.cloudfront.net/doppel/),
+and [Keycard](https://deie4jwv7t2oo.cloudfront.net/keycard/). CloudFront is deployed, HTTPS routes and
+referenced assets were verified, and the S3 origin remains private.
+
 Infrastructure, caching, and repeatable deployment are documented in
 [`infra/README.md`](infra/README.md). Run `python3 scripts/deploy-sandbox.py`
 to build and redeploy to this sandbox. The script checks the account before any

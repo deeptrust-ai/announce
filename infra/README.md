@@ -4,6 +4,20 @@ Deploys to the user-confirmed **DeepTrust sandbox account 272183979614** using
 profile `deeptrust-sandbox`, in `us-east-1`. The deployment script verifies STS
 identity and refuses a different account.
 
+## Deployed URLs
+
+- [Root status page](https://deie4jwv7t2oo.cloudfront.net/)
+- [Doppel](https://deie4jwv7t2oo.cloudfront.net/doppel/)
+- [Keycard](https://deie4jwv7t2oo.cloudfront.net/keycard/)
+
+Initial deployment completed October 28, 2026. CloudFormation reported
+`CREATE_COMPLETE`, CloudFront reported `Deployed`, and cache invalidation
+completed. HTTPS responses for all three routes, their referenced JS/CSS,
+primary branding, and both models returned 200. The direct S3 origin returned
+403, and HTTP redirected to HTTPS. No visual browser checks or tests were run.
+
+## Redeploy
+
 ```sh
 python3 scripts/deploy-sandbox.py
 ```

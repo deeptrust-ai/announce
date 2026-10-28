@@ -144,6 +144,20 @@ proofs were run. The dev server was left untouched. Deployment outputs are
 written to `infra/sandbox-deployment.json` only when deployment succeeds; consult
 that file and current AWS state before claiming a current live deployment.
 
+The initial deployment completed October 28, 2026: CloudFormation
+`CREATE_COMPLETE`, CloudFront `Deployed`, invalidation complete. Live endpoints:
+- Root: https://deie4jwv7t2oo.cloudfront.net/
+- Doppel: https://deie4jwv7t2oo.cloudfront.net/doppel/
+- Keycard: https://deie4jwv7t2oo.cloudfront.net/keycard/
+
+All three HTTPS routes and referenced JS/CSS, primary branding, and models
+returned 200; direct S3 access returned 403, and HTTP redirected to HTTPS.
+No browser visual verification or tests were run. The production build
+succeeded with existing canvas accessibility/self-closing warnings. No Git
+push was performed. Hosting configuration and deployment outputs are committed
+locally. The user briefly paused and then explicitly resumed deployment;
+background audio in that voice segment did not change the site design.
+
 ## User workflow
 
 - The user is a senior developer. Use short, direct updates and quick bullets.
