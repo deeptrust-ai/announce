@@ -23,15 +23,17 @@ The production build is written to `dist/`. Serve that directory with a static h
 
 ## Scene
 
-- `src/lib/scene.ts`: camera, objects, pointer movement, and render loop.
+- `src/lib/scene.ts`: GLB loading, floor, lighting, camera controls, and rendering.
 - `src/lib/Scene.svelte`: canvas lifecycle and WebGL fallback.
 - `src/App.svelte`: page composition.
 - `src/app.css`: full-screen layout.
 
-The placeholder scene contains a rotating wireframe sculpture and stars. It fits
-the viewport, caps pixel density at 2, pauses while the tab is hidden, and renders
-a still frame when reduced motion is enabled. GPU resources and event listeners
-are released when the component unmounts.
+The scene loads `public/models/hub-network.glb` onto a dark floor with shadows
+and a subtle glow on the hub ports. Drag to orbit; scroll or pinch to zoom. The
+camera stays above the floor and frames the model when the viewport changes.
+The model stays still, and frames render only when needed. Pixel density is
+capped at 2. Camera damping is disabled when reduced motion is enabled. GPU
+resources and event listeners are released when the component unmounts.
 
 ## Blender model
 
@@ -43,8 +45,8 @@ The original logo proportions give a height of approximately 11.63 inches.
 The rounded outer corners follow the SVG's original Bezier curves. The navy
 background rectangle is excluded. No bevel is added to the other edges.
 The mesh is centered at the origin. The Blender file includes a separate preview
-studio collection; the GLB contains only the glyph. The landing-page scene does
-not load the model yet.
+studio collection; the GLB contains only the glyph. The logo remains separate
+from the live hub scene for the next animation step.
 
 To regenerate on macOS with Blender installed:
 

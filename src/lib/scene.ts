@@ -1,145 +1,240 @@
 import {
+  ACESFilmicToneMapping,
+  Box3,
   BufferGeometry,
-  Float32BufferAttribute,
-  FogExp2,
-  Group,
-  LineBasicMaterial,
-  LineSegments,
+  Color,
+  DirectionalLight,
+  Fog,
+  HemisphereLight,
+  Material,
   MathUtils,
   Mesh,
-  MeshBasicMaterial,
+  MeshStandardMaterial,
+  Object3D,
+  PCFSoftShadowMap,
   PerspectiveCamera,
-  Points,
-  PointsMaterial,
+  PlaneGeometry,
   Scene,
-  TorusKnotGeometry,
+  Texture,
   Vector2,
+  Vector3,
   WebGLRenderer,
-  WireframeGeometry,
 } from 'three'
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js'
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js'
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js'
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 
-/** Mount the scene and return cleanup for Svelte unmounts and hot reloads. */
-export function createScene(canvas: HTMLCanvasElement): () => void {
-  const renderer = new WebGLRenderer({ canvas, antialias: true, alpha: true })
-  const scene = new Scene()
-  scene.fog = new FogExp2('#060b13', 0.055)
+type SceneCallbacks = {
+  onReady?: () => void
+  onError?: (error: unknown) => void
+}
 
-  const camera = new PerspectiveCamera(45, 1, 0.1, 100)
-  camera.position.z = 7
-
-  // Replace this group to build the final landing-page scene.
-  const sculpture = new Group()
-  const geometry = new TorusKnotGeometry(1.25, 0.38, 180, 20)
-  const surfaceMaterial = new MeshBasicMaterial({ color: '#081822' })
-  const surface = new Mesh(geometry, surfaceMaterial)
-  const wireGeometry = new WireframeGeometry(geometry)
-  const wireMaterial = new LineBasicMaterial({
-    color: '#77ddd1',
-    transparent: true,
-    opacity: 0.65,
-  })
-  const wire = new LineSegments(wireGeometry, wireMaterial)
-  wire.scale.setScalar(1.002)
-  sculpture.add(surface, wire)
-  sculpture.rotation.set(0.3, 0, 0.2)
-  scene.add(sculpture)
-
-  const positions = new Float32Array(600 * 3)
-  for (let i = 0; i < positions.length; i += 3) {
-    positions[i] = MathUtils.randFloatSpread(24)
-    positions[i + 1] = MathUtils.randFloatSpread(18)
-    positions[i + 2] = MathUtils.randFloat(-18, 2)
-  }
-  const starsGeometry = new BufferGeometry()
-  starsGeometry.setAttribute('position', new Float32BufferAttribute(positions, 3))
-  const starsMaterial = new PointsMaterial({
-    color: '#91bacb',
-    size: 0.018,
-    transparent: true,
-    opacity: 0.65,
-    depthWrite: false,
-  })
-  const stars = new Points(starsGeometry, starsMaterial)
-  scene.add(stars)
-
-  const pointer = new Vector2()
-  const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)')
-  let previousTime: number | undefined
-
-  function render(time: number) {
-    const delta = previousTime === undefined ? 0 : Math.min((time - previousTime) / 1000, 0.05)
-    previousTime = time
-
-    if (!motionPreference.matches) {
-      sculpture.rotation.y += delta * 0.12
-      sculpture.rotation.x += delta * 0.045
-      stars.rotation.y += delta * 0.008
-      camera.position.x = MathUtils.damp(camera.position.x, pointer.x * 0.35, 3, delta)
-      camera.position.y = MathUtils.damp(camera.position.y, pointer.y * 0.25, 3, delta)
-      camera.lookAt(0, 0, 0)
+function disposeModel(root: Object3D) {
+  const geometries = new Set<BufferGeometry>()
+  const materials = new Set<Material>()
+  const textures = new Set<Texture>()
+  root.traverse((object) => {
+    if (!(object instanceof Mesh)) return
+    geometries.add(object.geometry)
+    for (const material of Array.isArray(object.material) ? object.material : [object.material]) {
+      materials.add(material)
+      for (const value of Object.values(material)) {
+        if (value instanceof Texture) textures.add(value)
+      }
     }
+  })
+  geometries.forEach((geometry) => geometry.dispose())
+  materials.forEach((material) => material.dispose())
+  textures.forEach((texture) => texture.dispose())
+}
 
-    renderer.render(scene, camera)
+/** Mount the floor scene and return cleanup for Svelte unmounts and hot reloads. */
+export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks = {}): () => void {
+  const renderer = new WebGLRenderer({ canvas, antialias: true })
+  renderer.toneMapping = ACESFilmicToneMapping
+  renderer.toneMappingExposure = 1.05
+  renderer.shadowMap.enabled = true
+  renderer.shadowMap.type = PCFSoftShadowMap
+  renderer.shadowMap.autoUpdate = false
+
+  const scene = new Scene()
+  scene.background = new Color('#080d14')
+  scene.fog = new Fog('#080d14', 10, 30)
+
+  const camera = new PerspectiveCamera(40, 1, 0.02, 80)
+  camera.position.set(0, 3.3, 3.8)
+  const controls = new OrbitControls(camera, canvas)
+  controls.enablePan = false
+  controls.enableDamping = true
+  controls.dampingFactor = 0.08
+  controls.minPolarAngle = 0.15
+  controls.maxPolarAngle = Math.PI * 0.38
+  controls.minDistance = 1.5
+  controls.maxDistance = 18
+  controls.target.set(0, 0, 0)
+  controls.update()
+
+  const floor = new Mesh(
+    new PlaneGeometry(200, 200),
+    new MeshStandardMaterial({ color: '#111820', roughness: 0.92, metalness: 0.05 }),
+  )
+  floor.name = 'Floor'
+  floor.rotation.x = -Math.PI / 2
+  floor.position.y = -0.001
+  floor.receiveShadow = true
+  scene.add(floor)
+
+  scene.add(new HemisphereLight('#c5d8ed', '#29212c', 1.1))
+  const key = new DirectionalLight('#fff0dc', 3)
+  key.position.set(-3, 6, 4)
+  key.castShadow = true
+  key.shadow.mapSize.set(2048, 2048)
+  key.shadow.camera.left = -2
+  key.shadow.camera.right = 2
+  key.shadow.camera.top = 2
+  key.shadow.camera.bottom = -2
+  key.shadow.camera.near = 0.1
+  key.shadow.camera.far = 15
+  key.shadow.bias = -0.0001
+  key.shadow.normalBias = 0.002
+  scene.add(key)
+  const fill = new DirectionalLight('#a5c8ff', 1)
+  fill.position.set(4, 3, -3)
+  scene.add(fill)
+
+  const composer = new EffectComposer(renderer)
+  const renderPass = new RenderPass(scene, camera)
+  const bloomPass = new UnrealBloomPass(new Vector2(1, 1), 0.35, 0.4, 1.1)
+  const outputPass = new OutputPass()
+  composer.addPass(renderPass)
+  composer.addPass(bloomPass)
+  composer.addPass(outputPass)
+
+  const bounds = new Box3()
+  const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)')
+  let disposed = false
+  let frame = 0
+
+  // The hub stays still. Draw only while loading, resizing, or moving the camera.
+  function requestRender() {
+    if (!disposed && !document.hidden && !frame) frame = requestAnimationFrame(render)
+  }
+
+  function render() {
+    frame = 0
+    if (disposed) return
+    controls.update()
+    composer.render()
+  }
+
+  function fitCamera() {
+    if (bounds.isEmpty()) return
+    const center = bounds.getCenter(new Vector3())
+    const direction = camera.position.clone().sub(controls.target).normalize()
+    const right = new Vector3().crossVectors(camera.up, direction).normalize()
+    const up = new Vector3().crossVectors(direction, right).normalize()
+    const tanVertical = Math.tan(MathUtils.degToRad(camera.fov / 2))
+    const tanHorizontal = tanVertical * camera.aspect
+    let distance = 0
+    for (const x of [bounds.min.x, bounds.max.x]) {
+      for (const y of [bounds.min.y, bounds.max.y]) {
+        for (const z of [bounds.min.z, bounds.max.z]) {
+          const corner = new Vector3(x, y, z).sub(center)
+          distance = Math.max(
+            distance,
+            corner.dot(direction) + Math.abs(corner.dot(right)) / tanHorizontal,
+            corner.dot(direction) + Math.abs(corner.dot(up)) / tanVertical,
+          )
+        }
+      }
+    }
+    controls.target.copy(center)
+    camera.position.copy(center).addScaledVector(direction, distance * 1.16)
+    controls.maxDistance = Math.max(18, distance * 2)
+    controls.update()
   }
 
   function resize() {
     const { width, height } = canvas.getBoundingClientRect()
     if (!width || !height) return
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    const pixelRatio = Math.min(window.devicePixelRatio, 2)
+    renderer.setPixelRatio(pixelRatio)
     renderer.setSize(width, height, false)
+    composer.setPixelRatio(pixelRatio)
+    composer.setSize(width, height)
     camera.aspect = width / height
-    // Keep the sculpture inside the viewport on narrow screens.
-    camera.position.z = camera.aspect < 1 ? 7 / camera.aspect : 7
     camera.updateProjectionMatrix()
-    render(performance.now())
+    fitCamera()
+    requestRender()
   }
 
-  function movePointer(event: PointerEvent) {
-    pointer.set(
-      (event.clientX / window.innerWidth) * 2 - 1,
-      -(event.clientY / window.innerHeight) * 2 + 1,
-    )
+  function updateMotionPreference() {
+    controls.enableDamping = !motionPreference.matches
+    requestRender()
   }
 
-  function resetPointer() {
-    pointer.set(0, 0)
-  }
-
-  function updateAnimation() {
-    previousTime = undefined
-    renderer.setAnimationLoop(null)
-    if (!document.hidden && !motionPreference.matches) {
-      renderer.setAnimationLoop(render)
-    } else if (!document.hidden) {
-      camera.position.x = 0
-      camera.position.y = 0
-      camera.lookAt(0, 0, 0)
-      render(performance.now())
+  function updateVisibility() {
+    if (document.hidden) {
+      cancelAnimationFrame(frame)
+      frame = 0
+    } else {
+      resize()
     }
   }
 
+  controls.addEventListener('change', requestRender)
   const resizeObserver = new ResizeObserver(resize)
   resizeObserver.observe(canvas)
-  window.addEventListener('pointermove', movePointer, { passive: true })
-  document.documentElement.addEventListener('pointerleave', resetPointer)
-  document.addEventListener('visibilitychange', updateAnimation)
-  motionPreference.addEventListener('change', updateAnimation)
+  document.addEventListener('visibilitychange', updateVisibility)
+  motionPreference.addEventListener('change', updateMotionPreference)
+  updateMotionPreference()
   resize()
-  updateAnimation()
+
+  new GLTFLoader().load(
+    `${import.meta.env.BASE_URL}models/hub-network.glb`,
+    (gltf) => {
+      if (disposed) {
+        disposeModel(gltf.scene)
+        return
+      }
+      // The GLB is already Y-up and rests at Y=0. Preserve node groups for animation.
+      const hub = gltf.scene
+      hub.traverse((object) => {
+        if (object instanceof Mesh) {
+          object.castShadow = true
+          object.receiveShadow = true
+        }
+      })
+      scene.add(hub)
+      bounds.setFromObject(hub)
+      renderer.shadowMap.needsUpdate = true
+      fitCamera()
+      requestRender()
+      callbacks.onReady?.()
+    },
+    undefined,
+    (error) => {
+      if (!disposed) callbacks.onError?.(error)
+    },
+  )
 
   return () => {
-    renderer.setAnimationLoop(null)
+    disposed = true
+    cancelAnimationFrame(frame)
     resizeObserver.disconnect()
-    window.removeEventListener('pointermove', movePointer)
-    document.documentElement.removeEventListener('pointerleave', resetPointer)
-    document.removeEventListener('visibilitychange', updateAnimation)
-    motionPreference.removeEventListener('change', updateAnimation)
-    geometry.dispose()
-    surfaceMaterial.dispose()
-    wireGeometry.dispose()
-    wireMaterial.dispose()
-    starsGeometry.dispose()
-    starsMaterial.dispose()
+    controls.removeEventListener('change', requestRender)
+    controls.dispose()
+    document.removeEventListener('visibilitychange', updateVisibility)
+    motionPreference.removeEventListener('change', updateMotionPreference)
+    disposeModel(scene)
+    key.shadow.dispose()
+    bloomPass.dispose()
+    outputPass.dispose()
+    renderPass.dispose()
+    composer.dispose()
     renderer.dispose()
   }
 }
