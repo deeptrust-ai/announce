@@ -33,6 +33,7 @@ The production build is written to `dist/`. Serve that directory with a static h
 - `src/lib/final-hub-camera.ts`: overlapping camera catch-up and final close overhead framing.
 - `src/lib/hub-approach.ts`: delayed drift into the top slot of the hub orbit.
 - `src/lib/hub-expansion.ts`: seven-to-eight-node redistribution with moving links and ports.
+- `src/lib/hub-breathing.ts`: independent slow glow rhythms for the lime ports and rim.
 - `src/lib/gravity-lensing.ts`: world-space distortion of only the floor-grid coordinates.
 - `src/lib/timeline.ts`: shared transition names, start times, and durations.
 - `src/lib/Scene.svelte`: canvas lifecycle and WebGL fallback.
@@ -128,8 +129,9 @@ horizontal distance and final height for framing, without lifting the initial
 eye height. Replay and direct-stage shortcuts also restore the proper lens.
 The logo stays centered while settling into the forming card. Reduced
 motion skips to the completed card and overhead camera, without sparks,
-shockwave, or jolt. Hidden tabs pause the timeline. Rendering stops after the
-13.8-second sequence until a resize or visibility change. Pixel density is
+shockwave, or jolt. Hidden tabs pause animation. After the 13.8-second sequence,
+the final view holds while the lime ports and rim keep breathing slowly. Reduced
+motion holds their baseline glow and renders on demand. Pixel density is
 capped at 2. GPU resources and event listeners are released on unmount.
 
 The hub center sits 30 floor-grid cells directly south of the logo center,
@@ -172,6 +174,18 @@ and grid release all finish together at second 13.8. Both lens and shockwave
 strength reach exactly zero, leaving a straight grid. Replays reset the pulse and distortion. There is no
 full-scene lensing pass.
 
+
+The text layer is an HTML heading above the canvas: “Deep Trust is now a part
+of Doppel.” It fades and lifts into view during the final grid release, from
+12.6 to 13.8 seconds, centered over the hub. It stays crisp because it is outside
+the 3D effects. Replay resets the reveal; reduced motion shows it immediately.
+
+Each lime hub port has an independent breathing rhythm, with periods around
+4.6–6.8 seconds and offset phases. The rim breathes more slowly over 7.2 seconds.
+Small secondary variations make the glow less uniform. A separate ambient clock
+continues these rhythms while the camera, models, grid, and text hold their final
+state. Hidden tabs pause it; reduced motion uses steady glow. The final camera
+fit is cached after settlement and refreshed on replay or resize.
 
 ## Blender model
 

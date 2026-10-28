@@ -62,6 +62,7 @@ the later joining sequence was already approved or add unrelated page content.
 - `src/lib/final-hub-camera.ts`: final overhead fit of the completed eight-node hub.
 - `src/lib/hub-approach.ts`: delayed card approach into the top orbit slot.
 - `src/lib/hub-expansion.ts`: clockwise node redistribution, links, and eighth port.
+- `src/lib/hub-breathing.ts`: independent, slow emission rhythms for ports and rim.
 - `src/lib/gravity-lensing.ts`: world-space lens centers and GLSL for only the floor-grid coordinates.
 - `src/lib/timeline.ts`: transition definitions shared by playback and preview menu.
 - `src/app.css`: full-screen layout.
@@ -294,12 +295,37 @@ hub plate bounds can retain the pre-placement position near the origin and send
 the wire north through the logo. The world orientation itself is correct:
 north is screen up / -Z, south is screen down / +Z, east is +X, west is -X.
 
-Rendering continues during the 13.8-second sequence including the south connection, then returns to rendering on
-demand. Pixel density is capped at 2. Cleanup disposes geometry, materials,
+The main sequence ends at 13.8 seconds, but rendering continues for the slow
+port/rim breathing. Hidden tabs pause both clocks. Reduced motion holds the
+final scene with baseline emission and renders on demand. Pixel density is capped at 2. Cleanup disposes geometry, materials,
 shadow maps, and postprocessing resources. Both GLBs must load before the shot
 starts; asynchronous loading handles unmounts and loading errors.
 
 The original rotating wireframe sculpture and stars have been removed.
+
+## Announcement layer and ambient glow
+
+`Scene.svelte` renders the accessible HTML heading “Deep Trust is now a part of
+Doppel” above the canvas, centered over the final hub. `onAnnouncement(progress)`
+reports an eased reveal from the start of grid release (12.6 s) to the shared
+endpoint (13.8 s). CSS applies opacity and a small upward reveal. The copy is
+split into three lines, with pale lime Doppel text. It receives no Three.js
+lensing, bloom, or geometric distortion and does not intercept pointer events.
+Replay resets progress; direct release preview reveals it with the final beat.
+Reduced motion shows the complete heading immediately with the final scene.
+
+`hub-breathing.ts` gives every `Port_*` group (including DeepTrust) independent
+emissive materials, keeping dark sockets steady. The lime rim has its own slower
+rhythm. Ports use 4.6–6.8 second periods, distinct phases, and small secondary
+variations; the rim uses 7.2 seconds. Emission stays near baseline, with no sharp
+flashes or synchronized beat. Replaced unreferenced source materials are disposed,
+and scene cleanup disposes the assigned clones. Breathing starts after loading
+and continues after the main timeline completes, using a separate ambient clock.
+The camera, logo, layout, normalized grid, and text remain settled. The final
+camera fit is cached once the layout completes and invalidated on replay/resize.
+Hidden tabs pause the ambient clock; reduced motion restores baseline emission
+and stops continuous rendering after the final frame. No tests, builds, browser
+checks, or proof screenshots were run for this iteration.
 
 ## Logo asset
 

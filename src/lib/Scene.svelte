@@ -9,6 +9,7 @@
   let status = $state<'loading' | 'ready' | 'error'>('loading')
   let errorMessage = $state('')
   let currentTransition = $state<TransitionId>('camera')
+  let announcementProgress = $state(0)
   let controller: SceneController | undefined
 
   function playTransition(transition: TransitionId) {
@@ -34,6 +35,9 @@
         onTransition: (transition) => {
           currentTransition = transition
         },
+        onAnnouncement: (progress) => {
+          announcementProgress = progress
+        },
       })
       return () => {
         controller?.dispose()
@@ -52,6 +56,15 @@
     bind:this={canvas}
     aria-label="The DeepTrust logo becoming a blue card, drawing a connection south, and drifting toward the hub with gravitational lensing around both objects"
   ></canvas>
+  <h1
+    class="announcement"
+    style:--reveal={announcementProgress}
+    aria-hidden={status !== 'ready' || announcementProgress === 0}
+  >
+    <span class="brand">Deep Trust</span>
+    <span class="joining">is now a part of</span>
+    <span class="destination">Doppel</span>
+  </h1>
   <nav class="transitions" aria-label="Animation transitions">
     <h2>Preview transitions</h2>
     <ol>
@@ -87,6 +100,42 @@
     width: 100%;
     height: 100%;
     touch-action: none;
+  }
+
+  .announcement {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: min(18rem, 60vw);
+    margin: 0;
+    color: #f3f7ff;
+    font-size: clamp(1.4rem, 3.6vmin, 2.4rem);
+    font-weight: 500;
+    line-height: 1.08;
+    letter-spacing: -0.035em;
+    text-align: center;
+    text-shadow: 0 2px 20px #080d14, 0 1px 4px #080d14;
+    pointer-events: none;
+    opacity: var(--reveal);
+    transform: translate(-50%, -50%) translateY(calc(12px - var(--reveal) * 12px));
+  }
+
+  .announcement span {
+    display: block;
+  }
+
+  .joining {
+    margin: 0.65em 0;
+    color: #c2cedb;
+    font-size: 0.48em;
+    font-weight: 400;
+    letter-spacing: 0.015em;
+  }
+
+  .destination {
+    color: #e6ffb5;
+    font-size: 1.25em;
+    font-weight: 650;
   }
 
   p {

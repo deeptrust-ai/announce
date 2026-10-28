@@ -8,6 +8,7 @@ import {
   HemisphereLight,
   LineSegments,
   Material,
+  MathUtils,
   Mesh,
   Object3D,
   PCFShadowMap,
@@ -32,6 +33,7 @@ import { applyConnectionView, fitConnectionView, CONNECTION_SHOT } from './conne
 import type { ConnectionView } from './connection-camera'
 import { createHubApproach } from './hub-approach'
 import { createHubExpansion } from './hub-expansion'
+import { createHubBreathing } from './hub-breathing'
 import { applyFinalHubView, fitFinalHubView } from './final-hub-camera'
 import { APPROACH_START, ARRIVAL_START, CONNECTION_START, FINAL_HUB_START, FINAL_HUB_DURATION, LENS_RELEASE_START, SCENE_DURATION, TRANSITIONS, startingTransition, transitionAt } from './timeline'
 import type { TransitionId } from './timeline'
@@ -40,6 +42,7 @@ type SceneCallbacks = {
   onReady?: () => void
   onError?: (error: unknown) => void
   onTransition?: (transition: TransitionId) => void
+  onAnnouncement?: (progress: number) => void
 }
 
 export type SceneController = {
@@ -124,6 +127,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
   let ready = false
   let elapsed = TRANSITIONS.find((transition) => transition.id === requestedTransition)?.start ?? 0
   let previousTime: number | undefined
+  let ambientElapsed = 0
   let logoModel: Object3D | undefined
   let hubModel: Object3D | undefined
   let card: ReturnType<typeof createCardConstruction> | undefined
@@ -132,9 +136,12 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
   let connectionBounds: Box3 | undefined
   let approach: ReturnType<typeof createHubApproach> | undefined
   let expansion: ReturnType<typeof createHubExpansion> | undefined
+  let breathing: ReturnType<typeof createHubBreathing> | undefined
+  let settledHubView: ReturnType<typeof fitFinalHubView> | undefined
   let reportedTransition: TransitionId | undefined
 
   function reportTransition() {
+    callbacks.onAnnouncement?.(MathUtils.smootherstep(elapsed, LENS_RELEASE_START, SCENE_DURATION))
     const current = transitionAt(elapsed)
     if (current !== reportedTransition) {
       reportedTransition = current
@@ -148,6 +155,8 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
     const start = TRANSITIONS.find((item) => item.id === transition)?.start ?? 0
     elapsed = motionPreference.matches ? SCENE_DURATION : start
     previousTime = undefined
+    ambientElapsed = 0
+    settledHubView = undefined
     card?.reset()
     arrival.reset()
     connection?.reset()
@@ -167,9 +176,11 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
   function render(time: number) {
     frame = 0
     if (disposed) return
-    if (ready && elapsed < SCENE_DURATION) {
+    if (ready) {
       if (previousTime !== undefined) {
-        elapsed = Math.min(SCENE_DURATION, elapsed + (time - previousTime) / 1000)
+        const delta = (time - previousTime) / 1000
+        elapsed = Math.min(SCENE_DURATION, elapsed + delta)
+        ambientElapsed += delta
       }
       previousTime = time
     }
@@ -189,8 +200,9 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
     }
     if (elapsed >= FINAL_HUB_START && connectionView && card && hubModel && logoModel) {
       // Refit the moving card and hub each frame rather than caching an early pose.
-      const finalHubView = fitFinalHubView(camera, hubModel,
+      const finalHubView = settledHubView ?? fitFinalHubView(camera, hubModel,
         card.root.getObjectByName('DeepTrust_Card_Body')!, logoModel)
+      if (elapsed >= SCENE_DURATION) settledHubView = finalHubView
       applyFinalHubView(camera, connectionView.target, finalHubView,
         (elapsed - FINAL_HUB_START) / FINAL_HUB_DURATION)
     }
@@ -202,8 +214,9 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
         card.root, hubModel, motionPreference.matches)
     }
     if (ready) reportTransition()
+    breathing?.update(ambientElapsed, motionPreference.matches)
     composer.render()
-    if (ready && elapsed < SCENE_DURATION) requestRender()
+    if (ready && (elapsed < SCENE_DURATION || !motionPreference.matches)) requestRender()
   }
 
   function refreshConnectionView() {
@@ -228,6 +241,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
     composer.setSize(width, height)
     camera.aspect = width / height
     camera.updateProjectionMatrix()
+    settledHubView = undefined
     refreshConnectionView()
     requestRender()
   }
@@ -285,6 +299,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
             connection = createSouthConnection(card.root, card.width, hubModel)
             scene.add(connection.root)
             expansion = createHubExpansion(hubModel)
+            breathing = createHubBreathing(hubModel)
             approach = createHubApproach(card.root, hubModel, expansion.orbitRadius)
             refreshConnectionView()
           } catch (error) {
