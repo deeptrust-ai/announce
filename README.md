@@ -32,10 +32,10 @@ The production build is written to `dist/`. Serve that directory with a static h
 - `src/app.css`: full-screen layout.
 
 The scene starts focused on the DeepTrust logo, lying flat on a dark floor.
-The camera makes a continuous 180-degree rising spiral over 3 seconds, from
-4 degrees above the floor to directly overhead at 90 degrees, then holds there.
-Turning, elevation, and camera distance share one easing curve. The camera eases
-only at the beginning and end, with no midpoint stop or separate squaring stage.
+The camera turns continuously through 180 degrees over 3 seconds. It stays at
+4 degrees above the floor for the first 2 seconds, with no change in height or
+distance. During the final second it smoothly rises to directly overhead at
+90 degrees. The turn keeps moving during the rise, with no pause or position jump.
 The turn ends at azimuth 0 so the logo finishes aligned with the screen, with
 horizontal bars and no diagonal tilt. The camera keeps looking at the logo
 throughout. The shot plays once after both GLBs load; refresh the page to replay it.
@@ -73,8 +73,9 @@ After the overhead camera settles, a blue card constructs around the logo:
   for later movement together.
 
 The grazing 4-degree start puts the camera about 6 cm above the floor in a
-landscape viewport. Camera distance rises continuously from 0.68 to 1.2 meters,
-with extra distance for portrait viewports. The logo stays still during the
+landscape viewport. Camera distance stays at 0.68 meters for 2 seconds, then
+increases smoothly to 1.2 meters in the final second, with extra distance for
+portrait viewports. The logo stays still during the
 camera shot. Reduced motion skips to the completed card and overhead camera,
 without sparks. Hidden tabs pause the timeline. Rendering stops after the full
 6-second sequence until a resize or visibility change. Pixel density is

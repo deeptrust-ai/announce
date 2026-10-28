@@ -2,6 +2,7 @@ import { MathUtils, PerspectiveCamera, Vector3 } from 'three'
 
 export const OPENING_SHOT = {
   durationSeconds: 3,
+  riseDelaySeconds: 2,
   // Finish the half-turn at azimuth 0, aligning the flat logo with the screen.
   startAzimuth: -180,
   turnDegrees: 180,
@@ -17,19 +18,23 @@ function ease(progress: number) {
   return (1 - Math.cos(Math.PI * MathUtils.clamp(progress, 0, 1))) / 2
 }
 
-/** One continuous rising half-turn, easing only at the start and final overhead pose. */
+/** Turn continuously, staying low for two seconds before the final overhead rise. */
 export function applyOpeningShot(camera: PerspectiveCamera, focus: Vector3, elapsed: number) {
-  const progress = ease(elapsed / OPENING_DURATION)
+  const turnProgress = ease(elapsed / OPENING_DURATION)
+  const riseProgress = ease(
+    (elapsed - OPENING_SHOT.riseDelaySeconds)
+      / (OPENING_DURATION - OPENING_SHOT.riseDelaySeconds),
+  )
   const azimuth = MathUtils.degToRad(
-    OPENING_SHOT.startAzimuth + OPENING_SHOT.turnDegrees * progress,
+    OPENING_SHOT.startAzimuth + OPENING_SHOT.turnDegrees * turnProgress,
   )
   const elevation = MathUtils.degToRad(
-    MathUtils.lerp(OPENING_SHOT.startElevation, OPENING_SHOT.endElevation, progress),
+    MathUtils.lerp(OPENING_SHOT.startElevation, OPENING_SHOT.endElevation, riseProgress),
   )
   const distance = MathUtils.lerp(
     OPENING_SHOT.startDistance,
     OPENING_SHOT.endDistance,
-    progress,
+    riseProgress,
   ) * Math.max(1, 1 / camera.aspect)
 
   if (elapsed >= OPENING_DURATION) {

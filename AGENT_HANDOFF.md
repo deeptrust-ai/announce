@@ -60,15 +60,19 @@ Current opening shot choices:
 - Start at a -180-degree azimuth and a grazing 4-degree elevation, focused on the
   flat logo. This puts the camera about 6 cm above the floor on landscape screens.
   The user requested this low start after seeing the first 35-degree version.
-- Turn 180 degrees while rising from 4 to 90 degrees over one continuous
-  3-second motion. Azimuth, elevation, and distance share the same progress.
+- Turn 180 degrees continuously over 3 seconds. Hold the low 4-degree elevation
+  and camera distance for the first 2 seconds. Smoothly raise to 90 degrees and
+  increase distance during the final second, while the turn keeps progressing.
+  `riseDelaySeconds` controls the delay; azimuth uses the full transition time.
 - End the turn at azimuth 0. The logo finishes aligned with the screen, with
   horizontal bars and no 45-degree tilt. The orientation remains continuous
   through the spiral; there is no separate roll correction or snap.
-- Camera distance rises continuously from 0.68 meters initially to 1.2 overhead.
+- Camera distance stays at 0.68 meters until second 2, then smoothly increases
+  to 1.2 meters overhead at second 3.
 - Increase distance for portrait viewports to keep the logo in frame.
-- Ease only at the overall start and finish. There is no stage boundary or
-  midpoint stop. Play once and hold the final view. Refresh to replay.
+- The continuous turn has its own start/end easing. Elevation and distance use
+  a delayed smooth rise with no jump at second 2. There is no overall motion
+  stop before overhead. Play once and hold the final view. Refresh to replay.
 - Keep a stable camera up vector at the overhead pole and focus on the logo.
 - Reduced motion skips to the final overhead shot and completed card, without
   sparks. Hidden tabs pause elapsed time.
