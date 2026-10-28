@@ -397,7 +397,7 @@ logo images do not duplicate it for screen readers. The visible middle line is
 fades in over 0.65 seconds; after 0.15 seconds, “is now a part of” types at
 0.075 seconds per character. After the full phrase and a 0.2-second pause,
 Doppel fades in over 0.75 seconds. After a further 0.25-second pause, the final
-“Read the Press Release =>” button fades in over 0.6 seconds. The whole reveal
+“Read the Press Release →” button fades in over 0.6 seconds. The whole reveal
 now lasts 3.8 seconds and ends at 16.4 seconds. The connecting phrase uses a smaller 1.125–2 rem scale and
 lighter weight so the logos carry the hierarchy. An invisible full-text copy
 reserves its line; the typed characters do not shift the logos or layout.
@@ -416,7 +416,9 @@ the whole announcement. The bottom-right Back / Restart / Next controls stay
 separate from the editorial grid and restart the active timeline entry.
 
 The press-release control is a locally styled anchor beneath the logos, outside
-the heading, aligned to the editorial left edge. The user supplied its exact
+the heading, aligned to the editorial left edge. It uses a real right arrow, a transparent
+background with a light outline, and a larger 3–5 rem responsive gap above it.
+Hover changes border/text color without filling the background. The user supplied its exact
 URL: `https://deeptrust.ai/press-release`. It opens a new tab with
 `noopener noreferrer`. Space is reserved before reveal; visibility, pointer
 interaction, and keyboard tab order follow its final fade. Reduced motion shows

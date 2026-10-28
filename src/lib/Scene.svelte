@@ -91,7 +91,7 @@
         style:visibility={reveal.pressReleaseOpacity > 0 ? 'visible' : 'hidden'}
         style:pointer-events={reveal.pressReleaseOpacity === 1 ? 'auto' : 'none'}
         tabindex={reveal.pressReleaseOpacity === 1 ? 0 : -1}
-      >Read the Press Release <span aria-hidden="true">=&gt;</span></a>
+      >Read the Press Release <span aria-hidden="true">→</span></a>
 
     </div>
   </section>
@@ -190,11 +190,11 @@
     gap: 1.5rem;
     max-width: 100%;
     min-height: 3rem;
-    margin-top: clamp(1.5rem, 3.75vh, 3rem);
+    margin-top: clamp(3rem, 7vh, 5rem);
     padding: 0.85rem 1.125rem;
-    border: 1px solid #e7eef6;
-    background: #e7eef6;
-    color: #080d14;
+    border: 1px solid rgb(231 238 246 / 55%);
+    background: transparent;
+    color: #e7eef6;
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: 0.875rem;
     font-weight: 500;
@@ -202,8 +202,9 @@
   }
 
   .press-release:not(:disabled):hover {
-    background: #e6ffb5;
+    background: transparent;
     border-color: #e6ffb5;
+    color: #e6ffb5;
   }
 
   .press-release:focus-visible {

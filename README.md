@@ -194,7 +194,7 @@ at 16.4 seconds, including the final press-release button. The joining/camera/gr
 the node orbits continue indefinitely. Space is reserved
 for the full phrase to prevent layout shifts. Replay resets the sequence;
 reduced motion shows the complete message immediately. Last, after Doppel is
-fully visible and a 0.25-second pause, “Read the Press Release =>” fades in over
+fully visible and a 0.25-second pause, “Read the Press Release →” fades in over
 0.6 seconds. It opens `https://deeptrust.ai/press-release` in a new tab. Its space
 is reserved from the start, and it only becomes interactive once fully revealed. Brand asset provenance is in `public/branding/SOURCES.md`.
 
