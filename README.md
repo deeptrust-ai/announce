@@ -23,17 +23,28 @@ The production build is written to `dist/`. Serve that directory with a static h
 
 ## Scene
 
-- `src/lib/scene.ts`: GLB loading, floor, lighting, camera controls, and rendering.
+- `src/lib/scene.ts`: GLB loading, floor, lighting, and animation lifecycle.
+- `src/lib/opening-shot.ts`: opening camera path, timing, and distances.
 - `src/lib/Scene.svelte`: canvas lifecycle and WebGL fallback.
 - `src/App.svelte`: page composition.
 - `src/app.css`: full-screen layout.
 
-The scene loads `public/models/hub-network.glb` onto a dark floor with shadows
-and a subtle glow on the hub ports. Drag to orbit; scroll or pinch to zoom. The
-camera stays above the floor and frames the model when the viewport changes.
-The model stays still, and frames render only when needed. Pixel density is
-capped at 2. Camera damping is disabled when reduced motion is enabled. GPU
-resources and event listeners are released when the component unmounts.
+The scene starts focused on the DeepTrust logo, lying flat on a dark floor.
+The camera makes one 360-degree orbit over 18 seconds, rising from 35 to 65
+degrees above the floor. It then rises for another 6 seconds to a position
+directly above the logo, looking straight down, and holds there. The camera
+keeps looking at the logo throughout. The shot plays once after both GLBs load;
+refresh the page to replay it.
+
+Camera distance rises from 0.68 to 0.92 to 1.2 meters, with extra distance for
+portrait viewports. The logo stays still. Reduced motion skips directly to the
+final overhead shot. Hidden tabs pause the timeline. Rendering stops after the
+shot finishes until a resize or visibility change. Pixel density is capped at 2.
+GPU resources and event listeners are released when the component unmounts.
+
+The existing hub network sits at `(12, 0, -12)` meters, outside the opening shot.
+Its separate nodes and links are retained for the later acquisition sequence.
+Logo travel, joining the hub, and rearranging nodes are not implemented yet.
 
 ## Blender model
 
@@ -45,8 +56,8 @@ The original logo proportions give a height of approximately 11.63 inches.
 The rounded outer corners follow the SVG's original Bezier curves. The navy
 background rectangle is excluded. No bevel is added to the other edges.
 The mesh is centered at the origin. The Blender file includes a separate preview
-studio collection; the GLB contains only the glyph. The logo remains separate
-from the live hub scene for the next animation step.
+studio collection; the GLB contains only the glyph. The live scene rotates the
+logo's front face upward and lifts its base to floor level.
 
 To regenerate on macOS with Blender installed:
 

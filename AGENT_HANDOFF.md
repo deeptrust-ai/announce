@@ -22,36 +22,56 @@ before making changes. Continue from the existing implementation.
 ## Intent and scope
 
 The landing page is a full-screen Three.js scene inside a simple Svelte app.
-The visual concept is DeepTrust being acquired and added to a central hub.
+The visual concept is DeepTrust being acquired by Doppel and added to its hub.
 Treat this as the user's creative brief, not evidence of a public acquisition.
 
 Two assets have been created: the DeepTrust logo and a hub network based on the
-user's supplied image. The hub now appears in the Three.js scene on a floor.
-The acquisition animation has not been implemented. Its movement, timing,
-arrival point, and final logo placement have not been decided.
+user's supplied image. Both are loaded into the same Three.js floor scene.
+The first logo/camera transition is implemented: an orbit, then an overhead rise.
+Logo travel, hub joining, and node rearrangement have not been implemented.
+The travel route, joining timing, arrival point, and final logo placement have
+not been decided.
 
 Continue with the user's next visual request. If asked to implement the joining
 sequence, use these assets and retain their separate transforms. Do not assume
-an animation design was already approved or add unrelated landing-page content.
+the later joining sequence was already approved or add unrelated page content.
 
 ## Current app
 
 - Svelte 5, TypeScript, Vite 8, Three.js 0.186; npm and `package-lock.json`.
 - `src/App.svelte`: full-screen page composition.
 - `src/lib/Scene.svelte`: canvas lifecycle, model-loading status, and errors.
-- `src/lib/scene.ts`: GLB loading, floor, lights, shadows, camera, and rendering.
+- `src/lib/scene.ts`: GLB loading, floor, lights, shadows, and animation lifecycle.
+- `src/lib/opening-shot.ts`: camera choreography and configurable shot constants.
 - `src/app.css`: full-screen layout.
-- `public/models/hub-network.glb`: asset currently loaded by the scene.
+- `public/models/hub-network.glb`: distant destination for the later sequence.
+- `public/models/inner-truth.glb`: DeepTrust logo currently featured by the camera.
 
 The scene uses a dark floor, angled perspective camera, warm key light, cool
 fill light, hemisphere light, soft shadows, and subtle bloom on the lime ports.
-OrbitControls supports drag to orbit and scroll/pinch to zoom. Panning is off,
-and the camera remains above the floor. The camera reframes on viewport changes.
+The camera follows the opening shot automatically. Manual OrbitControls were
+removed so they cannot compete with the exact overhead camera pose.
 
-The hub is static. Rendering happens on demand during loading, resizing, and
-camera movement. Pixel density is capped at 2. Reduced motion disables camera
-damping. Cleanup disposes controls, geometry, materials, shadow maps, and
-postprocessing resources. Async GLB loading handles unmounts and loading errors.
+Opening shot choices for the first visual iteration:
+
+- Start at a 45-degree azimuth and 35-degree elevation, focused on the flat logo.
+- Orbit a full 360 degrees over 18 seconds while rising to 65-degree elevation.
+- Rise for 6 more seconds to an exact overhead position, looking down 90 degrees.
+- Camera distances: 0.68 meters initially, 0.92 after the orbit, 1.2 overhead.
+- Increase distance for portrait viewports to keep the logo in frame.
+- Ease each phase, play once, and hold the final view. Refresh to replay.
+- Keep a stable camera up vector at the overhead pole and focus on the logo.
+- Reduced motion skips to the final shot. Hidden tabs pause elapsed time.
+
+The hub's GLB scene is named `Doppel_Hub` and positioned at `(12, 0, -12)` meters,
+about 17 meters from the logo. It stays outside the opening frame. Its existing
+groups remain intact for later animation. Neither the logo nor the hub moves
+during this first camera transition.
+
+Rendering continues during the 24-second opening, then returns to rendering on
+demand. Pixel density is capped at 2. Cleanup disposes geometry, materials,
+shadow maps, and postprocessing resources. Both GLBs must load before the shot
+starts; asynchronous loading handles unmounts and loading errors.
 
 The original rotating wireframe sculpture and stars have been removed.
 
@@ -79,7 +99,8 @@ the actual SVG geometry. Do not revert to a font glyph. The historical
 `inner-truth` filenames now refer to the correct logo model.
 
 The logo GLB is upright, centered at the origin, Y-up, facing +Z, with extrusion
-depth along Z. It is not yet loaded into the live scene.
+depth along Z. The live scene rotates it -90 degrees around X so its front faces
+upward, then lifts its base to Y=0. The runtime scene is named `DeepTrust_Logo`.
 
 ## Hub asset
 
@@ -158,9 +179,12 @@ for manual edits first. Neither exported asset needs external fonts or textures.
 ## Git and verification status
 
 Work was on `main`. Recheck the branch and working tree before editing.
-The latest implementation commit before this handoff was:
+The hub-only implementation commit, before the opening camera shot, was:
 
 `ca61694` — Show hub network on a lit floor in Three.js
+
+The next iteration adds the automatic opening logo orbit and overhead camera
+transition. Read the local Git log for its commit hash.
 
 Earlier relevant commits:
 

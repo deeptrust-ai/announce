@@ -13,8 +13,8 @@
           status = 'ready'
         },
         onError: (error) => {
-          console.error('Unable to load the hub model.', error)
-          errorMessage = 'The hub model could not be loaded. Reload the page to try again.'
+          console.error('Unable to load the scene models.', error)
+          errorMessage = 'The scene models could not be loaded. Reload the page to try again.'
           status = 'error'
         },
       })
@@ -29,11 +29,10 @@
 <div class="scene" aria-busy={status === 'loading'}>
   <canvas
     bind:this={canvas}
-    aria-label="A three-dimensional hub network resting on a dark floor"
-    title="Drag to orbit. Scroll or pinch to zoom."
+    aria-label="The DeepTrust logo lying on a floor as the camera circles and rises to an overhead view"
   ></canvas>
   {#if status !== 'ready'}
-    <p role="status">{status === 'loading' ? 'Loading hub…' : errorMessage}</p>
+    <p role="status">{status === 'loading' ? 'Loading scene…' : errorMessage}</p>
   {/if}
 </div>
 

@@ -7,7 +7,6 @@ import {
   Fog,
   HemisphereLight,
   Material,
-  MathUtils,
   Mesh,
   MeshStandardMaterial,
   Object3D,
@@ -20,12 +19,12 @@ import {
   Vector3,
   WebGLRenderer,
 } from 'three'
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js'
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js'
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
+import { applyOpeningShot, OPENING_DURATION } from './opening-shot'
 
 type SceneCallbacks = {
   onReady?: () => void
@@ -65,17 +64,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
   scene.fog = new Fog('#080d14', 10, 30)
 
   const camera = new PerspectiveCamera(40, 1, 0.02, 80)
-  camera.position.set(0, 3.3, 3.8)
-  const controls = new OrbitControls(camera, canvas)
-  controls.enablePan = false
-  controls.enableDamping = true
-  controls.dampingFactor = 0.08
-  controls.minPolarAngle = 0.15
-  controls.maxPolarAngle = Math.PI * 0.38
-  controls.minDistance = 1.5
-  controls.maxDistance = 18
-  controls.target.set(0, 0, 0)
-  controls.update()
+  const logoFocus = new Vector3()
 
   const floor = new Mesh(
     new PlaneGeometry(200, 200),
@@ -92,14 +81,14 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
   key.position.set(-3, 6, 4)
   key.castShadow = true
   key.shadow.mapSize.set(2048, 2048)
-  key.shadow.camera.left = -2
-  key.shadow.camera.right = 2
-  key.shadow.camera.top = 2
-  key.shadow.camera.bottom = -2
+  key.shadow.camera.left = -1
+  key.shadow.camera.right = 1
+  key.shadow.camera.top = 1
+  key.shadow.camera.bottom = -1
   key.shadow.camera.near = 0.1
   key.shadow.camera.far = 15
-  key.shadow.bias = -0.0001
-  key.shadow.normalBias = 0.002
+  key.shadow.bias = -0.00001
+  key.shadow.normalBias = 0.0003
   scene.add(key)
   const fill = new DirectionalLight('#a5c8ff', 1)
   fill.position.set(4, 3, -3)
@@ -113,48 +102,31 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
   composer.addPass(bloomPass)
   composer.addPass(outputPass)
 
-  const bounds = new Box3()
   const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)')
   let disposed = false
   let frame = 0
+  let loadedAssets = 0
+  let ready = false
+  let elapsed = 0
+  let previousTime: number | undefined
 
-  // The hub stays still. Draw only while loading, resizing, or moving the camera.
+  // Animate the opening once, then hold the overhead shot without a render loop.
   function requestRender() {
     if (!disposed && !document.hidden && !frame) frame = requestAnimationFrame(render)
   }
 
-  function render() {
+  function render(time: number) {
     frame = 0
     if (disposed) return
-    controls.update()
-    composer.render()
-  }
-
-  function fitCamera() {
-    if (bounds.isEmpty()) return
-    const center = bounds.getCenter(new Vector3())
-    const direction = camera.position.clone().sub(controls.target).normalize()
-    const right = new Vector3().crossVectors(camera.up, direction).normalize()
-    const up = new Vector3().crossVectors(direction, right).normalize()
-    const tanVertical = Math.tan(MathUtils.degToRad(camera.fov / 2))
-    const tanHorizontal = tanVertical * camera.aspect
-    let distance = 0
-    for (const x of [bounds.min.x, bounds.max.x]) {
-      for (const y of [bounds.min.y, bounds.max.y]) {
-        for (const z of [bounds.min.z, bounds.max.z]) {
-          const corner = new Vector3(x, y, z).sub(center)
-          distance = Math.max(
-            distance,
-            corner.dot(direction) + Math.abs(corner.dot(right)) / tanHorizontal,
-            corner.dot(direction) + Math.abs(corner.dot(up)) / tanVertical,
-          )
-        }
+    if (ready && elapsed < OPENING_DURATION) {
+      if (previousTime !== undefined) {
+        elapsed = Math.min(OPENING_DURATION, elapsed + (time - previousTime) / 1000)
       }
+      previousTime = time
     }
-    controls.target.copy(center)
-    camera.position.copy(center).addScaledVector(direction, distance * 1.16)
-    controls.maxDistance = Math.max(18, distance * 2)
-    controls.update()
+    applyOpeningShot(camera, logoFocus, elapsed)
+    composer.render()
+    if (ready && elapsed < OPENING_DURATION) requestRender()
   }
 
   function resize() {
@@ -167,16 +139,17 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
     composer.setSize(width, height)
     camera.aspect = width / height
     camera.updateProjectionMatrix()
-    fitCamera()
     requestRender()
   }
 
   function updateMotionPreference() {
-    controls.enableDamping = !motionPreference.matches
+    if (ready && motionPreference.matches) elapsed = OPENING_DURATION
+    previousTime = undefined
     requestRender()
   }
 
   function updateVisibility() {
+    previousTime = undefined
     if (document.hidden) {
       cancelAnimationFrame(frame)
       frame = 0
@@ -185,7 +158,6 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
     }
   }
 
-  controls.addEventListener('change', requestRender)
   const resizeObserver = new ResizeObserver(resize)
   resizeObserver.observe(canvas)
   document.addEventListener('visibilitychange', updateVisibility)
@@ -193,40 +165,60 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
   updateMotionPreference()
   resize()
 
-  new GLTFLoader().load(
-    `${import.meta.env.BASE_URL}models/hub-network.glb`,
-    (gltf) => {
-      if (disposed) {
-        disposeModel(gltf.scene)
-        return
-      }
-      // The GLB is already Y-up and rests at Y=0. Preserve node groups for animation.
-      const hub = gltf.scene
-      hub.traverse((object) => {
-        if (object instanceof Mesh) {
-          object.castShadow = true
-          object.receiveShadow = true
+  const loader = new GLTFLoader()
+  function loadAsset(filename: string, place: (model: Object3D) => void) {
+    loader.load(
+      `${import.meta.env.BASE_URL}models/${filename}`,
+      (gltf) => {
+        if (disposed) {
+          disposeModel(gltf.scene)
+          return
         }
-      })
-      scene.add(hub)
-      bounds.setFromObject(hub)
-      renderer.shadowMap.needsUpdate = true
-      fitCamera()
-      requestRender()
-      callbacks.onReady?.()
-    },
-    undefined,
-    (error) => {
-      if (!disposed) callbacks.onError?.(error)
-    },
-  )
+        const model = gltf.scene
+        place(model)
+        model.traverse((object) => {
+          if (object instanceof Mesh) {
+            object.castShadow = true
+            object.receiveShadow = true
+          }
+        })
+        scene.add(model)
+        renderer.shadowMap.needsUpdate = true
+        loadedAssets += 1
+        if (loadedAssets === 2) {
+          ready = true
+          elapsed = motionPreference.matches ? OPENING_DURATION : 0
+          previousTime = undefined
+          callbacks.onReady?.()
+        }
+        requestRender()
+      },
+      undefined,
+      (error) => {
+        if (!disposed) callbacks.onError?.(error)
+      },
+    )
+  }
+
+  loadAsset('inner-truth.glb', (logo) => {
+    logo.name = 'DeepTrust_Logo'
+    // The logo arrives upright. Rotate its front face upward and rest its base on the floor.
+    logo.rotation.x = -Math.PI / 2
+    const bounds = new Box3().setFromObject(logo)
+    logo.position.y -= bounds.min.y
+    bounds.setFromObject(logo).getCenter(logoFocus)
+  })
+
+  loadAsset('hub-network.glb', (hub) => {
+    // Keep its existing groups intact for the later travel and joining sequence.
+    hub.name = 'Doppel_Hub'
+    hub.position.set(12, 0, -12)
+  })
 
   return () => {
     disposed = true
     cancelAnimationFrame(frame)
     resizeObserver.disconnect()
-    controls.removeEventListener('change', requestRender)
-    controls.dispose()
     document.removeEventListener('visibilitychange', updateVisibility)
     motionPreference.removeEventListener('change', updateMotionPreference)
     disposeModel(scene)
