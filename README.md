@@ -26,6 +26,7 @@ The production build is written to `dist/`. Serve that directory with a static h
 - `src/lib/scene.ts`: GLB loading, floor, lighting, and animation lifecycle.
 - `src/lib/opening-shot.ts`: opening camera path, timing, and distances.
 - `src/lib/card-construction.ts`: split border trace, sparks, and tiled card fill.
+- `src/lib/arrival-effect.ts`: floor shockwave and brief camera impact.
 - `src/lib/timeline.ts`: shared transition names, start times, and durations.
 - `src/lib/Scene.svelte`: canvas lifecycle and WebGL fallback.
 - `src/App.svelte`: page composition.
@@ -33,34 +34,44 @@ The production build is written to `dist/`. Serve that directory with a static h
 
 The scene starts focused on the DeepTrust logo, lying flat on a dark floor.
 The camera turns continuously through 180 degrees over 3 seconds. It starts
-close to the logo at a grazing angle, then dollies backward for the first 2
-seconds at a fixed low eye height. During the final second it smoothly rises to
-directly overhead at 90 degrees, narrowing its FOV from 58 to 40 degrees as it
-ascends. The turn keeps moving during the rise, with no pause or position jump.
+close to the logo at a grazing angle and immediately begins a gentle climb.
+Physical height follows a quadratic curve: slow at first, then progressively
+faster toward overhead. A continuous radial arc pulls backward early and
+converges above the logo. There is no delayed takeoff, stage boundary, or midpoint
+stop. FOV narrows from 58 to 40 degrees using the same quadratic progress.
 The turn ends at azimuth 0 so the logo finishes aligned with the screen, with
 horizontal bars and no diagonal tilt. The camera keeps looking at the logo
 throughout. The shot plays once after both GLBs load; refresh the page to replay it.
 
-The left-side preview menu lists Camera rise (3 s), Border draw (1 s), and Tiled
-fill (2 s). Click an entry to reset and replay from its beginning, then continue
-the following transitions. Camera rise also replays the whole sequence. The
-active entry follows playback. Buttons support normal keyboard focus and
-activation; the canvas stays full-screen beneath the overlay. Menu names,
-durations, and start times come from the shared timeline.
+The transitions overlap and finish together at second 3:
+
+| Preview | Starts | Duration | Ends |
+| --- | --- | --- | --- |
+| Camera rise | 0 s | 3 s | 3 s |
+| Border draw | 1.5 s | 1.5 s | 3 s |
+| Tiled fill | 2 s | 1 s | 3 s |
+| Arrival pulse | 3 s | 0.8 s | 3.8 s |
+
+The left-side preview menu derives names, durations, and entry points from these
+shared values. Clicking resets and replays from that point, with the camera and
+other effects already at their correct timeline state. Camera rise replays all.
+The latest started transition is highlighted as playback advances. Native
+buttons support keyboard activation and focus; the canvas stays full-screen.
 
 The menu also updates the URL without reloading. `http://localhost:5173/?start=draw`
-starts at the exact overhead pose and plays border drawing from its first frame.
-`http://localhost:5173/?start=fill` starts with the border complete and fill just
-beginning. Refresh either URL to replay that stage and its following transitions.
+starts border drawing at its first frame with the camera halfway through its
+move. `http://localhost:5173/?start=fill` starts fill with a partially drawn border
+and the camera at second 2. `?start=arrival` previews the completed-card impact.
+Refresh to replay that starting point and the remaining sequence.
 The default URL still plays the full sequence. Reduced motion still skips to
 the completed card.
 
-After the overhead camera settles, a blue card constructs around the logo:
+While the camera is still rising, a blue card constructs around the logo:
 
 - The border traces from the top center down both sides simultaneously, meeting
-  at the bottom center over 1 second. Bright heads emit blue spark trails.
-- Only after the border closes, a 12-by-12 grid reveals the interior over 2
-  seconds. Cells appear top-to-bottom with deterministic variation near the fill
+  at the bottom center over 1.5 seconds. Bright heads emit blue spark trails.
+- Half a second after drawing starts, a 12-by-12 grid reveals the interior over
+  1 second while the border continues. Cells appear top-to-bottom with variation near the fill
   front. Each cell fades from dark to its final fill, with no flash, glow, or
   brightness overshoot. The finished surface is solid, without a checker pattern
   or tile gaps.
@@ -73,16 +84,22 @@ After the overhead camera settles, a blue card constructs around the logo:
   GLB remains unchanged. `Node_DeepTrust` parents the logo and construction parts
   for later movement together.
 
+At second 3, the camera, border, and fill finish together. A subtle soft blue ring
+expands across the floor for 0.8 seconds and fades. A small damped camera impact
+lasts 0.28 seconds, then returns to the exact square overhead pose. Offsets are
+applied to a fresh base pose every frame, so they cannot accumulate. Spark tails
+and border glow cool naturally during the arrival pulse.
+
 The grazing 4-degree start puts the camera about 3 cm above the floor. It starts
-0.24 meters from the logo and pulls back to a 0.68-meter ground-plane radius,
-holding eye height fixed until second 2. It reaches the same 1.2-meter overhead
+0.24 meters from the logo and arcs outward to roughly a 0.56-meter ground-plane
+radius while climbing. It reaches the same 1.2-meter overhead
 distance and 40-degree FOV as before at second 3. Portrait viewports increase
 horizontal distance and final height for framing, without lifting the initial
 eye height. Replay and direct-stage shortcuts also restore the proper lens.
-The logo stays still during the
-camera shot. Reduced motion skips to the completed card and overhead camera,
-without sparks. Hidden tabs pause the timeline. Rendering stops after the full
-6-second sequence until a resize or visibility change. Pixel density is
+The logo stays centered while settling into the forming card. Reduced
+motion skips to the completed card and overhead camera, without sparks,
+shockwave, or jolt. Hidden tabs pause the timeline. Rendering stops after the
+3.8-second sequence until a resize or visibility change. Pixel density is
 capped at 2. GPU resources and event listeners are released on unmount.
 
 The existing hub network sits at `(12, 0, -12)` meters, outside the opening shot.

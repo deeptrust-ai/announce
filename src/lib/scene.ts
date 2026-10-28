@@ -25,9 +25,10 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js'
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js'
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
-import { applyOpeningShot, OPENING_DURATION, OPENING_SHOT } from './opening-shot'
-import { createCardConstruction } from './card-construction'
-import { SCENE_DURATION, TRANSITIONS, startingTransition, transitionAt } from './timeline'
+import { applyOpeningShot, OPENING_SHOT } from './opening-shot'
+import { CARD_CONSTRUCTION, createCardConstruction } from './card-construction'
+import { createArrivalEffect } from './arrival-effect'
+import { ARRIVAL_START, SCENE_DURATION, TRANSITIONS, startingTransition, transitionAt } from './timeline'
 import type { TransitionId } from './timeline'
 
 type SceneCallbacks = {
@@ -112,6 +113,9 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
   composer.addPass(bloomPass)
   composer.addPass(outputPass)
 
+  const arrival = createArrivalEffect()
+  scene.add(arrival.root)
+
   const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)')
   let requestedTransition = startingTransition(window.location.search)
   let disposed = false
@@ -140,6 +144,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
     elapsed = motionPreference.matches ? SCENE_DURATION : start
     previousTime = undefined
     card?.reset()
+    arrival.reset()
     renderer.shadowMap.needsUpdate = true
     reportTransition()
     requestRender()
@@ -160,7 +165,8 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
       previousTime = time
     }
     applyOpeningShot(camera, logoFocus, elapsed)
-    if (card?.update(elapsed - OPENING_DURATION)) renderer.shadowMap.needsUpdate = true
+    if (card?.update(elapsed - CARD_CONSTRUCTION.startSeconds)) renderer.shadowMap.needsUpdate = true
+    arrival.update(ready ? elapsed - ARRIVAL_START : -1, camera, motionPreference.matches)
     if (ready) reportTransition()
     composer.render()
     if (ready && elapsed < SCENE_DURATION) requestRender()
@@ -225,6 +231,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
         if (loadedAssets === 2 && logoModel && hubModel) {
           try {
             card = createCardConstruction(logoModel, hubModel)
+            card.root.add(arrival.root)
             scene.add(card.root)
           } catch (error) {
             callbacks.onError?.(error)

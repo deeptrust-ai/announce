@@ -23,15 +23,20 @@ import {
 } from 'three'
 
 export const CARD_CONSTRUCTION = {
-  outlineSeconds: 1,
-  fillSeconds: 2,
+  startSeconds: 1.5,
+  outlineSeconds: 1.5,
+  fillDelaySeconds: 0.5,
+  fillSeconds: 1,
   logoSettleSeconds: 0.9,
   gridSize: 12,
   fillColor: '#102B55',
   logoScale: 0.52,
 } as const
 
-export const CARD_DURATION = CARD_CONSTRUCTION.outlineSeconds + CARD_CONSTRUCTION.fillSeconds
+export const CARD_DURATION = Math.max(
+  CARD_CONSTRUCTION.outlineSeconds,
+  CARD_CONSTRUCTION.fillDelaySeconds + CARD_CONSTRUCTION.fillSeconds,
+)
 
 // The navy background color in public/branding/logo-mark.svg.
 const DEEPTRUST_BLUE = '#061533'
@@ -240,9 +245,10 @@ export function createCardConstruction(logo: Object3D, hub: Object3D) {
   function update(time: number) {
     if (time < 0) return false
     const activeTime = MathUtils.clamp(time, 0, CARD_DURATION)
+    const effectsTime = Math.max(0, time)
     const outline = MathUtils.clamp(activeTime / CARD_CONSTRUCTION.outlineSeconds, 0, 1)
     const fill = MathUtils.clamp(
-      (activeTime - CARD_CONSTRUCTION.outlineSeconds) / CARD_CONSTRUCTION.fillSeconds, 0, 1,
+      (activeTime - CARD_CONSTRUCTION.fillDelaySeconds) / CARD_CONSTRUCTION.fillSeconds, 0, 1,
     )
     const settle = MathUtils.smootherstep(activeTime, 0, CARD_CONSTRUCTION.logoSettleSeconds)
     construction.visible = true
@@ -254,7 +260,7 @@ export function createCardConstruction(logo: Object3D, hub: Object3D) {
     logo.position.y = MathUtils.lerp(startPosition.y, finalLogoY, settle)
     logoMaterials.forEach((startColor, material) => material.color.lerpColors(startColor, white, settle))
 
-    const cooling = 1 - MathUtils.smoothstep(activeTime,
+    const cooling = 1 - MathUtils.smoothstep(effectsTime,
       CARD_CONSTRUCTION.outlineSeconds, CARD_CONSTRUCTION.outlineSeconds + 0.45)
     borderMaterial.emissiveIntensity = 24 + cooling * 140
     for (const { path, mesh, head } of branches) {
@@ -262,15 +268,15 @@ export function createCardConstruction(logo: Object3D, hub: Object3D) {
       head.visible = activeTime > 0 && outline < 1
       if (head.visible) head.position.copy(path.getPointAt(outline))
     }
-    body.visible = activeTime >= CARD_CONSTRUCTION.outlineSeconds
+    body.visible = activeTime >= CARD_CONSTRUCTION.fillDelaySeconds
     // Avoid a solid-card shadow before its cells have actually filled in.
     body.castShadow = fill >= 1
     fillProgress.value = fill
 
-    sparks.visible = activeTime > 0 && activeTime < CARD_CONSTRUCTION.outlineSeconds + 0.4
+    sparks.visible = effectsTime > 0 && effectsTime < CARD_CONSTRUCTION.outlineSeconds + 0.4
     if (sparks.visible) {
       particles.forEach((particle, index) => {
-        const age = activeTime - particle.birth
+        const age = effectsTime - particle.birth
         const alive = age >= 0 && age < particle.lifetime
         const energy = alive ? (1 - age / particle.lifetime) ** 2 * 220 : 0
         for (let end = 0; end < 2; end += 1) {

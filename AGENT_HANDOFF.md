@@ -27,8 +27,9 @@ Treat this as the user's creative brief, not evidence of a public acquisition.
 
 Two assets have been created: the DeepTrust logo and a hub network based on the
 user's supplied image. Both are loaded into the same Three.js floor scene.
-The opening is implemented: one continuous rising spiral from near the floor to
-an overhead view, followed by construction of a blue node/card around the logo.
+The opening is implemented: an accelerating rise from near the floor to overhead,
+overlapping construction of a blue node/card. They finish together in a brief
+blue shockwave and restrained camera impact.
 Logo travel, hub joining, and node rearrangement have not been implemented.
 The travel route, joining timing, arrival point, and final logo placement have
 not been decided.
@@ -45,6 +46,7 @@ the later joining sequence was already approved or add unrelated page content.
 - `src/lib/scene.ts`: GLB loading, floor, lights, shadows, and animation lifecycle.
 - `src/lib/opening-shot.ts`: camera choreography and configurable shot constants.
 - `src/lib/card-construction.ts`: matching node body, split border, sparks, tiled fill.
+- `src/lib/arrival-effect.ts`: floor pulse, damped camera impact, and reset.
 - `src/lib/timeline.ts`: transition definitions shared by playback and preview menu.
 - `src/app.css`: full-screen layout.
 - `public/models/hub-network.glb`: distant destination for the later sequence.
@@ -60,53 +62,63 @@ Current opening shot choices:
 - Start at a -180-degree azimuth and a grazing 4-degree elevation, focused on the
   flat logo, 0.24 meters away. This puts the camera about 3 cm above the floor.
   The user requested this low start after seeing the first 35-degree version.
-- Turn 180 degrees continuously over 3 seconds. Dolly backward to a 0.68-meter
-  ground-plane radius during the first 2 seconds at fixed physical eye height.
-  The gaze angle decreases during the pullback so the camera does not lift.
-  Smoothly raise to 90 degrees during the final second while the turn continues.
-  `riseDelaySeconds` controls the delay; azimuth uses the full transition time.
+- Turn 180 degrees continuously over 3 seconds. Physical height follows `t²`
+  over the entire move, starting gently and accelerating toward overhead. This
+  replaces the old 2-second height hold and last-second takeoff, which felt jumpy.
+  `riseExponent` controls this profile. A single smooth radial arc pulls backward
+  to roughly 0.56 meters, then converges above the logo without a phase switch.
 - End the turn at azimuth 0. The logo finishes aligned with the screen, with
   horizontal bars and no 45-degree tilt. The orientation remains continuous
   through the spiral; there is no separate roll correction or snap.
-- Reach 1.2 meters overhead at second 3. FOV stays at 58 degrees during the
-  pullback, then smoothly narrows to 40 degrees during the ascent. The final
+- Reach 1.2 meters overhead at second 3. FOV narrows from 58 to 40 degrees using
+  the same quadratic progress as height, without a separate lens stage. The final
   overhead framing is preserved. Every applied pose updates the projection
   matrix when FOV changes, including direct-stage seeks and reduced motion.
 - Increase horizontal distance and final height for portrait viewports, while
   keeping the initial eye height fixed.
-- The continuous turn and backward dolly have their own smooth easing. Elevation
-  and lens use a delayed smooth rise with no jump at second 2. There is no overall motion
-  stop before overhead. Play once and hold the final view. Refresh to replay.
+- The turn eases at its endpoints. The radial arc has zero horizontal velocity
+  at both ends. Height and FOV accelerate over the full move, without symmetric
+  rise easing or a midpoint stop. Play once and hold the final view. Refresh to replay.
 - Keep a stable camera up vector at the overhead pole and focus on the logo.
 - Reduced motion skips to the final overhead shot and completed card, without
-  sparks. Hidden tabs pause elapsed time.
+  sparks, pulse, or jolt. Hidden tabs pause elapsed time.
 
-The left-side preview menu offers Camera rise (3 s), Border draw (1 s), and
-Tiled fill (2 s), derived from shared timeline constants. Clicking replays from
-that stage's beginning and naturally continues the following stages, without a
-reload or model refetch. Camera rise replays all. The current stage is highlighted
-as playback advances. Native buttons provide keyboard activation and focus.
+The shared timeline now overlaps the effects:
+
+- Camera rise: starts 0 s, lasts 3 s, ends 3 s.
+- Border draw: starts 1.5 s, lasts 1.5 s, ends 3 s.
+- Tiled fill: starts 2 s, lasts 1 s, ends 3 s.
+- Arrival pulse: starts 3 s, lasts 0.8 s, ends 3.8 s.
+
+The user explicitly superseded the earlier sequential timing and the requirement
+to close the border before filling. Camera, outline, and fill all complete when
+the arrival impact begins. Offsets and durations are derived from shared values.
+The left-side preview menu lists all four effects. Clicking resets and seeks to
+that entry, with correct partial camera/card state, then plays forward without
+a reload or model refetch. Camera rise replays all. The latest started stage is
+highlighted as playback advances. Native buttons provide keyboard activation.
 
 The URL tracks the selected starting point without reloading:
-`http://localhost:5173/?start=draw` begins at exact overhead with an undrawn border;
-`http://localhost:5173/?start=fill` begins with the border closed and fill at time
-zero. Refresh to replay. The default URL starts the camera sequence. Reduced
-motion still shows the completed card immediately.
+`http://localhost:5173/?start=draw` begins with an undrawn border and the camera
+at second 1.5. `http://localhost:5173/?start=fill` begins at second 2, with fill at
+zero, partial border, and camera still rising. `?start=arrival` starts the pulse
+with camera and card complete. Refresh to replay. The default URL starts the
+whole sequence. Reduced motion shows the completed card without animated impact.
 
 `createScene` returns a controller with `playFrom(transitionId)` and `dispose()`.
 Replays reset the logo's original pose/color, border draw ranges, body reveal,
-sparks, and shadow state before seeking. Do not remove this reset when adding
+sparks, arrival pulse, and shadow state before seeking. Do not remove this reset when adding
 later transitions, or replaying the camera shot can retain a completed card.
 
-After the 3-second camera shot, the camera holds still while the card forms:
+Card construction overlaps the camera shot:
 
-- One second: outline starts at top center, grows around both sides at once,
+- From second 1.5 to 3: outline starts at top center, grows around both sides at once,
   then joins at bottom center. Two blue luminous heads emit short spark trails.
-- Next 2 seconds: a 12-by-12 grid reveals cells top-to-bottom with randomized
+- From second 2 to 3: a 12-by-12 grid reveals cells top-to-bottom with randomized
   activation near the advancing front. Cells fade from dark to final fill;
   no flashes, glow, or emissive pulse. Cells are twice the linear size of the
   earlier 24-by-24 grid. Rounded clipping and the reveal direction are preserved.
-  No fill is visible before border closure. Final fill is a solid navy surface,
+  Fill begins while the border is drawing. Final fill is a solid navy surface,
   with no permanent checker pattern.
 - Geometry comes from the hub GLB's actual `Messages_Body`, with matching
   12-inch width, 2.4-inch corner radius, and 1.5-inch depth. The border uses the
@@ -128,12 +140,20 @@ After the 3-second camera shot, the camera holds still while the card forms:
   premature solid-card shadow. Generated meshes and spark resources are disposed
   through the scene cleanup.
 
+At second 3, a soft bluish floor ring expands from the logo area and fades over
+0.8 seconds. Camera impact lasts 0.28 seconds: maximum configured 1.5 cm vertical
+impulse, 0.35-degree tilt, and 0.65-degree roll, attenuated immediately by damping.
+The base camera pose is reapplied before each impulse, so offsets do not build
+up. After the brief impact, camera alignment is exactly overhead and square.
+Arrival is attached to `Node_DeepTrust`, reset on menu replay, and disposed with
+the scene. Its shader ring is soft additive blue, not a full-screen flash.
+
 The hub's GLB scene is named `Doppel_Hub` and positioned at `(12, 0, -12)` meters,
 about 17 meters from the logo. It stays outside the opening frame. Its existing
-groups remain intact for later animation. Neither the logo nor the hub moves
-during this first camera transition.
+groups remain intact for later animation. The hub stays distant. The logo stays
+centered while scaling and lifting into its forming card during the camera move.
 
-Rendering continues during the full 6-second sequence, then returns to rendering on
+Rendering continues during the 3.8-second sequence including arrival fade, then returns to rendering on
 demand. Pixel density is capped at 2. Cleanup disposes geometry, materials,
 shadow maps, and postprocessing resources. Both GLBs must load before the shot
 starts; asynchronous loading handles unmounts and loading errors.
