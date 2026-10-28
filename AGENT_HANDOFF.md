@@ -29,9 +29,11 @@ Do not restore them until the user requests the next part.
 The card has a thin extruded rounded body. Its face uses the authentic NFC-card
 artwork as a texture, with the baked-in K cleared at runtime inside its existing
 circuit frame. The source PNG is unchanged. The center starts empty. The actual
-DeepTrust SVG bar bounds become eight fine 1.8-unit centerline strokes in
-mask/time textures. A bright drawing front traces them left to right, top to
-bottom. The finished mark is flat pearl-colored linework, with no relief, bevel,
+DeepTrust SVG bar bounds become sixteen fine strokes: two parallel lines per
+original solid block. Each is 0.7 SVG units thick, with a 0.7-unit gap. The mark
+is about 20% smaller than the initial single-line version (0.85 world-unit map
+width). A bright drawing front traces all sixteen lines left to right, top to
+bottom within the existing 4.8 seconds. The finished mark is flat pearl-colored linework, with no relief, bevel,
 bump, or edge shading, echoing the Keycard K's circuit-line treatment.
 The KEYCARD.AI label is masked during the etch, shockwave, lift, and most of the spin.
 Circuit tracks remain visible throughout.

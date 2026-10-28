@@ -73,7 +73,7 @@ function roundedCard() {
   return shape
 }
 
-/** Translate the actual mark's eight bars into fine circuit-style centerlines.
+/** Translate each of the mark's eight bars into a close pair of circuit lines.
  * The time map draws each line left to right, top to bottom. */
 function createEtchMaps(source: string) {
   const svg = new DOMParser().parseFromString(source, 'image/svg+xml')
@@ -94,26 +94,31 @@ function createEtchMaps(source: string) {
   mask.width = mask.height = timing.width = timing.height = 512
   const maskContext = mask.getContext('2d')!, timeContext = timing.getContext('2d')!
   maskContext.scale(8, 8); timeContext.scale(8, 8)
-  const lineWidth = 1.8
+  const lineWidth = 0.7
+  const lineOffsets = [-0.7, 0.7]
+  const lineCount = paths.length * lineOffsets.length
   for (const context of [maskContext, timeContext]) {
     context.lineWidth = lineWidth
     context.lineCap = 'round'
   }
   maskContext.strokeStyle = 'white'
   timeContext.fillStyle = 'white'; timeContext.fillRect(0, 0, 64, 64)
-  paths.forEach(({ left, right, top, bottom }, index) => {
-    const path = new Path2D()
-    const center = (top + bottom) / 2
-    path.moveTo(left + lineWidth / 2, center)
-    path.lineTo(right - lineWidth / 2, center)
-    maskContext.stroke(path)
-    const gradient = timeContext.createLinearGradient(left, 0, right, 0)
-    // Avoid exact zero/one to leave a clean blank start and completed last frame.
-    const start = Math.round((0.015 + index / paths.length * 0.97) * 255)
-    const end = Math.round((0.015 + (index + 0.94) / paths.length * 0.97) * 255)
-    gradient.addColorStop(0, `rgb(${start},${start},${start})`)
-    gradient.addColorStop(1, `rgb(${end},${end},${end})`)
-    timeContext.strokeStyle = gradient; timeContext.stroke(path)
+  paths.forEach(({ left, right, top, bottom }, blockIndex) => {
+    lineOffsets.forEach((offset, lineIndex) => {
+      const path = new Path2D()
+      const center = (top + bottom) / 2 + offset
+      path.moveTo(left + lineWidth / 2, center)
+      path.lineTo(right - lineWidth / 2, center)
+      maskContext.stroke(path)
+      const gradient = timeContext.createLinearGradient(left, 0, right, 0)
+      const index = blockIndex * lineOffsets.length + lineIndex
+      // Trace all sixteen lines in order within the existing etch duration.
+      const start = Math.round((0.015 + index / lineCount * 0.97) * 255)
+      const end = Math.round((0.015 + (index + 0.94) / lineCount * 0.97) * 255)
+      gradient.addColorStop(0, `rgb(${start},${start},${start})`)
+      gradient.addColorStop(1, `rgb(${end},${end},${end})`)
+      timeContext.strokeStyle = gradient; timeContext.stroke(path)
+    })
   })
   return { mask: new CanvasTexture(mask), timing: new CanvasTexture(timing) }
 }
@@ -154,7 +159,7 @@ const cardFragment = /* glsl */`
     color = mix(color, blankLabel + grain, label);
 
     // The mark is in the face's material, not a raised or floating logo mesh.
-    vec2 logoUv = (vUv - center) / vec2(1.06 / 2.52, 1.06 / 3.96) + .5;
+    vec2 logoUv = (vUv - center) / vec2(.85 / 2.52, .85 / 3.96) + .5;
     float inside = step(0., logoUv.x) * step(logoUv.x, 1.) * step(0., logoUv.y) * step(logoUv.y, 1.);
     float mask = texture2D(uMask, logoUv).a * inside;
     float arrival = texture2D(uTiming, logoUv).r;
