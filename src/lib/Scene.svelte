@@ -167,7 +167,7 @@
   .joining-reserve { visibility: hidden; }
 
   .doppel-logo {
-    width: clamp(15rem, 28vw, 29rem);
+    width: clamp(11.25rem, 21vw, 21.75rem);
     filter: brightness(0) invert(1);
   }
 
@@ -255,12 +255,12 @@
     }
 
     .deeptrust-logo { width: 11rem; }
-    .doppel-logo { width: min(17rem, 100%); }
+    .doppel-logo { width: min(12.75rem, 75%); }
   }
 
   @media (max-height: 500px) {
     h1 { font-size: 1.125rem; gap: 0.75rem; }
     .deeptrust-logo { width: 9rem; }
-    .doppel-logo { width: 12rem; }
+    .doppel-logo { width: 9rem; }
   }
 </style>

@@ -326,7 +326,8 @@ left gradient supports legibility while the animated scene continues underneath.
 The DeepTrust logo lockup is the existing `logo-full.svg`. The Doppel lockup is
 `public/branding/doppel-lockup.svg`, downloaded from the official website's
 `/static/logos/doppel-lockup-dark.svg`; CSS renders it white on the dark scene.
-`public/branding/SOURCES.md` records provenance. Both retain their aspect ratios.
+`public/branding/SOURCES.md` records provenance. Both retain their aspect ratios. The Doppel logo is now 25% smaller across
+desktop, mobile, and short viewports; the DeepTrust logo size is unchanged.
 The heading's accessible name is “Deep Trust is now a part of Doppel”; decorative
 logo images do not duplicate it for screen readers. The visible middle line is
 “is now a part of”, set much smaller than the logos on one reserved line. The layer does not intercept pointer events.
