@@ -18,6 +18,7 @@ import {
   Vector3,
   WebGLRenderer,
 } from 'three'
+import { createKeycardLaser } from './keycard-laser'
 
 /** The opening etch and hero reveal stop before any announcement copy. */
 export const KEYCARD_OPENING = {
@@ -57,6 +58,8 @@ function applyCardPose(object: Object3D, time: number) {
 const WIDTH = 2.52
 const HEIGHT = 3.96
 const DEPTH = 0.045
+const LOGO_SIZE = 0.72
+const LOGO_CENTER_Y = 1 - 288 / 792
 
 function roundedCard() {
   const x = -WIDTH / 2, y = -HEIGHT / 2, radius = 0.13
@@ -94,9 +97,12 @@ function createEtchMaps(source: string) {
   mask.width = mask.height = timing.width = timing.height = 512
   const maskContext = mask.getContext('2d')!, timeContext = timing.getContext('2d')!
   maskContext.scale(8, 8); timeContext.scale(8, 8)
-  const lineWidth = 0.7
-  const lineOffsets = [-0.7, 0.7]
+  // The K reference uses a stroke about one third of its center-to-center pitch.
+  // A 4.25-unit pitch continues evenly across pairs and between original rows.
+  const lineWidth = 1.5
+  const lineOffsets = [-2.125, 2.125]
   const lineCount = paths.length * lineOffsets.length
+  const segments: { left: number; right: number; y: number; start: number; end: number }[] = []
   for (const context of [maskContext, timeContext]) {
     context.lineWidth = lineWidth
     context.lineCap = 'round'
@@ -115,12 +121,13 @@ function createEtchMaps(source: string) {
       // Trace all sixteen lines in order within the existing etch duration.
       const start = Math.round((0.015 + index / lineCount * 0.97) * 255)
       const end = Math.round((0.015 + (index + 0.94) / lineCount * 0.97) * 255)
+      segments.push({ left, right, y: center, start: start / 255, end: end / 255 })
       gradient.addColorStop(0, `rgb(${start},${start},${start})`)
       gradient.addColorStop(1, `rgb(${end},${end},${end})`)
       timeContext.strokeStyle = gradient; timeContext.stroke(path)
     })
   })
-  return { mask: new CanvasTexture(mask), timing: new CanvasTexture(timing) }
+  return { mask: new CanvasTexture(mask), timing: new CanvasTexture(timing), segments }
 }
 
 const vertexShader = /* glsl */`
@@ -145,7 +152,7 @@ const cardFragment = /* glsl */`
   void main() {
     vec3 color = texture2D(uCard, vUv).rgb;
     // Clear the baked-in K inside the innermost circuit frame; preserve all tracks.
-    vec2 center = vec2(0.5, 1. - 288. / 792.);
+    vec2 center = vec2(0.5, ${LOGO_CENTER_Y});
     vec2 aperture = abs(vUv - center) - vec2(84. / 504., 73. / 792.);
     float blank = 1. - smoothstep(-.002, .001, max(aperture.x, aperture.y));
     float grain = (hash(vUv * vec2(504., 792.)) - .5) * .006;
@@ -159,7 +166,7 @@ const cardFragment = /* glsl */`
     color = mix(color, blankLabel + grain, label);
 
     // The mark is in the face's material, not a raised or floating logo mesh.
-    vec2 logoUv = (vUv - center) / vec2(.85 / 2.52, .85 / 3.96) + .5;
+    vec2 logoUv = (vUv - center) / vec2(${LOGO_SIZE / WIDTH}, ${LOGO_SIZE / HEIGHT}) + .5;
     float inside = step(0., logoUv.x) * step(logoUv.x, 1.) * step(0., logoUv.y) * step(logoUv.y, 1.);
     float mask = texture2D(uMask, logoUv).a * inside;
     float arrival = texture2D(uTiming, logoUv).r;
@@ -281,6 +288,8 @@ export async function createKeycardScene(canvas: HTMLCanvasElement, signal: Abor
   const floor = new Mesh(floorGeometry, floorMaterial)
   floor.rotation.x = -Math.PI / 2
   scene.add(floor)
+  const laser = createKeycardLaser()
+  scene.add(laser.mesh)
 
   const preference = window.matchMedia('(prefers-reduced-motion: reduce)')
   let elapsed = 0, frame = 0, previous: number | undefined, disposed = false
@@ -289,6 +298,7 @@ export async function createKeycardScene(canvas: HTMLCanvasElement, signal: Abor
   const floorDirection = new Vector3(0, 1, .62).normalize()
   const target = new Vector3()
   const heroOffset = new Vector3()
+  const laserHit = new Vector3()
   const start = new URLSearchParams(window.location.search).get('start')
   elapsed = start === 'complete' ? END : KEYCARD_STAGES.find((stage) => stage.id === start)?.start ?? 0
   if (preference.matches) elapsed = END
@@ -306,6 +316,23 @@ export async function createKeycardScene(canvas: HTMLCanvasElement, signal: Abor
     target.copy(card.position)
     camera.position.copy(floorDirection).multiplyScalar(floorDistance).lerp(heroOffset, lift).add(target)
     camera.lookAt(target)
+    camera.updateMatrixWorld()
+    card.updateMatrixWorld(true)
+    // Match the quantized time map and the shader's .005 cutting-front offset.
+    const cuttingTime = faceMaterial.uniforms.uEtch!.value - .005
+    const segment = elapsed >= KEYCARD_OPENING.pause && elapsed < ETCH_END && !preference.matches
+      ? maps.segments.find((line) => cuttingTime >= line.start && cuttingTime <= line.end)
+      : undefined
+    if (segment) {
+      const progress = clamp((cuttingTime - segment.start) / (segment.end - segment.start))
+      const x = segment.left + (segment.right - segment.left) * progress
+      laserHit.set(
+        (x / 64 - .5) * LOGO_SIZE,
+        (LOGO_CENTER_Y - .5) * HEIGHT + (.5 - segment.y / 64) * LOGO_SIZE,
+        DEPTH / 2 + .002,
+      ).applyMatrix4(card.matrixWorld)
+    }
+    laser.update(segment ? laserHit : undefined, camera, elapsed)
     const blur = elapsed >= SPIN_START && elapsed <= HERO_START ? Math.pow(Math.sin(spinProgress * Math.PI), 2) : 0
     trails.forEach(({ root, material, delay }, index) => {
       root.visible = blur > .001
@@ -328,6 +355,7 @@ export async function createKeycardScene(canvas: HTMLCanvasElement, signal: Abor
   function resize() {
     const width = Math.max(1, canvas.clientWidth), height = Math.max(1, canvas.clientHeight)
     renderer.setSize(width, height, false)
+    laser.resize(canvas.width, canvas.height, renderer.getPixelRatio())
     camera.aspect = width / height
     // Fit the card's projected corners with room for the shockwave on every aspect.
     camera.position.copy(floorDirection).multiplyScalar(10)
@@ -387,6 +415,7 @@ export async function createKeycardScene(canvas: HTMLCanvasElement, signal: Abor
       window.removeEventListener('keydown', restart)
       bodyGeometry.dispose(); bodyMaterial.dispose(); faceGeometry.dispose(); faceMaterial.dispose()
       trails.forEach(({ material }) => material.dispose())
+      laser.dispose()
       floorGeometry.dispose(); floorMaterial.dispose(); cardTexture.dispose(); maps.mask.dispose(); maps.timing.dispose()
       renderer.dispose()
     },

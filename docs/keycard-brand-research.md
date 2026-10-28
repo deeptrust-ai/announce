@@ -86,8 +86,8 @@ Keycard entry point.
 The next corrections narrow implementation to the opening etch and hero reveal.
 The card starts lying flat on a dark grid with its chip center empty. DeepTrust's
 eight-block mark draws into that center as sixteen thin, flat circuit-style
-lines, two closely spaced lines per original block. The mark is about 20%
-smaller than the first linework version. After the etching completes, a single
+lines, two per original block, with a consistent K-like stroke-to-gap rhythm. The mark now uses a 0.72-world-unit map, about 32% smaller than the first
+linework version, to leave clear space inside the circuit frame. After the etching completes, a single
 shockwave expands through the floor. The card then lifts upright, spins rapidly,
 and settles into its front-facing hero view. The card retains the
 NFC artwork's circuit tracks. The K is masked in the runtime material,
@@ -104,7 +104,11 @@ the actual DeepTrust SVG bar bounds as thin centerline maps, and a world-space g
 An elevated camera initially shows the card resting on the floor, then tracks
 its center as it lifts and settles into the hero view. The sixteen logo
 lines draw left to right, top to bottom, with an illuminated front and a flat
-pearlescent finish. There is no relief, bevel, or simulated edge shading. The shockwave distorts only the floor.
+pearlescent finish. A glowing blue beam from outside the upper-left frame
+follows the cutting point, synchronized to the stroke timing map. The revised
+1.5-unit strokes are about twice as thick as the first paired-line draft, with
+a roughly 4.25-unit pitch that repeats across pairs and rows. There is no relief,
+bevel, or simulated edge shading. The shockwave distorts only the floor.
 
 The sequence is: 0.8-second hold, 4.8-second engraving, 0.35-second cooling pause,
 1.7-second shockwave, 2-second upright lift, 3-second six-turn spin, and
