@@ -39,6 +39,11 @@ The turn ends at azimuth 0 so the logo finishes aligned with the screen, with
 horizontal bars and no diagonal tilt. The camera keeps looking at the logo
 throughout. The shot plays once after both GLBs load; refresh the page to replay it.
 
+For rapid visual iteration, open `http://localhost:5173/?start=draw`. This starts
+at the exact overhead pose and plays border drawing from its first frame, then
+the normal tiled fill. Refresh to restart drawing. The default URL still plays
+the full sequence. Reduced motion still skips to the completed card.
+
 After the overhead camera settles, a blue card constructs around the logo:
 
 - The border traces from the top center down both sides simultaneously, meeting

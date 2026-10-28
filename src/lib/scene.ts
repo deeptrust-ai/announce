@@ -107,11 +107,13 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
   composer.addPass(outputPass)
 
   const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)')
+  const startElapsed = new URLSearchParams(window.location.search).get('start') === 'draw'
+    ? OPENING_DURATION : 0
   let disposed = false
   let frame = 0
   let loadedAssets = 0
   let ready = false
-  let elapsed = 0
+  let elapsed = startElapsed
   let previousTime: number | undefined
   let logoModel: Object3D | undefined
   let hubModel: Object3D | undefined
@@ -203,7 +205,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
             return
           }
           ready = true
-          elapsed = motionPreference.matches ? SCENE_DURATION : 0
+          elapsed = motionPreference.matches ? SCENE_DURATION : startElapsed
           previousTime = undefined
           callbacks.onReady?.()
         }

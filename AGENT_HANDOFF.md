@@ -72,6 +72,12 @@ Current opening shot choices:
 - Reduced motion skips to the final overhead shot and completed card, without
   sparks. Hidden tabs pause elapsed time.
 
+Visual iteration shortcut: `http://localhost:5173/?start=draw` skips the opening
+camera move and starts border drawing from time zero in the exact overhead pose.
+Refresh that URL to replay the draw and fill with their normal timing. The
+default URL keeps the complete sequence; reduced motion still shows the final
+completed card.
+
 After the 12-second camera shot, the camera holds still while the card forms:
 
 - Three seconds: outline starts at top center, grows around both sides at once,
