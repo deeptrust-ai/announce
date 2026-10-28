@@ -86,8 +86,11 @@ While the camera is still rising, a blue card constructs around the logo:
   for later movement together.
 
 At second 3, the camera, border, and fill finish together. A subtle soft blue ring
-expands across the floor for 0.8 seconds and fades. Its width parameter is 0.11 m,
-twice the original 0.055 m; peak brightness and expansion timing are unchanged.
+starts at zero radius beneath the card center, expands to 0.75 m over 0.8 seconds,
+and fades. Its width parameter is 0.22 m, doubled again from 0.11 m, with no
+brightness increase. The pulse plane sits between the floor and card base, so
+the opaque card masks its center and the glow emerges from underneath. The
+plane is large enough to contain the wider soft tail without square clipping.
 A small damped camera impact
 lasts 0.28 seconds, then returns to the exact square overhead pose. Offsets are
 applied to a fresh base pose every frame, so they cannot accumulate. Spark tails

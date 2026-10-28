@@ -142,8 +142,13 @@ Card construction overlaps the camera shot:
   through the scene cleanup.
 
 At second 3, a soft bluish floor ring expands from the logo area and fades over
-0.8 seconds. Its width parameter is 0.11 m, doubled from 0.055 m without changing
-peak brightness, expansion radius, speed, or timing. Camera impact lasts 0.28 seconds:
+0.8 seconds. Its width parameter is 0.22 m, doubled again from 0.11 m without
+increasing brightness. The radius starts at zero at the card center and expands
+to 0.75 m. Its plane is at Y=-0.0005 m, between the floor at -0.001 m and card
+base at 0, with depth testing enabled. The card occludes the center so the pulse
+emerges from underneath. The plane's size includes the wider Gaussian tail to
+avoid square clipping. Replay resets the radius to zero.
+Camera impact lasts 0.28 seconds:
 maximum configured 1.5 cm vertical
 impulse, 0.35-degree tilt, and 0.65-degree roll, attenuated immediately by damping.
 The base camera pose is reapplied before each impulse, so offsets do not build

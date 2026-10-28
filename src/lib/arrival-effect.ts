@@ -12,9 +12,9 @@ import {
 export const ARRIVAL_EFFECT = {
   durationSeconds: 0.8,
   joltSeconds: 0.28,
-  startRadius: 0.07,
+  startRadius: 0,
   endRadius: 0.75,
-  ringWidth: 0.11,
+  ringWidth: 0.22,
 } as const
 
 /** A floor-level pulse and a tiny, absolute-time camera impulse at completion. */
@@ -31,13 +31,14 @@ export function createArrivalEffect() {
   const material = new ShaderMaterial({
     uniforms,
     transparent: true,
+    depthTest: true,
     depthWrite: false,
     blending: AdditiveBlending,
     toneMapped: false,
     vertexShader: `
       varying vec2 vFloor;
       void main() {
-        vFloor = (uv - 0.5) * 1.8;
+        vFloor = position.xy;
         gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
       }
     `,
@@ -54,14 +55,19 @@ export function createArrivalEffect() {
       }
     `,
   })
-  const pulse = new Mesh(new PlaneGeometry(1.8, 1.8), material)
+  // Leave room for the wider band's soft tail without clipping it to a square.
+  const diameter = 2 * (ARRIVAL_EFFECT.endRadius + ARRIVAL_EFFECT.ringWidth * 3)
+  const pulse = new Mesh(new PlaneGeometry(diameter, diameter), material)
   pulse.name = 'Blue_Floor_Shockwave'
   pulse.rotation.x = -Math.PI / 2
-  pulse.position.y = 0.0005
+  // Floor is at -0.001 m; card base is at 0. The pulse sits between them,
+  // centered under the card, so the card occludes it until it emerges at the edges.
+  pulse.position.y = -0.0005
   root.add(pulse)
 
   function reset() {
     root.visible = false
+    uniforms.uRadius.value = ARRIVAL_EFFECT.startRadius
     uniforms.uOpacity.value = 0
   }
 
