@@ -37,9 +37,9 @@ overlapping construction of a blue node/card. They finish together in a brief
 blue shockwave and restrained camera impact. A blue connection then draws south
 from the completed card toward the distant hub while the camera rises vertically
 to reveal both objects.
-A delayed drift now brings the complete DeepTrust card closer to the hub, with
-localized gravitational lensing around both objects. Entering the hub orbit and
-rearranging existing nodes have not been implemented.
+A delayed drift now brings the complete DeepTrust card into the top of the hub
+orbit, while the seven original nodes redistribute into an eight-node layout.
+Gravitational lensing affects only the surrounding floor grid.
 The travel route, joining timing, arrival point, and final logo placement have
 not been decided.
 
@@ -59,7 +59,8 @@ the later joining sequence was already approved or add unrelated page content.
 - `src/lib/floor.ts`: solid floor with a faint, antialiased world-aligned grid.
 - `src/lib/south-connection.ts`: bottom-center port and southbound connection trace.
 - `src/lib/connection-camera.ts`: vertical rise and framing of both connection endpoints.
-- `src/lib/hub-approach.ts`: delayed card approach with absolute-time positions.
+- `src/lib/hub-approach.ts`: delayed card approach into the top orbit slot.
+- `src/lib/hub-expansion.ts`: clockwise node redistribution, links, and eighth port.
 - `src/lib/gravity-lensing.ts`: world-space lens centers and GLSL for only the floor-grid coordinates.
 - `src/lib/timeline.ts`: transition definitions shared by playback and preview menu.
 - `src/app.css`: full-screen layout.
@@ -209,17 +210,31 @@ for a one-second delay followed by a line-tip chase; do not restore that chase.
 The wire maintains a minimum 1.2-pixel screen diameter at high camera positions,
 scaling only its cross-section. Its endpoint and length remain unchanged.
 The connector uses separate absolute transforms and resets on menu
-replay. The source endpoint and port now follow the moving card each frame; the hub
-endpoint stays at the plate rim. The original hub nodes do not rearrange yet.
+replay. The source endpoint and port follow the moving card each frame; the hub
+endpoint stays at the northern plate rim beneath the new DeepTrust port.
 
 Two seconds after connection starts, the complete `Node_DeepTrust` drifts south
 over eight seconds, using smootherstep easing and absolute positions. It stops
-eight floor-grid cells north of the hub center, outside the existing orbit.
-`HUB_APPROACH` controls delay, duration, and stopping distance. Replay restores
+at the north/top position of the existing orbit, using the actual radius of
+`Node_Messages` from the GLB. This supersedes the earlier eight-grid-cell stop
+outside the orbit. `HUB_APPROACH` controls delay and duration. Replay restores
 the original card position. The shadow light follows the card with a constant
 offset, preserving its lighting direction and shadow coverage. Camera fitting
 uses the cached original scene bounds so resizing during travel does not
 recompose the shot or lose the original logo location.
+
+The hub expands from seven points to eight during the approach. Existing nodes
+retain their clockwise order: Messages, Domains, Email, Social Media, Paid Ads,
+Telco, URLs. Their final slots are 45, 90, 135, 180, 225, 270, and 315 degrees
+clockwise from north; DeepTrust occupies 0 degrees at the top. The motion starts
+20% into the approach and settles at 90%, using smootherstep easing. Node cards
+and icons translate around the orbit without rotation. Their matching ports
+move to the same angles, and their baked radial links rotate about the hub
+center. A clone of the original Messages port becomes `Port_DeepTrust` and
+scales into view as the top slot opens. Shared geometry/materials are preserved
+and disposed with the loaded hub. Replay restores all original node, link, and
+port transforms and hides the eighth port. The Blender source and GLB are not
+modified; all redistribution happens in the runtime scene.
 
 The user clarified that gravitational lensing must affect ONLY the grid. The
 first implementation used a full-scene postprocessing pass, which also warped
@@ -313,8 +328,8 @@ The exported object hierarchy preserves:
 
 Each node parent owns its card and icon. Links have `source_node` and
 `target_port` custom properties, exported as glTF extras. Ports use `Port_*`
-names. This structure is intended to support later acquisition animation.
-The link geometry is static; moving a node alone will not update its link.
+names. The source link geometry is baked; `hub-expansion.ts` rotates each link
+with its node and port to preserve the connection during orbit redistribution.
 
 ## Blender workflow
 

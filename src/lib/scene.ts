@@ -31,6 +31,7 @@ import { createSouthConnection, SOUTH_CONNECTION } from './south-connection'
 import { applyConnectionView, fitConnectionView } from './connection-camera'
 import type { ConnectionView } from './connection-camera'
 import { createHubApproach } from './hub-approach'
+import { createHubExpansion } from './hub-expansion'
 import { APPROACH_START, ARRIVAL_START, CONNECTION_START, SCENE_DURATION, TRANSITIONS, startingTransition, transitionAt } from './timeline'
 import type { TransitionId } from './timeline'
 
@@ -129,6 +130,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
   let connectionView: ConnectionView | undefined
   let connectionBounds: Box3 | undefined
   let approach: ReturnType<typeof createHubApproach> | undefined
+  let expansion: ReturnType<typeof createHubExpansion> | undefined
   let reportedTransition: TransitionId | undefined
 
   function reportTransition() {
@@ -149,6 +151,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
     arrival.reset()
     connection?.reset()
     approach?.reset()
+    expansion?.reset()
     floor.lensing.reset()
     renderer.shadowMap.needsUpdate = true
     reportTransition()
@@ -172,6 +175,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
     applyOpeningShot(camera, logoFocus, elapsed)
     if (card?.update(elapsed - CARD_CONSTRUCTION.startSeconds)) renderer.shadowMap.needsUpdate = true
     if (approach?.update(elapsed - APPROACH_START)) renderer.shadowMap.needsUpdate = true
+    if (expansion?.update(elapsed - APPROACH_START)) renderer.shadowMap.needsUpdate = true
     if (card) {
       key.target.position.copy(card.root.position)
       key.position.copy(card.root.position).add(keyOffset)
@@ -271,7 +275,8 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
             scene.add(card.root)
             connection = createSouthConnection(card.root, card.width, hubModel)
             scene.add(connection.root)
-            approach = createHubApproach(card.root, hubModel, card.width * GRID_CARD_RATIO)
+            expansion = createHubExpansion(hubModel)
+            approach = createHubApproach(card.root, hubModel, expansion.orbitRadius)
             refreshConnectionView()
           } catch (error) {
             callbacks.onError?.(error)

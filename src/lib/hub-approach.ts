@@ -3,14 +3,13 @@ import { MathUtils, Object3D, Vector3 } from 'three'
 export const HUB_APPROACH = {
   delaySeconds: 2,
   durationSeconds: 8,
-  stopDistanceGridCells: 8,
 } as const
 
-/** Drift the complete DeepTrust card south, stopping outside the existing orbit. */
-export function createHubApproach(card: Object3D, hub: Object3D, gridCellSize: number) {
+/** Drift the complete DeepTrust card into the north slot of the hub orbit. */
+export function createHubApproach(card: Object3D, hub: Object3D, orbitRadius: number) {
   const origin = card.position.clone()
   const destination = new Vector3(
-    origin.x, origin.y, hub.position.z - gridCellSize * HUB_APPROACH.stopDistanceGridCells,
+    hub.position.x, origin.y, hub.position.z - orbitRadius,
   )
   let previousProgress = -1
 

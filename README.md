@@ -30,7 +30,8 @@ The production build is written to `dist/`. Serve that directory with a static h
 - `src/lib/floor.ts`: unlit floor grid with a separate shadow receiver.
 - `src/lib/south-connection.ts`: outgoing port and southbound connection trace.
 - `src/lib/connection-camera.ts`: vertical camera rise that frames the logo and hub.
-- `src/lib/hub-approach.ts`: delayed drift of the whole DeepTrust card toward the hub.
+- `src/lib/hub-approach.ts`: delayed drift into the top slot of the hub orbit.
+- `src/lib/hub-expansion.ts`: seven-to-eight-node redistribution with moving links and ports.
 - `src/lib/gravity-lensing.ts`: world-space distortion of only the floor-grid coordinates.
 - `src/lib/timeline.ts`: shared transition names, start times, and durations.
 - `src/lib/Scene.svelte`: canvas lifecycle and WebGL fallback.
@@ -139,10 +140,14 @@ in landscape and portrait. Fog distance grows with altitude to keep them visible
 The connection maintains a minimum visible screen thickness as the camera rises.
 Two seconds into the line scene, DeepTrust begins an eight-second eased drift
 toward the hub. Its logo, body, border, and source port move together. It stops
-eight grid cells north of the hub center, outside the existing node orbit. The
+at the top of the existing node orbit, at the same radius as the other cards. The
 wire stays attached as its source moves and continues drawing to the hub.
 The camera completes its existing pullback and holds the original composition.
-The original hub nodes stay in place.
+During the approach, the seven original nodes slide clockwise into seven
+evenly spaced slots, leaving the top slot for DeepTrust. The final eight-node
+layout has 45-degree spacing. Cards and icons remain upright; their amber
+links and lime hub ports follow their angular movement. A new lime port appears
+at the top for DeepTrust. Replaying restores the original seven-node layout.
 
 As attraction begins, the floor shader gradually bends only its grid lookup
 coordinates around each object. The logo, hub, connection, lighting, shadows,
