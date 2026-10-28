@@ -28,7 +28,7 @@ export const KEYCARD_OPENING = {
   pulse: 1.7,
   lift: 2,
   spin: 3,
-  turns: 6,
+  turns: 6.5,
   hero: 0.9,
 } as const
 const ETCH_END = KEYCARD_OPENING.pause + KEYCARD_OPENING.etch
@@ -161,7 +161,7 @@ const cardFragment = /* glsl */`
     vec3 lineColor = mix(vec3(.55, .64, .67), vec3(.68, .57, .68), logoUv.x);
     color = mix(color, lineColor, cut);
     color += vec3(.5, .85, 1.) * head * 2.;
-    // The final rotation reveals the untouched original K and KEYCARD.AI label.
+    // The back face always uses the untouched original K and KEYCARD.AI label.
     color = mix(color, texture2D(uCard, vUv).rgb, uOriginal);
     gl_FragColor = vec4(color, uOpacity);
     #include <tonemapping_fragment>
@@ -251,6 +251,14 @@ export async function createKeycardScene(canvas: HTMLCanvasElement, signal: Abor
     if (length(max(corner, 0.)) + min(max(corner.x, corner.y), 0.) > .13) discard;
     vec3 color = texture2D`)
   card.add(face)
+  const backMaterial = new ShaderMaterial({
+    vertexShader, fragmentShader: faceMaterial.fragmentShader,
+    uniforms: { ...faceMaterial.uniforms, uOriginal: { value: 1 } },
+  })
+  const back = new Mesh(faceGeometry, backMaterial)
+  back.position.z = -face.position.z
+  back.rotation.y = Math.PI
+  card.add(back)
 
   // Short shutter samples smear only the fast-spinning card; the grid stays crisp.
   const trails = Array.from({ length: 5 }, (_, index) => {
@@ -262,8 +270,16 @@ export async function createKeycardScene(canvas: HTMLCanvasElement, signal: Abor
     const root = new Group()
     const mesh = new Mesh(faceGeometry, material)
     mesh.position.z = face.position.z
-    root.add(mesh); scene.add(root)
-    return { root, material, delay: (index + 1) * .014 }
+    const backTrailMaterial = new ShaderMaterial({
+      vertexShader, fragmentShader: backMaterial.fragmentShader,
+      uniforms: { ...backMaterial.uniforms, uOpacity: material.uniforms.uOpacity! },
+      transparent: true, depthWrite: false,
+    })
+    const backMesh = new Mesh(faceGeometry, backTrailMaterial)
+    backMesh.position.z = back.position.z
+    backMesh.rotation.y = Math.PI
+    root.add(mesh, backMesh); scene.add(root)
+    return { root, material, backTrailMaterial, delay: (index + 1) * .014 }
   })
 
   const floorGeometry = new PlaneGeometry(100, 100)
@@ -291,9 +307,6 @@ export async function createKeycardScene(canvas: HTMLCanvasElement, signal: Abor
     floorMaterial.uniforms.uPulse!.value = Math.max(0, Math.min(1, (elapsed - PULSE_START) / KEYCARD_OPENING.pulse))
     floorMaterial.uniforms.uPulseActive!.value = !preference.matches && elapsed > PULSE_START && elapsed < LIFT_START ? 1 : 0
     const spinProgress = clamp((elapsed - SPIN_START) / KEYCARD_OPENING.spin)
-    const turns = ease(spinProgress) * KEYCARD_OPENING.turns
-    // Swap while the face points away during the last revolution, before it lands.
-    faceMaterial.uniforms.uOriginal!.value = ease((turns - (KEYCARD_OPENING.turns - .7)) / .3)
     applyCardPose(card, elapsed)
     const lift = ease((elapsed - LIFT_START) / KEYCARD_OPENING.lift)
     target.copy(card.position)
@@ -396,8 +409,8 @@ export async function createKeycardScene(canvas: HTMLCanvasElement, signal: Abor
       document.removeEventListener('visibilitychange', visibility)
       preference.removeEventListener('change', motion)
       window.removeEventListener('keydown', restart)
-      bodyGeometry.dispose(); bodyMaterial.dispose(); faceGeometry.dispose(); faceMaterial.dispose()
-      trails.forEach(({ material }) => material.dispose())
+      bodyGeometry.dispose(); bodyMaterial.dispose(); faceGeometry.dispose(); faceMaterial.dispose(); backMaterial.dispose()
+      trails.forEach(({ material, backTrailMaterial }) => { material.dispose(); backTrailMaterial.dispose() })
       laser.dispose()
       floorGeometry.dispose(); floorMaterial.dispose(); cardTexture.dispose(); maps.mask.dispose(); maps.timing.dispose()
       renderer.dispose()

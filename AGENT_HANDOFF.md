@@ -41,17 +41,19 @@ using the same quantized time ranges as the etch maps. It switches off between
 bars and after etching, and remains absent with reduced motion. The finished
 mark is a flat pearlescent material treatment with no relief, bevel, bump, or
 edge shading.
-The KEYCARD.AI label is masked during the etch, shockwave, lift, and most of the spin.
+The front KEYCARD.AI label stays masked throughout. A separate reverse face
+always carries the untouched original K and KEYCARD.AI artwork, even before
+spinning. It is rotated 180 degrees locally so it reads correctly from behind.
 Circuit tracks remain visible throughout.
 
 Timeline: 0.8-second blank hold, 4.8-second engraving, 0.35-second cooling pause,
-1.7-second floor shockwave, 2-second lift upright, 3-second six-turn spin, and
+1.7-second floor shockwave, 2-second lift upright, 3-second six-and-a-half-turn spin, and
 0.9-second hero settle. The card floats clear of the floor while standing up.
 The camera tracks its center and eases from the elevated floor view into a
 front-facing portrait-card hero. Five short shutter samples create a subtle
-blur trail only during the rapid spin. While the card faces away during its
-last revolution, its face switches to the untouched original NFC artwork. The
-finale shows the original Keycard K and KEYCARD.AI label, not the DeepTrust mark. At second 13.55 all
+blur trails for both faces only during the rapid spin. The front retains
+DeepTrust and the back retains Keycard throughout; there is no artwork swap.
+The extra half turn lands with the original Keycard reverse facing the camera. At second 13.55 all
 motion stops. No later text or content transition follows.
 
 Controls: Previous / Restart / Next, with the current stage label and 1–6 index.

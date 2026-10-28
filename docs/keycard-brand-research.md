@@ -92,8 +92,9 @@ the circuit frame. After the etching completes, a single
 shockwave expands through the floor. The card then lifts upright, spins rapidly,
 and settles into its front-facing hero view. The card retains the
 NFC artwork's circuit tracks. The K is masked in the runtime material,
-leaving the original PNG unchanged. The KEYCARD.AI label is hidden until the
-last turn reveals the original Keycard artwork. Only the scene and playback
+leaving the original PNG unchanged. The front KEYCARD.AI label is hidden.
+A separate reverse face always carries the original Keycard K and KEYCARD.AI
+artwork, visible whenever that side turns toward the camera. Only the scene and playback
 controls are visible. The earlier
 scrolling announcement and content blocks are deferred until later transitions.
 
@@ -110,10 +111,11 @@ follows the cutting point, synchronized to the timing map. There is no relief,
 bevel, or simulated edge shading. The shockwave distorts only the floor.
 
 The sequence is: 0.8-second hold, 4.8-second engraving, 0.35-second cooling pause,
-1.7-second shockwave, 2-second upright lift, 3-second six-turn spin, and
+1.7-second shockwave, 2-second upright lift, 3-second six-and-a-half-turn spin, and
 0.9-second hero settle. A short shutter trail approximates motion blur during
-the spin. The face changes while pointing away in the last revolution, so the
-finished hero reveals the original Keycard K and KEYCARD.AI label. Previous,
+the spin, on both sides. The front and back keep their respective artwork
+throughout. The final half turn leaves the original Keycard reverse facing
+the camera. Previous,
 Restart, and Next controls cover all six stages; R restarts the current stage.
 Reduced motion shows the finished hero without animation; hidden tabs pause.
 DPR is capped at two; animation stops after the hero settles.

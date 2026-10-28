@@ -14,8 +14,9 @@ https://www.keycard.ai/brand/
 The SVG geometry and PNG artwork are unchanged on disk. The Keycard opening
 uses the PNG as a material texture and masks its center K at runtime so the
 DeepTrust mark can be etched into the empty center. The KEYCARD.AI label is
-also masked during the opening. The last spin restores the untouched original
-texture, including its K and KEYCARD.AI label, for the final upright hero. Assets are served locally, with no hotlinked logo
+also masked on the DeepTrust front. A separate back face always uses the
+untouched original texture, including its K and KEYCARD.AI label. The spin
+ends with this back face toward the camera for the final upright hero. Assets are served locally, with no hotlinked logo
 requests. Typeface files in `public/fonts/keycard/` are Geist and Geist Mono,
 retrieved from the public font assets used on Keycard's homepage:
 
