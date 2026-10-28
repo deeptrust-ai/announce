@@ -27,8 +27,9 @@ The production build is written to `dist/`. Serve that directory with a static h
 - `src/lib/opening-shot.ts`: opening camera path, timing, and distances.
 - `src/lib/card-construction.ts`: split border trace, sparks, and tiled card fill.
 - `src/lib/arrival-effect.ts`: floor shockwave and brief camera impact.
-- `src/lib/floor.ts`: solid shadow-receiving floor with a faint world-aligned grid.
+- `src/lib/floor.ts`: unlit floor grid with a separate shadow receiver.
 - `src/lib/south-connection.ts`: outgoing port and southbound connection trace.
+- `src/lib/connection-camera.ts`: vertical camera rise that frames the logo and hub.
 - `src/lib/timeline.ts`: shared transition names, start times, and durations.
 - `src/lib/Scene.svelte`: canvas lifecycle and WebGL fallback.
 - `src/App.svelte`: page composition.
@@ -54,7 +55,7 @@ The connection starts after the arrival pulse:
 | Border draw | 1.5 s | 1.5 s | 3 s |
 | Tiled fill | 2 s | 1 s | 3 s |
 | Arrival pulse | 3 s | 0.8 s | 3.8 s |
-| South connection | 3.8 s | 3 s | 6.8 s |
+| South connection | 3.8 s | 6 s | 9.8 s |
 
 The left-side preview menu derives names, durations, and entry points from these
 shared values. Clicking resets and replays from that point, with the camera and
@@ -102,10 +103,11 @@ and border glow cool naturally during the arrival pulse.
 
 The solid dark floor has faint square grid lines aligned to world X/Z. Cells
 measure 70% of the actual hub card width: about 0.21336 m (8.4 inches) for a
-12-inch card. The grid is part of the floor material, so it receives the same
-shadows without overlapping geometry or z-fighting. Antialiasing and distance
-fading keep the lines subdued near the horizon.
-The grid now uses stronger blue-gray contrast and slightly wider lines for visibility.
+12-inch card. The grid uses an unlit color layer so its visibility does not depend on the
+lighting path. A separate, slightly raised transparent shadow receiver preserves
+the card shadow. Antialiasing and distance fading keep distant lines subdued;
+the fade distance grows with camera height. This fixes the missing grid observed
+in the browser, rather than only increasing its contrast.
 
 The grazing 4-degree start puts the camera about 3 cm above the floor. It starts
 0.24 meters from the logo and arcs outward to roughly a 0.56-meter ground-plane
@@ -116,15 +118,20 @@ eye height. Replay and direct-stage shortcuts also restore the proper lens.
 The logo stays centered while settling into the forming card. Reduced
 motion skips to the completed card and overhead camera, without sparks,
 shockwave, or jolt. Hidden tabs pause the timeline. Rendering stops after the
-6.8-second sequence until a resize or visibility change. Pixel density is
+9.8-second sequence until a resize or visibility change. Pixel density is
 capped at 2. GPU resources and event listeners are released on unmount.
 
-The existing hub network sits at `(0, 0, 18)` meters, directly south of the logo
-in world +Z and below it in the final overhead view. After the arrival pulse,
+The hub center sits 30 floor-grid cells directly south of the logo center,
+about `(0, 0, 6.4008)` meters for the current card size,
+in world +Z and below it in the final view. Spacing derives from the same
+loaded card width and grid ratio as the visible floor cells. After the arrival pulse,
 a blue port appears at the card's bottom center and a connection draws toward
-the hub's northern rim over 3 seconds. The trace starts slowly, then accelerates
-into the distance. The camera stays fixed overhead; the head leaves the bottom
-of the frame while the hub remains distant. Menu replay resets the port and wire.
+the hub's northern rim over 6 seconds. The trace starts slowly, then accelerates
+into the distance. During the connection, the camera rises vertically with smooth
+easing and gradually aims toward the diagram center. Its floor position and lens
+stay fixed. The final height fits both the logo and the complete hub with margin
+in landscape and portrait. Fog distance grows with altitude to keep them visible. Menu replay resets the port and wire.
+The connection maintains a minimum visible screen thickness as the camera rises.
 The card and other nodes do not travel or rearrange in this transition.
 
 ## Blender model
@@ -175,3 +182,7 @@ the GLB. Regenerate with:
 /Applications/Blender.app/Contents/MacOS/Blender --background --factory-startup \
   --python scripts/create-hub-network.py
 ```
+
+This iteration passed `npm run check`, targeted landscape/portrait camera-framing
+checks, and a browser visual check against the existing local dev server. No
+production build, push, or deployment was performed.

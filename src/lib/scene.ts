@@ -10,7 +10,7 @@ import {
   Material,
   Mesh,
   Object3D,
-  PCFSoftShadowMap,
+  PCFShadowMap,
   PerspectiveCamera,
   Scene,
   Texture,
@@ -26,8 +26,10 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { applyOpeningShot, OPENING_SHOT } from './opening-shot'
 import { CARD_CONSTRUCTION, createCardConstruction } from './card-construction'
 import { createArrivalEffect } from './arrival-effect'
-import { createFloor } from './floor'
+import { createFloor, GRID_CARD_RATIO } from './floor'
 import { createSouthConnection, SOUTH_CONNECTION } from './south-connection'
+import { applyConnectionView, fitConnectionView } from './connection-camera'
+import type { ConnectionView } from './connection-camera'
 import { ARRIVAL_START, CONNECTION_START, SCENE_DURATION, TRANSITIONS, startingTransition, transitionAt } from './timeline'
 import type { TransitionId } from './timeline'
 
@@ -67,14 +69,15 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
   renderer.toneMapping = ACESFilmicToneMapping
   renderer.toneMappingExposure = 1.05
   renderer.shadowMap.enabled = true
-  renderer.shadowMap.type = PCFSoftShadowMap
+  renderer.shadowMap.type = PCFShadowMap
   renderer.shadowMap.autoUpdate = false
 
   const scene = new Scene()
   scene.background = new Color('#080d14')
-  scene.fog = new Fog('#080d14', 10, 30)
+  const fog = new Fog('#080d14', 10, 30)
+  scene.fog = fog
 
-  const camera = new PerspectiveCamera(OPENING_SHOT.endFov, 1, 0.02, 80)
+  const camera = new PerspectiveCamera(OPENING_SHOT.endFov, 1, 0.02, 1000)
   const logoFocus = new Vector3()
 
   const floor = createFloor()
@@ -93,7 +96,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
   key.shadow.camera.far = 15
   key.shadow.bias = -0.00001
   key.shadow.normalBias = 0.0003
-  scene.add(key)
+  scene.add(key, key.target)
   const fill = new DirectionalLight('#a5c8ff', 1)
   fill.position.set(4, 3, -3)
   scene.add(fill)
@@ -115,12 +118,13 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
   let frame = 0
   let loadedAssets = 0
   let ready = false
-  let elapsed = TRANSITIONS.find((transition) => transition.id === requestedTransition)!.start
+  let elapsed = TRANSITIONS.find((transition) => transition.id === requestedTransition)?.start ?? 0
   let previousTime: number | undefined
   let logoModel: Object3D | undefined
   let hubModel: Object3D | undefined
   let card: ReturnType<typeof createCardConstruction> | undefined
   let connection: ReturnType<typeof createSouthConnection> | undefined
+  let connectionView: ConnectionView | undefined
   let reportedTransition: TransitionId | undefined
 
   function reportTransition() {
@@ -134,7 +138,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
   function playFrom(transition: TransitionId) {
     if (disposed) return
     requestedTransition = transition
-    const start = TRANSITIONS.find((item) => item.id === transition)!.start
+    const start = TRANSITIONS.find((item) => item.id === transition)?.start ?? 0
     elapsed = motionPreference.matches ? SCENE_DURATION : start
     previousTime = undefined
     card?.reset()
@@ -163,9 +167,25 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
     if (card?.update(elapsed - CARD_CONSTRUCTION.startSeconds)) renderer.shadowMap.needsUpdate = true
     arrival.update(ready ? elapsed - ARRIVAL_START : -1, camera, motionPreference.matches)
     if (connection?.update(elapsed - CONNECTION_START)) renderer.shadowMap.needsUpdate = true
+    if (connectionView && elapsed >= CONNECTION_START) {
+      applyConnectionView(camera, logoFocus, connectionView,
+        (elapsed - CONNECTION_START) / SOUTH_CONNECTION.durationSeconds)
+    }
+    // Keep the distant objects clear as the view widens; fog must not hide them at altitude.
+    fog.near = Math.max(10, camera.position.y * 1.8)
+    fog.far = Math.max(30, camera.position.y * 4)
     if (ready) reportTransition()
     composer.render()
     if (ready && elapsed < SCENE_DURATION) requestRender()
+  }
+
+  function refreshConnectionView() {
+    if (!card || !hubModel) return
+    card.root.updateWorldMatrix(true, true)
+    hubModel.updateWorldMatrix(true, true)
+    const body = card.root.getObjectByName('DeepTrust_Card_Body')!
+    const bounds = new Box3().setFromObject(body).union(new Box3().setFromObject(hubModel))
+    connectionView = fitConnectionView(camera, logoFocus, bounds)
   }
 
   function resize() {
@@ -178,6 +198,7 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
     composer.setSize(width, height)
     camera.aspect = width / height
     camera.updateProjectionMatrix()
+    refreshConnectionView()
     requestRender()
   }
 
@@ -228,10 +249,12 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
           try {
             card = createCardConstruction(logoModel, hubModel)
             floor.setCardWidth(card.width)
+            hubModel.position.set(0, 0, card.width * GRID_CARD_RATIO * SOUTH_CONNECTION.hubDistanceGridCells)
             card.root.add(arrival.root)
             scene.add(card.root)
             connection = createSouthConnection(card.root, card.width, hubModel)
             scene.add(connection.root)
+            refreshConnectionView()
           } catch (error) {
             callbacks.onError?.(error)
             requestRender()
@@ -264,7 +287,6 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
     hubModel = hub
     // Keep its existing groups intact for the later travel and joining sequence.
     hub.name = 'Doppel_Hub'
-    hub.position.set(0, 0, SOUTH_CONNECTION.hubDistance)
   })
 
   function dispose() {

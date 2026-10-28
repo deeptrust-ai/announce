@@ -14,7 +14,9 @@ before making changes. Continue from the existing implementation.
 - The user runs the app and checks it in parallel. Do not start, stop, or restart
   their development server.
 - The user explicitly said not to worry about running tests. Skip routine test
-  runs. Be clear about what has and has not been verified.
+  runs. The user later explicitly requested a test to diagnose the missing grid;
+  targeted checks and browser verification were performed for that repair and
+  the accompanying camera change. Be clear about verification for each iteration.
 - Do not push or deploy unless requested.
 - Preserve unrelated edits and unsaved Blender work. Inspect the actual state
   before replacing an open file or model.
@@ -30,7 +32,8 @@ user's supplied image. Both are loaded into the same Three.js floor scene.
 The opening is implemented: an accelerating rise from near the floor to overhead,
 overlapping construction of a blue node/card. They finish together in a brief
 blue shockwave and restrained camera impact. A blue connection then draws south
-from the completed card toward the distant hub while the camera stays fixed.
+from the completed card toward the distant hub while the camera rises vertically
+to reveal both objects.
 Moving the logo into the hub orbit and rearranging nodes have not been implemented.
 The travel route, joining timing, arrival point, and final logo placement have
 not been decided.
@@ -50,6 +53,7 @@ the later joining sequence was already approved or add unrelated page content.
 - `src/lib/arrival-effect.ts`: floor pulse, damped camera impact, and reset.
 - `src/lib/floor.ts`: solid floor with a faint, antialiased world-aligned grid.
 - `src/lib/south-connection.ts`: bottom-center port and southbound connection trace.
+- `src/lib/connection-camera.ts`: vertical rise and framing of both connection endpoints.
 - `src/lib/timeline.ts`: transition definitions shared by playback and preview menu.
 - `src/app.css`: full-screen layout.
 - `public/models/hub-network.glb`: distant destination for the later sequence.
@@ -92,7 +96,7 @@ The shared timeline now overlaps the effects:
 - Border draw: starts 1.5 s, lasts 1.5 s, ends 3 s.
 - Tiled fill: starts 2 s, lasts 1 s, ends 3 s.
 - Arrival pulse: starts 3 s, lasts 0.8 s, ends 3.8 s.
-- South connection: starts 3.8 s, lasts 3 s, ends 6.8 s.
+- South connection: starts 3.8 s, lasts 6 s, ends 9.8 s.
 
 The user explicitly superseded the earlier sequential timing and the requirement
 to close the border before filling. Camera, outline, and fill all complete when
@@ -164,23 +168,38 @@ the scene. Its shader ring is soft additive blue, not a full-screen flash.
 The environment floor stays solid dark with faint square grid lines. Grid cells
 are 70% of the actual final card width, measured from the loaded hub geometry:
 about 0.21336 m / 8.4 inches for a 12-inch card. The material pattern uses world
-X/Z coordinates and is part of the existing shadow-receiving plane. No second
-surface is added. Derivative antialiasing, pixel-density fading, and distance
-fading suppress distracting distant lines. The grid material is disposed by the
-existing scene cleanup. The user could not see the first faint grid iteration.
-The current version uses a brighter blue-gray, a 32% blend instead of 16%, and
-a 0.7 mm nominal line half-width instead of 0.4 mm. Cell spacing is unchanged.
+X/Z coordinates. The original lit floor material failed to render even in bright
+diagnostic configurations. There were no shader compile errors; the precise
+low-level cause was not established. The repair uses MeshBasicMaterial for the
+floor color/grid and a separate transparent ShadowMaterial receiver 0.2 mm above
+it. The browser now shows both the grid and the card shadow. Derivative
+antialiasing, pixel-density fading, and distance fading suppress distracting
+distant lines; fade distances scale with camera altitude. The grid uses a
+blue-gray 32% blend and a 0.7 mm nominal line half-width. Cell spacing is unchanged.
+Scene cleanup disposes both layers and the shared geometry. PCFShadowMap replaces
+the removed PCFSoftShadowMap constant to avoid its runtime warning.
 
-The hub's GLB scene is named `Doppel_Hub` and positioned at `(0, 0, 18)` meters.
+The hub's GLB scene is named `Doppel_Hub`. Its center is 30 floor-grid cells
+south of the logo center, about `(0, 0, 6.4008)` meters with the current card.
+`hubDistanceGridCells` controls this spacing. Placement derives from the actual
+loaded card width times the exported `GRID_CARD_RATIO`, so floor and hub agree.
+This replaces the earlier 18-meter spacing at the user's request.
 World +Z is south: down the screen in the square overhead view. The hub remains
 distant and its internal node positions are retained. The logo stays centered
 while scaling and lifting into its forming card during the camera move.
 
 After the pulse finishes, a small blue port appears at the card's bottom-center
 border. A matching wire draws south toward the hub's northern plate rim over
-3 seconds, with cubic progress so the visible beginning grows slowly before
-the head leaves the frame. The camera stays fixed overhead throughout this
-transition. The connector uses separate absolute transforms and resets on menu
+6 seconds, with cubic progress so the visible beginning grows slowly. At the
+same time, the camera rises vertically above its original floor position, with
+smootherstep easing, and gradually aims toward the diagram center. Its lens
+stays at 40 degrees. The final height fits the completed card and whole hub
+inside an 86% viewport margin, recalculated on resize. Fog distances scale with
+altitude so the distant objects stay visible. This supersedes the earlier request
+for a one-second delay followed by a line-tip chase; do not restore that chase.
+The wire maintains a minimum 1.2-pixel screen diameter at high camera positions,
+scaling only its cross-section. Its endpoint and length remain unchanged.
+The connector uses separate absolute transforms and resets on menu
 replay. No card travel or node rearrangement occurs yet. Its path is fixed for
 this iteration; later movement will require updating connector endpoints.
 
@@ -190,7 +209,7 @@ hub plate bounds can retain the pre-placement position near the origin and send
 the wire north through the logo. The world orientation itself is correct:
 north is screen up / -Z, south is screen down / +Z, east is +X, west is -X.
 
-Rendering continues during the 6.8-second sequence including the south connection, then returns to rendering on
+Rendering continues during the 9.8-second sequence including the south connection, then returns to rendering on
 demand. Pixel density is capped at 2. Cleanup disposes geometry, materials,
 shadow maps, and postprocessing resources. Both GLBs must load before the shot
 starts; asynchronous loading handles unmounts and loading errors.
@@ -318,7 +337,10 @@ Earlier relevant commits:
 
 Changes have been committed locally. No push or deployment was performed in
 this session. Blender asset generation and rendered previews succeeded. The
-latest Three.js implementation has **not** been tested, built, or verified in a
-browser by the agent, following the user's iteration preference. The user is
-checking the running app in parallel. Do not report the browser appearance as
-verified without fresh evidence.
+latest iteration passed `npm run check` (no diagnostics), targeted mathematical
+checks using the actual hub GLB bounds for landscape and portrait framing, and
+a visual browser check of the grid and wider view on the existing local server.
+The camera checks confirm a monotonic rise, fixed X/Z and lens, and both objects
+inside the final view. No production build was run. The user is checking the app
+in parallel; their server was not started, stopped, or restarted. Recheck current
+behavior before claiming future changes are verified.

@@ -7,17 +7,19 @@ import {
   MeshBasicMaterial,
   MeshStandardMaterial,
   Object3D,
+  PerspectiveCamera,
   SphereGeometry,
   TorusGeometry,
+  Vector2,
   Vector3,
 } from 'three'
 
 export const SOUTH_CONNECTION = {
-  durationSeconds: 3,
-  hubDistance: 18,
+  durationSeconds: 6,
+  hubDistanceGridCells: 30,
 } as const
 
-/** Draw a fixed connection south (+Z) while the overhead camera stays on the card. */
+/** Draw a fixed connection south (+Z) as the camera rises to reveal the hub. */
 export function createSouthConnection(card: Object3D, width: number, hub: Object3D) {
   const border = card.getObjectByName('Border_Left_Trace')
   const plate = hub.getObjectByName('Hub_Plate')
@@ -55,6 +57,20 @@ export function createSouthConnection(card: Object3D, width: number, hub: Object
   wire.quaternion.setFromUnitVectors(new Vector3(0, 1, 0), direction)
   wire.castShadow = true
   wire.receiveShadow = true
+  const viewport = new Vector2()
+  const viewPosition = new Vector3()
+  // Preserve the thin connection when the camera lifts far enough to make its
+  // physical diameter subpixel. Scale only its cross-section, never its length.
+  wire.onBeforeRender = (renderer, _scene, camera) => {
+    if (!(camera instanceof PerspectiveCamera)) return
+    renderer.getSize(viewport)
+    wire.getWorldPosition(viewPosition).applyMatrix4(camera.matrixWorldInverse)
+    const metersPerPixel = 2 * Math.abs(viewPosition.z)
+      * Math.tan(MathUtils.degToRad(camera.fov / 2)) / viewport.y
+    const thickness = Math.max(1, metersPerPixel * 0.6 / radius)
+    wire.scale.x = wire.scale.z = thickness
+    wire.updateMatrixWorld()
+  }
   root.add(wire)
 
   const port = new Mesh(new TorusGeometry(radius * 2.8, radius * 0.6, 8, 24), material)
