@@ -1,9 +1,11 @@
 import { MathUtils, PerspectiveCamera, Vector3 } from 'three'
 
 export const OPENING_SHOT = {
-  orbitSeconds: 18,
+  orbitSeconds: 6,
   overheadSeconds: 6,
-  startAzimuth: 45,
+  // Finish the half-turn at azimuth 0, aligning the flat logo with the screen.
+  startAzimuth: -180,
+  turnDegrees: 180,
   startElevation: 4,
   orbitEndElevation: 65,
   startDistance: 0.68,
@@ -17,11 +19,13 @@ function ease(progress: number) {
   return (1 - Math.cos(Math.PI * MathUtils.clamp(progress, 0, 1))) / 2
 }
 
-/** Keep the camera focused on the logo through one orbit and the overhead rise. */
+/** Keep the camera focused on the logo through a half-turn and the overhead rise. */
 export function applyOpeningShot(camera: PerspectiveCamera, focus: Vector3, elapsed: number) {
   const orbit = ease(elapsed / OPENING_SHOT.orbitSeconds)
   const rise = ease((elapsed - OPENING_SHOT.orbitSeconds) / OPENING_SHOT.overheadSeconds)
-  const azimuth = MathUtils.degToRad(OPENING_SHOT.startAzimuth) + Math.PI * 2 * orbit
+  const azimuth = MathUtils.degToRad(
+    OPENING_SHOT.startAzimuth + OPENING_SHOT.turnDegrees * orbit,
+  )
   const elevation = MathUtils.degToRad(
     MathUtils.lerp(OPENING_SHOT.startElevation, OPENING_SHOT.orbitEndElevation, orbit)
       + (90 - OPENING_SHOT.orbitEndElevation) * rise,

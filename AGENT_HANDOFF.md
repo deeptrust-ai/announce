@@ -54,11 +54,14 @@ removed so they cannot compete with the exact overhead camera pose.
 
 Current opening shot choices:
 
-- Start at a 45-degree azimuth and a grazing 4-degree elevation, focused on the
+- Start at a -180-degree azimuth and a grazing 4-degree elevation, focused on the
   flat logo. This puts the camera about 6 cm above the floor on landscape screens.
   The user requested this low start after seeing the first 35-degree version.
-- Orbit a full 360 degrees over 18 seconds while rising to 65-degree elevation.
+- Turn 180 degrees over 6 seconds while rising to 65-degree elevation.
 - Rise for 6 more seconds to an exact overhead position, looking down 90 degrees.
+- End the turn at azimuth 0. The logo finishes aligned with the screen, with
+  horizontal bars and no 45-degree tilt. The orientation remains continuous
+  through the overhead rise; there is no separate roll correction or snap.
 - Camera distances: 0.68 meters initially, 0.92 after the orbit, 1.2 overhead.
 - Increase distance for portrait viewports to keep the logo in frame.
 - Ease each phase, play once, and hold the final view. Refresh to replay.
@@ -70,7 +73,7 @@ about 17 meters from the logo. It stays outside the opening frame. Its existing
 groups remain intact for later animation. Neither the logo nor the hub moves
 during this first camera transition.
 
-Rendering continues during the 24-second opening, then returns to rendering on
+Rendering continues during the 12-second opening, then returns to rendering on
 demand. Pixel density is capped at 2. Cleanup disposes geometry, materials,
 shadow maps, and postprocessing resources. Both GLBs must load before the shot
 starts; asynchronous loading handles unmounts and loading errors.

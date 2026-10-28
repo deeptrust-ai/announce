@@ -30,17 +30,18 @@ The production build is written to `dist/`. Serve that directory with a static h
 - `src/app.css`: full-screen layout.
 
 The scene starts focused on the DeepTrust logo, lying flat on a dark floor.
-The camera makes one 360-degree orbit over 18 seconds, rising from 4 to 65
+The camera makes a 180-degree turn over 6 seconds, rising from 4 to 65
 degrees above the floor. It then rises for another 6 seconds to a position
-directly above the logo, looking straight down, and holds there. The camera
-keeps looking at the logo throughout. The shot plays once after both GLBs load;
-refresh the page to replay it.
+directly above the logo, looking straight down, and holds there. The turn ends
+at azimuth 0 so the logo finishes aligned with the screen, with horizontal bars
+and no diagonal tilt. The camera keeps looking at the logo throughout. The
+12-second shot plays once after both GLBs load; refresh the page to replay it.
 
 The grazing 4-degree start puts the camera about 6 cm above the floor in a
 landscape viewport. Camera distance rises from 0.68 to 0.92 to 1.2 meters, with
 extra distance for portrait viewports. The logo stays still. Reduced motion skips
-directly to the final overhead shot. Hidden tabs pause the timeline. Rendering stops after the
-shot finishes until a resize or visibility change. Pixel density is capped at 2.
+directly to the final overhead shot. Hidden tabs pause the timeline. Rendering
+stops after the shot finishes until a resize or visibility change. Pixel density is capped at 2.
 GPU resources and event listeners are released when the component unmounts.
 
 The existing hub network sits at `(12, 0, -12)` meters, outside the opening shot.
