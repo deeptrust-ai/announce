@@ -65,10 +65,10 @@ The connection starts after the arrival pulse:
 | Final hub view | 8.2 s | 5.6 s | 13.8 s |
 | Grid release | 12.6 s | 1.2 s | 13.8 s |
 
-The left-side preview menu derives names, durations, and entry points from these
-shared values. Clicking resets and replays from that point, with the camera and
-other effects already at their correct timeline state. Camera rise replays all.
-The latest started transition is highlighted as playback advances. Native
+The compact bottom-right controls derive their order and entry points from
+these shared values. Back and Next seek to the adjacent transition; Restart
+replays the current transition. The current name and position update as playback
+advances. Back is disabled on the first transition, Next on the last. Native
 buttons support keyboard activation and focus; the canvas stays full-screen.
 
 The menu also updates the URL without reloading. `http://localhost:5173/?start=draw`
@@ -175,10 +175,14 @@ strength reach exactly zero, leaving a straight grid. Replays reset the pulse an
 full-scene lensing pass.
 
 
-The text layer is an HTML heading above the canvas: “Deep Trust is now a part
-of Doppel.” It fades and lifts into view during the final grid release, from
-12.6 to 13.8 seconds, centered over the hub. It stays crisp because it is outside
-the 3D effects. Replay resets the reveal; reduced motion shows it immediately.
+The text layer is a separate Swiss-style editorial layout above the canvas.
+It uses a twelve-column grid, a shared left edge, large Helvetica-family type,
+a fine horizontal rule, and the actual DeepTrust and Doppel logo lockups. The
+accessible heading reads “Deep Trust is now a part of Doppel.” The scene plays
+underneath; the text does not track or sit inside the hub. A quiet left gradient
+keeps it legible. Mobile uses six columns. Reveal still runs during the final
+grid release, from 12.6 to 13.8 seconds. Replay resets it; reduced motion shows
+it immediately. Brand asset provenance is in `public/branding/SOURCES.md`.
 
 Each lime hub port has an independent breathing rhythm, with periods around
 4.6–6.8 seconds and offset phases. The rim breathes more slowly over 7.2 seconds.

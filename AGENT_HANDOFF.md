@@ -114,10 +114,13 @@ The shared timeline now overlaps the effects:
 The user explicitly superseded the earlier sequential timing and the requirement
 to close the border before filling. Camera, outline, and fill all complete when
 the arrival impact begins. Offsets and durations are derived from shared values.
-The left-side preview menu lists all eight effects. Clicking resets and seeks to
-that entry, with correct partial camera/card state, then plays forward without
-a reload or model refetch. Camera rise replays all. The latest started stage is
-highlighted as playback advances. Native buttons provide keyboard activation.
+The full transition list has been replaced by compact bottom-right controls.
+They show the current transition name and index. Back and Next seek to adjacent
+entries in the shared timeline; Restart replays the current active transition.
+The index follows automatic stage progression. Back is disabled at the first
+entry, Next at the last, and all controls are disabled during loading/errors.
+Seeking resets and restores the correct partial state without reloading or
+refetching models. Native buttons provide keyboard focus and activation.
 
 The URL tracks the selected starting point without reloading:
 `http://localhost:5173/?start=draw` begins with an undrawn border and the camera
@@ -305,14 +308,27 @@ The original rotating wireframe sculpture and stars have been removed.
 
 ## Announcement layer and ambient glow
 
-`Scene.svelte` renders the accessible HTML heading “Deep Trust is now a part of
-Doppel” above the canvas, centered over the final hub. `onAnnouncement(progress)`
-reports an eased reveal from the start of grid release (12.6 s) to the shared
-endpoint (13.8 s). CSS applies opacity and a small upward reveal. The copy is
-split into three lines, with pale lime Doppel text. It receives no Three.js
-lensing, bloom, or geometric distortion and does not intercept pointer events.
-Replay resets progress; direct release preview reveals it with the final beat.
-Reduced motion shows the complete heading immediately with the final scene.
+`Scene.svelte` now renders a Swiss-style editorial layer independently of the
+Three.js scene. The user explicitly rejected text centered inside the hub.
+A full-screen twelve-column grid holds a left-aligned text block spanning six
+columns, with shared logo/type edges, a thin horizontal rule, generous spacing,
+and large Helvetica-family type. Mobile uses six columns. A restrained dark
+left gradient supports legibility while the animated scene continues underneath.
+The DeepTrust logo lockup is the existing `logo-full.svg`. The Doppel lockup is
+`public/branding/doppel-lockup.svg`, downloaded from the official website's
+`/static/logos/doppel-lockup-dark.svg`; CSS renders it white on the dark scene.
+`public/branding/SOURCES.md` records provenance. Both retain their aspect ratios.
+The heading's accessible name is “Deep Trust is now a part of Doppel”; decorative
+logo images do not duplicate it for screen readers. The visible middle line is
+“is now / a part of”. The layer does not intercept pointer events.
+
+`onAnnouncement(progress)` still reports an eased reveal during grid release,
+from 12.6 to 13.8 seconds. CSS applies opacity and a small upward reveal. Replay
+resets progress, release preview reveals it with the final beat, and reduced
+motion shows the complete editorial layer immediately. The overlay never follows
+hub coordinates or receives lensing, bloom, or other 3D effects. The transition
+list is now a compact bottom-right Back / Restart / Next control, separate from
+the editorial grid. Restart always replays the currently active timeline entry.
 
 `hub-breathing.ts` gives every `Port_*` group (including DeepTrust) independent
 emissive materials, keeping dark sockets steady. The lime rim has its own slower

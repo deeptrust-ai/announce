@@ -11,6 +11,14 @@
   let currentTransition = $state<TransitionId>('camera')
   let announcementProgress = $state(0)
   let controller: SceneController | undefined
+  const brandingBase = `${import.meta.env.BASE_URL}branding/`
+  const transitionIndex = $derived(Math.max(0, TRANSITIONS.findIndex((item) => item.id === currentTransition)))
+  const current = $derived(TRANSITIONS[transitionIndex]!)
+
+  function stepTransition(direction: -1 | 1) {
+    const next = TRANSITIONS[transitionIndex + direction]
+    if (next) playTransition(next.id)
+  }
 
   function playTransition(transition: TransitionId) {
     const url = new URL(window.location.href)
@@ -56,32 +64,30 @@
     bind:this={canvas}
     aria-label="The DeepTrust logo becoming a blue card, drawing a connection south, and drifting toward the hub with gravitational lensing around both objects"
   ></canvas>
-  <h1
-    class="announcement"
+  <section
+    class="editorial"
     style:--reveal={announcementProgress}
+    aria-label="Announcement"
     aria-hidden={status !== 'ready' || announcementProgress === 0}
   >
-    <span class="brand">Deep Trust</span>
-    <span class="joining">is now a part of</span>
-    <span class="destination">Doppel</span>
-  </h1>
-  <nav class="transitions" aria-label="Animation transitions">
-    <h2>Preview transitions</h2>
-    <ol>
-      {#each TRANSITIONS as transition}
-        <li>
-          <button
-            type="button"
-            disabled={status !== 'ready'}
-            aria-current={currentTransition === transition.id ? 'step' : undefined}
-            onclick={() => playTransition(transition.id)}
-          >
-            <span>{transition.name}</span>
-            <span class="duration">{Number(transition.duration.toFixed(1))} s</span>
-          </button>
-        </li>
-      {/each}
-    </ol>
+    <div class="editorial-copy">
+      <h1 aria-label="Deep Trust is now a part of Doppel">
+        <img class="deeptrust-logo" src={`${brandingBase}logo-full.svg`} alt="" width="173" height="28" />
+        <span class="joining">is now<br />a part of</span>
+        <img class="doppel-logo" src={`${brandingBase}doppel-lockup.svg`} alt="" width="146" height="32" />
+      </h1>
+    </div>
+  </section>
+  <nav class="transition-controls" aria-label="Animation transitions">
+    <div class="current-transition">
+      <span class="transition-count">{String(transitionIndex + 1).padStart(2, '0')} / {String(TRANSITIONS.length).padStart(2, '0')}</span>
+      <span>{current.name}</span>
+    </div>
+    <div class="transition-actions">
+      <button type="button" disabled={status !== 'ready' || transitionIndex === 0} onclick={() => stepTransition(-1)}>Back</button>
+      <button type="button" disabled={status !== 'ready'} aria-label="Restart current transition" onclick={() => playTransition(currentTransition)}>Restart</button>
+      <button type="button" disabled={status !== 'ready' || transitionIndex === TRANSITIONS.length - 1} onclick={() => stepTransition(1)}>Next</button>
+    </div>
   </nav>
   {#if status !== 'ready'}
     <p role="status">{status === 'loading' ? 'Loading scene…' : errorMessage}</p>
@@ -102,40 +108,54 @@
     touch-action: none;
   }
 
-  .announcement {
+  .editorial {
+    --page-margin: clamp(1.5rem, 4vw, 5rem);
     position: absolute;
-    top: 50%;
-    left: 50%;
-    width: min(18rem, 60vw);
-    margin: 0;
-    color: #f3f7ff;
-    font-size: clamp(1.4rem, 3.6vmin, 2.4rem);
-    font-weight: 500;
-    line-height: 1.08;
-    letter-spacing: -0.035em;
-    text-align: center;
-    text-shadow: 0 2px 20px #080d14, 0 1px 4px #080d14;
+    inset: 0;
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: clamp(0.75rem, 1.5vw, 1.5rem);
+    padding: var(--page-margin);
+    background: linear-gradient(90deg, rgb(8 13 20 / 76%), rgb(8 13 20 / 24%) 48%, transparent 78%);
     pointer-events: none;
     opacity: var(--reveal);
-    transform: translate(-50%, -50%) translateY(calc(12px - var(--reveal) * 12px));
   }
 
-  .announcement span {
+  .editorial-copy {
+    grid-column: 1 / span 6;
+    align-self: center;
+    padding-top: clamp(1.25rem, 2.5vh, 2.5rem);
+    border-top: 1px solid rgb(243 247 255 / 35%);
+    transform: translateY(calc(16px - var(--reveal) * 16px));
+  }
+
+  h1 {
+    display: grid;
+    justify-items: start;
+    gap: clamp(1.5rem, 4vh, 3.5rem);
+    margin: 0;
+    color: #f3f7ff;
+    text-align: left;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: clamp(3rem, 6.8vw, 7.5rem);
+    font-weight: 500;
+    line-height: 0.98;
+    letter-spacing: -0.055em;
+  }
+
+  h1 img {
     display: block;
+    max-width: 100%;
+    height: auto;
   }
 
-  .joining {
-    margin: 0.65em 0;
-    color: #c2cedb;
-    font-size: 0.48em;
-    font-weight: 400;
-    letter-spacing: 0.015em;
+  .deeptrust-logo {
+    width: clamp(11rem, 19vw, 19rem);
   }
 
-  .destination {
-    color: #e6ffb5;
-    font-size: 1.25em;
-    font-weight: 650;
+  .doppel-logo {
+    width: clamp(15rem, 28vw, 29rem);
+    filter: brightness(0) invert(1);
   }
 
   p {
@@ -146,78 +166,87 @@
     pointer-events: none;
   }
 
-  .transitions {
+  .transition-controls {
     position: absolute;
-    top: 1.25rem;
-    left: 1.25rem;
-    width: 13.5rem;
-    max-width: calc(100% - 2.5rem);
-    padding: 0.75rem;
+    right: clamp(1rem, 2vw, 2rem);
+    bottom: clamp(1rem, 2vw, 2rem);
+    width: min(19rem, calc(100% - 2rem));
     border: 1px solid #314359;
-    border-radius: 0.75rem;
-    background: rgb(8 13 20 / 92%);
+    background: rgb(8 13 20 / 88%);
     backdrop-filter: blur(12px);
-    box-shadow: 0 8px 32px rgb(0 0 0 / 20%);
   }
 
-  h2 {
-    margin: 0 0 0.5rem;
-    padding: 0 0.5rem;
-    color: #9bafc6;
+  .current-transition {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    padding: 0.7rem 0.8rem;
+    border-bottom: 1px solid #314359;
+    color: #c5d3e1;
     font-size: 0.7rem;
-    font-weight: 500;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
   }
 
-  ol {
+  .transition-count {
+    color: #8398ad;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .transition-actions {
     display: grid;
-    gap: 0.25rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
+    grid-template-columns: repeat(3, 1fr);
   }
 
   button {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    width: 100%;
-    padding: 0.65rem 0.5rem;
-    border: 1px solid transparent;
-    border-radius: 0.4rem;
+    min-height: 2.75rem;
+    border: 0;
     background: transparent;
     color: #e0eaf5;
     font: inherit;
-    font-size: 0.8rem;
-    text-align: left;
+    font-size: 0.75rem;
     cursor: pointer;
+  }
+
+  button + button {
+    border-left: 1px solid #314359;
   }
 
   button:hover:enabled {
     background: #152338;
   }
 
-  button[aria-current='step'] {
-    border-color: #3e6eac;
-    background: #102648;
-  }
-
   button:focus-visible {
     outline: 2px solid #a6cdff;
-    outline-offset: 2px;
+    outline-offset: -3px;
   }
 
   button:disabled {
-    opacity: 0.5;
-    cursor: wait;
+    opacity: 0.35;
+    cursor: default;
   }
 
-  .duration {
-    color: #a6bdd8;
-    font-size: 0.75rem;
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
+  @media (max-width: 640px) {
+    .editorial {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      background: linear-gradient(90deg, rgb(8 13 20 / 78%), rgb(8 13 20 / 30%) 65%, transparent);
+    }
+
+    .editorial-copy {
+      grid-column: 1 / -1;
+      max-width: 85%;
+    }
+
+    h1 {
+      font-size: clamp(2.8rem, 11vw, 4.5rem);
+      gap: 1.5rem;
+    }
+
+    .deeptrust-logo { width: 11rem; }
+    .doppel-logo { width: min(17rem, 100%); }
+  }
+
+  @media (max-height: 500px) {
+    h1 { font-size: clamp(2rem, 8vh, 3rem); gap: 1rem; }
+    .deeptrust-logo { width: 9rem; }
+    .doppel-logo { width: 12rem; }
   }
 </style>
