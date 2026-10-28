@@ -107,7 +107,7 @@ Keycard.ai, and a press-release link. Scrolling content blocks remain deferred.
 the actual filled DeepTrust SVG paths as etching maps, and a world-space grid shader.
 The camera starts tight on the empty logo area at a low 4-degree floor angle
 from the side. It cranes upward and outward through a restrained 90-degree
-swing during the etch, reaching a full-card floor view before the shockwave.
+swing during the etch, reaching a full-card floor view just as the shockwave begins.
 This follows the user's correction from a spiral to a quarter-turn crane move.
 It then tracks the card as it lifts and settles into the hero view. The eight original solid
 logo shapes etch left to right, top to bottom, with an illuminated front and a
@@ -115,9 +115,13 @@ flat pearlescent finish. A glowing blue beam from outside the upper-left frame
 follows the cutting point, synchronized to the timing map. There is no relief,
 bevel, or simulated edge shading. The shockwave distorts only the floor.
 
-The sequence is: 0.8-second hold, 4.8-second engraving, 0.35-second cooling pause,
-1.7-second shockwave, 2-second upright lift, 3-second six-and-a-half-turn spin, and
-0.9-second hero settle. During the spin, 8–12 freshly rendered shutter samples
+The sequence starts with a 0.8-second hold and 4.8-second engraving/crane move.
+When etching finishes, the shockwave begins immediately. After 0.22 seconds,
+the card jumps upright over one second; its spin starts 0.65 seconds into that
+jump and lasts three seconds. The floor wave continues through the launch for
+its full 1.7 seconds. The spin ends at 9.47 seconds, then the hero holds for
+0.9 seconds. This follows the user's clarified sequence, superseding their
+prior request to make every effect finish together. During the spin, 8–12 freshly rendered shutter samples
 are averaged over an exposure of up to 1/30 second. This replaces the earlier
 transparent ghost surfaces and captures both faces, the body, and occlusion.
 Exposure tapers toward zero as the spin ends; the final hero uses the normal
@@ -133,7 +137,7 @@ The original wordmarks carry the announcement; the Keycard wordmark has a small
 `https://deeptrust.ai/press-release`. The card eases right to leave room for the
 left-aligned copy, or above the copy on a narrow portrait screen, following the user's correction. Reduced motion
 shows the final hero and complete announcement; hidden tabs pause. DPR is capped
-at two; animation stops when the final CTA finishes at 17.35 seconds.
+at two; animation stops when the final CTA finishes at 14.17 seconds.
 The older content-block direction remains a reference for later transitions.
 
 Research included the official site, brand assets, product documentation, launch

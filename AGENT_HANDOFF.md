@@ -46,15 +46,22 @@ always carries the untouched original K and KEYCARD.AI artwork, even before
 spinning. It is rotated 180 degrees locally so it reads correctly from behind.
 Circuit tracks remain visible throughout.
 
-Timeline: 0.8-second blank hold, 4.8-second engraving, 0.35-second cooling pause,
-1.7-second floor shockwave, 2-second lift upright, 3-second six-and-a-half-turn spin, and
-0.9-second hero settle. The camera starts tight on the empty logo/chip area.
+Timeline: 0.8-second blank hold, then 4.8-second engraving with the camera
+pullback/crane move. At second 5.6, the completed etching immediately triggers
+the floor shockwave (no cooling pause). At 5.82 the card jumps upright over
+one second; at 6.47 the six-and-a-half-turn spin begins, overlapping the last
+0.35 seconds of the jump. The floor pulse continues independently until 7.3,
+rather than cutting off at launch. The spin ends at 9.47, followed by a
+0.9-second hero hold. The user clarified that these should NOT all finish at
+the same time: etch/camera first, shockwave on completion, then jump and spin.
+This clarification supersedes the earlier shared-ending request.
+The camera starts tight on the empty logo/chip area.
 It begins at a 4-degree grazing angle from the card's left side. During the
 4.8-second etch it cranes upward and outward with only a 90-degree horizontal
 swing, ending at about 72 degrees above the floor and easing its target toward
 the card center. The user explicitly wants a restrained dolly/crane move, not
 a full spiral or repeated orbit.
-It reaches the full-card view before the shockwave. Close-up distance adapts
+It reaches the full-card view just as the shockwave starts. Close-up distance adapts
 to portrait width; the lens remains 38 degrees. The card floats clear of the
 floor while standing up. The camera then tracks its center and eases into a
 front-facing portrait-card hero. `keycard-motion-blur.ts` averages freshly
@@ -67,7 +74,7 @@ and stage jumps cannot retain trails. The static floor stays sharp. The final
 hero bypasses the blur at the normal canvas resolution. The front retains
 DeepTrust and the back retains Keycard throughout; there is no artwork swap.
 The extra half turn lands with the original Keycard reverse facing the camera.
-At second 13.55, a seventh stage reveals “DeepTrust is now a part of Keycard.ai”
+At second 10.37, a seventh stage reveals “DeepTrust is now a part of Keycard.ai”
 using the original DeepTrust and Keycard wordmarks, with a small .ai suffix.
 This shares the original Doppel `announcement.ts` timing: DeepTrust fades in,
 the smaller joining phrase types, Keycard.ai fades in, and the outlined
@@ -75,7 +82,7 @@ the smaller joining phrase types, Keycard.ai fades in, and the outlined
 `https://deeptrust.ai/press-release`, opens a new tab, and cannot receive focus
 or clicks until fully revealed. The camera eases right and slightly wider over
 1.2 seconds to leave the left column clear. In portrait the card occupies the upper half of the screen, with the
-announcement and CTA beneath it in the lower half. Everything holds after 17.35 seconds; no content blocks follow.
+announcement and CTA beneath it in the lower half. Everything holds after 14.17 seconds; no content blocks follow.
 
 Controls: Previous / Restart / Next, with the current stage label and 1–7 index.
 Stages are `floor`, `etch`, `pulse`, `lift`, `spin`, `hero`, and `announcement`. R restarts the

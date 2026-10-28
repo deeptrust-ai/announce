@@ -26,17 +26,18 @@ import { ANNOUNCEMENT_DURATION } from './announcement'
 export const KEYCARD_OPENING = {
   pause: 0.8,
   etch: 4.8,
-  cool: 0.35,
   pulse: 1.7,
-  lift: 2,
+  launchDelay: 0.22,
+  lift: 1,
+  spinDelay: 0.65,
   spin: 3,
   turns: 6.5,
   hero: 0.9,
 } as const
 const ETCH_END = KEYCARD_OPENING.pause + KEYCARD_OPENING.etch
-const PULSE_START = ETCH_END + KEYCARD_OPENING.cool
-const LIFT_START = PULSE_START + KEYCARD_OPENING.pulse
-const SPIN_START = LIFT_START + KEYCARD_OPENING.lift
+const PULSE_START = ETCH_END
+const LIFT_START = PULSE_START + KEYCARD_OPENING.launchDelay
+const SPIN_START = LIFT_START + KEYCARD_OPENING.spinDelay
 const HERO_START = SPIN_START + KEYCARD_OPENING.spin
 const ANNOUNCEMENT_START = HERO_START + KEYCARD_OPENING.hero
 const END = ANNOUNCEMENT_START + ANNOUNCEMENT_DURATION
@@ -298,7 +299,7 @@ export async function createKeycardScene(
   function render() {
     faceMaterial.uniforms.uEtch!.value = Math.max(0, Math.min(1, (elapsed - KEYCARD_OPENING.pause) / KEYCARD_OPENING.etch))
     floorMaterial.uniforms.uPulse!.value = Math.max(0, Math.min(1, (elapsed - PULSE_START) / KEYCARD_OPENING.pulse))
-    floorMaterial.uniforms.uPulseActive!.value = !preference.matches && elapsed > PULSE_START && elapsed < LIFT_START ? 1 : 0
+    floorMaterial.uniforms.uPulseActive!.value = !preference.matches && elapsed > PULSE_START && elapsed < PULSE_START + KEYCARD_OPENING.pulse ? 1 : 0
     const spinProgress = clamp((elapsed - SPIN_START) / KEYCARD_OPENING.spin)
     applyCardPose(card, elapsed)
     card.updateMatrixWorld(true)

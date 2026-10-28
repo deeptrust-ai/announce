@@ -8,8 +8,8 @@ A minimal Svelte + TypeScript + Vite app with a full-screen Three.js scene.
 - `/keycard/`: independent Keycard opening. A card rests on a grid, receives the
   original solid DeepTrust logo etching from an off-screen blue laser, and emits one floor shockwave.
   The camera starts low beside the logo area, then cranes up and out through
-  a 90-degree swing during the etch. It then lifts upright,
-  spins six and a half times with shutter-sampled motion blur, and holds on the Keycard hero.
+  a 90-degree swing during the etch. The pulse triggers a quick upright jump,
+  overlapping a six-and-a-half-turn spin with shutter-sampled motion blur, and holds on the Keycard hero.
   Its back always carries the original Keycard K and KEYCARD.AI artwork,
   and faces the camera in the finale. A left-aligned overlay then reveals
   “DeepTrust is now a part of Keycard.ai” and the press-release link.
