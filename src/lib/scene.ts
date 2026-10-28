@@ -36,6 +36,9 @@ import { createHubExpansion } from './hub-expansion'
 import { createHubBreathing } from './hub-breathing'
 import { createHubOrbits } from './hub-orbits'
 import { createSphereInteraction } from './sphere-interaction'
+import { BRANDS } from './brand'
+import type { BrandVariant } from './brand'
+import { applyKeycardNetwork } from './keycard-network'
 import { applyFinalHubView, fitFinalHubView } from './final-hub-camera'
 import { ANNOUNCEMENT_DURATION } from './announcement'
 import { ANNOUNCEMENT_START, APPROACH_START, ARRIVAL_START, CONNECTION_START, FINAL_HUB_START, FINAL_HUB_DURATION, HUB_SETTLE_TIME, LENS_RELEASE_START, ORBITS_START, SCENE_DURATION, TRANSITIONS, startingTransition, transitionAt } from './timeline'
@@ -73,41 +76,42 @@ function disposeModel(root: Object3D) {
 }
 
 /** Mount the floor scene and return playback and cleanup controls. */
-export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks = {}): SceneController {
+export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks = {}, variant: BrandVariant = 'doppel'): SceneController {
+  const brand = BRANDS[variant]
   const renderer = new WebGLRenderer({ canvas, antialias: true })
   renderer.toneMapping = ACESFilmicToneMapping
   renderer.toneMappingExposure = 1.05
   renderer.shadowMap.enabled = false
 
   const scene = new Scene()
-  scene.background = new Color('#080d14')
-  const fog = new Fog('#080d14', 10, 30)
+  scene.background = new Color(brand.background)
+  const fog = new Fog(brand.background, 10, 30)
   scene.fog = fog
 
   const camera = new PerspectiveCamera(OPENING_SHOT.endFov, 1, 0.02, 1000)
   const logoFocus = new Vector3()
 
-  const floor = createFloor()
+  const floor = createFloor(variant)
   scene.add(floor.mesh)
 
-  scene.add(new HemisphereLight('#c5d8ed', '#29212c', 1.1))
-  const key = new DirectionalLight('#fff0dc', 3)
+  scene.add(new HemisphereLight(brand.hemisphere, brand.groundLight, 1.1))
+  const key = new DirectionalLight(brand.keyLight, 3)
   const keyOffset = new Vector3(-3, 6, 4)
   key.position.copy(keyOffset)
   scene.add(key, key.target)
-  const fill = new DirectionalLight('#a5c8ff', 1)
+  const fill = new DirectionalLight(brand.fillLight, 1)
   fill.position.set(4, 3, -3)
   scene.add(fill)
 
   const composer = new EffectComposer(renderer)
   const renderPass = new RenderPass(scene, camera)
-  const bloomPass = new UnrealBloomPass(new Vector2(1, 1), 0.35, 0.4, 1.1)
+  const bloomPass = new UnrealBloomPass(new Vector2(1, 1), brand.bloom, 0.4, 1.1)
   const outputPass = new OutputPass()
   composer.addPass(renderPass)
   composer.addPass(bloomPass)
   composer.addPass(outputPass)
 
-  const arrival = createArrivalEffect()
+  const arrival = createArrivalEffect(brand.arrival)
   scene.add(arrival.root)
 
   const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -348,7 +352,8 @@ export function createScene(canvas: HTMLCanvasElement, callbacks: SceneCallbacks
   loadAsset('hub-network.glb', (hub) => {
     hubModel = hub
     // Keep its existing groups intact for the later travel and joining sequence.
-    hub.name = 'Doppel_Hub'
+    hub.name = `${brand.name}_Hub`
+    if (variant === 'keycard') applyKeycardNetwork(hub)
     const plate = hub.getObjectByName('Hub_Plate')
     const rings = hub.getObjectByName('Orbit_Rings')
     if (plate) plate.visible = false

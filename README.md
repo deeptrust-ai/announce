@@ -2,6 +2,22 @@
 
 A minimal Svelte + TypeScript + Vite app with a full-screen Three.js scene.
 
+## Versions
+
+- `/`: original Doppel announcement.
+- `/keycard/`: separate Keycard acquisition concept with official artwork,
+  credential/iridescent styling, cool pearl/lime scene materials, and identity
+  node icons. The complete animation and rotation interactions are shared.
+
+Use `http://localhost:5173/keycard/` on the existing dev server. Stage shortcuts
+work on either page, for example `/keycard/?start=release`. Vite has separate
+HTML build entries for both pages. No tests, build, app browser verification,
+push, or deployment were run for this version, following the user's workflow.
+
+The brand/product research and design decisions are in
+[`docs/keycard-brand-research.md`](docs/keycard-brand-research.md). This is an
+acquisition concept based on the user's brief, not evidence of a public deal.
+
 ## Development
 
 Use Node.js 22.12+ or 24 LTS.
@@ -40,7 +56,9 @@ The production build is written to `dist/`. Serve that directory with a static h
 - `src/lib/timeline.ts`: shared transition names, start times, and durations.
 - `src/lib/announcement.ts`: staged logo fades and character-by-character copy timing.
 - `src/lib/Scene.svelte`: editorial overlay, compact controls, and canvas lifecycle.
-- `src/App.svelte`: page composition.
+- `src/App.svelte`: entry-path selection for Doppel and Keycard.
+- `src/lib/brand.ts`: independent brand copy, asset, scene, and lighting defaults.
+- `src/lib/keycard-network.ts`: Keycard materials and original identity/access icons.
 - `src/app.css`: full-screen layout.
 
 The scene starts focused on the DeepTrust logo, lying flat on a dark floor.

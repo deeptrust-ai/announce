@@ -18,7 +18,7 @@ export const ARRIVAL_EFFECT = {
 } as const
 
 /** A floor-level pulse and a tiny, absolute-time camera impulse at completion. */
-export function createArrivalEffect() {
+export function createArrivalEffect(color = '#4D83D9') {
   const root = new Group()
   root.name = 'DeepTrust_Arrival_Pulse'
   root.visible = false
@@ -26,7 +26,7 @@ export function createArrivalEffect() {
     uRadius: { value: ARRIVAL_EFFECT.startRadius as number },
     uOpacity: { value: 0 },
     uWidth: { value: ARRIVAL_EFFECT.ringWidth },
-    uColor: { value: new Color('#4D83D9') },
+    uColor: { value: new Color(color) },
   }
   const material = new ShaderMaterial({
     uniforms,

@@ -7,6 +7,42 @@ You are continuing the DeepTrust announcement landing page in:
 Read this prompt, the applicable `AGENTS.md` instructions, and the current source
 before making changes. Continue from the existing implementation.
 
+## Current versions: Doppel and Keycard
+
+The user requested a separate Keycard AI acquisition concept while preserving
+the Doppel scene. `/` remains Doppel. `/keycard/` is the Keycard edition, with
+its own `keycard/index.html` entry and shared Svelte/Three implementation.
+`src/App.svelte` selects the variant from the pathname; query stage shortcuts
+preserve that pathname. `vite.config.ts` includes both HTML build inputs.
+
+Read `docs/keycard-brand-research.md` for the researched product positioning,
+visual observations, sources, and design translation. This is concept copy for
+the user's exit scenario, not evidence that an acquisition has occurred.
+Keycard's live visual language uses a dark technical grid, iridescent credential
+surfaces, fine borders, chip/circuit artwork, compact metadata, and restrained
+lime verification accents. The new page uses official Keycard SVGs, self-hosted
+Geist/Geist Mono with OFL notices, and an original credential-style editorial
+frame. Commercial Mori/Supply fonts are not redistributed. Asset provenance is
+in `public/branding/keycard/SOURCES.md`.
+
+`brand.ts` contains independent defaults, including the original Doppel palette.
+`Scene.svelte` accepts a variant and passes it to `createScene`; it also selects
+logo artwork, accessible copy, page title, and Keycard-specific overlay styles.
+`floor.ts` and the arrival effect accept brand colors. The Keycard GLB instance
+is recolored at runtime by `keycard-network.ts`: dark iridescent node bodies,
+pearl/cyan links, lilac rim, and muted lime ports. The seven existing channel
+icons are hidden and replaced with original monoline Identity, Agents,
+Credentials, Policy, Resources, Sessions, and Audit icons. The source GLB/Blender
+files and DeepTrust logo are unchanged. Doppel does not run that transformation.
+
+Both retain the staged text/CTA reveal, cropped invisible sphere, evenly spaced
+shared rotation, fixed circular rim, no cast shadows, breathing ports, doubled
+mobile sphere, mouse/touch influence, arrow-key control, and playback buttons.
+The CTA retains the user-provided `https://deeptrust.ai/press-release` URL.
+Research inspected the official Keycard website only. No tests, builds, local
+app browser checks, or proof screenshots were run; nothing was pushed/deployed.
+Continue to let the user run and assess the app in parallel.
+
 ## User workflow
 
 - The user is a senior developer. Use short, direct updates and quick bullets.
