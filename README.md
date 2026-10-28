@@ -213,7 +213,8 @@ latitudes with equal nearest-neighbor distances. A single shared rotation adds
 slow spin, tumble, and gentle precession while preserving the 3D spacing.
 The earlier independent paths and per-node repulsion offsets are replaced by
 this rigid arrangement. All cards stay parallel to the camera; their anchors,
-ports, and spokes turn together. The original glowing ring turns with the sphere.
+ports, and spokes turn together. The original glowing ring keeps its fixed circular orientation while the
+anchor set rotates.
 Motion continues after the text finishes, pauses
 in hidden tabs, and becomes static under reduced motion. `?start=orbits`
 previews this transition. Source Blender and GLB assets remain unchanged.

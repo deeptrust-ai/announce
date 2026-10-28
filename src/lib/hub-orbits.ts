@@ -119,8 +119,8 @@ export function createHubOrbits(hub: Object3D, card: Object3D, connection: Group
     )
     sphereRotation.setFromEuler(sphereEuler)
     anchor.quaternion.copy(sphereRotation)
-    orientation.copy(sphereRotation).multiply(rimRotation)
-    rim.quaternion.slerpQuaternions(rimRotation, orientation, blend)
+    // Keep the glowing circumference circular; only the anchor set rotates.
+    rim.quaternion.copy(rimRotation)
     for (const entry of entries) {
       desired.copy(entry.anchorDirection).applyQuaternion(sphereRotation).multiplyScalar(orbitRadius)
       desired.y += centerHeight

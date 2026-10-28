@@ -341,8 +341,9 @@ spaced neighbors, not equal distance between all possible pairs.
 
 A single quaternion rotates all anchor vectors at the same radius. Motion
 combines continuous yaw (0.075 rad/s), slower tumble (0.025 rad/s), and gentle
-sinusoidal pitch/roll precession. The virtual anchor and original lime ring
-rotate with it. Distances between nodes remain fixed after the blend. The
+sinusoidal pitch/roll precession. The virtual anchor rotates with it. The original lime ring keeps its source
+orientation, so its circumference remains a circle instead of tumbling with the
+anchor set. Do not apply the sphere quaternion to the visible ring. Distances between nodes remain fixed after the blend. The
 separate unclamped animation clock continues indefinitely; hidden tabs pause
 it and reduced motion shows the static final arrangement.
 
